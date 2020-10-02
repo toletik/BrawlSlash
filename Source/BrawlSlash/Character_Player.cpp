@@ -59,48 +59,30 @@ void ACharacter_Player::Tick(float DeltaTime)
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+
+	//Left Joystick
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACharacter_Player::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACharacter_Player::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
+	//RightJoystick
 	PlayerInputComponent->BindAxis("TurnRate", this, &ACharacter_Player::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ACharacter_Player::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ACharacter_Player::TouchStopped);
+	//Buttons
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
+	PlayerInputComponent->BindAction("Counter", IE_Pressed, this, &ACharacter_Player::Counter);
+	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
+
+	
 }
 
-void ACharacter_Player::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	Jump();
-}
 
-void ACharacter_Player::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	StopJumping();
-}
-
-void ACharacter_Player::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void ACharacter_Player::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
+//Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -114,7 +96,6 @@ void ACharacter_Player::MoveForward(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
-
 void ACharacter_Player::MoveRight(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -129,3 +110,29 @@ void ACharacter_Player::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
+//RightJoystick
+void ACharacter_Player::TurnAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+void ACharacter_Player::LookUpAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+//Buttons
+void ACharacter_Player::Counter()
+{
+	isCountering = true;
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Counter");
+}
+
+void ACharacter_Player::Execution()
+{
+	isExecuting = true;
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Execution");
+}
+

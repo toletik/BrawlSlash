@@ -11,6 +11,14 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter
 {
 	GENERATED_BODY()
 
+	float health = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 5.0f;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isAttacking = false;
+
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
@@ -19,10 +27,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
+	virtual void Attack();
 
 };
