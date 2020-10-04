@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
 #include "Character_Base.generated.h"
 
 UCLASS()
@@ -19,10 +21,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isAttacking = false;
 
+
+
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
+	UMaterialInstanceDynamic* matDynamic = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

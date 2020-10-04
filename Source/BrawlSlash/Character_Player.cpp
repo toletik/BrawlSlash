@@ -9,6 +9,8 @@
 #include "GameFramework/Controller.h"
 #include "Engine/World.h"
 
+#include "DrawDebugHelpers.h"
+
 // Sets default values
 ACharacter_Player::ACharacter_Player()
 {
@@ -42,20 +44,6 @@ ACharacter_Player::ACharacter_Player()
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 }
 
-// Called when the game starts or when spawned
-void ACharacter_Player::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ACharacter_Player::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -81,11 +69,61 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 }
 
+// Called when the game starts or when spawned
+void ACharacter_Player::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void ACharacter_Player::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+
+	//GetInputAxisValue("MoveForward");
+	//GetInputAxisValue("MoveRight");
+
+	
+	//check if something in the way
+	FHitResult hit;
+	FCollisionQueryParams raycastParams;
+	raycastParams.AddIgnoredActor(this);
+	FVector direction {GetInputAxisValue("MoveForward"), GetInputAxisValue("MoveRight"), 0};
+	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
+	
+	if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("highlightable"))
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
+
+		if (Cast<ACharacter_Base>(hit.GetActor()) != NULL)
+		{
+			if(elementToHighlight != nullptr)
+				elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 0);
+
+			elementToHighlight = Cast<ACharacter_Base>(hit.GetActor());
+			elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 1);
+		}
+	}
+	else
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
+
+		if (elementToHighlight != nullptr)
+			elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 0);
+
+		elementToHighlight = nullptr;
+	}
+
+
+}
+
 
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -98,7 +136,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();

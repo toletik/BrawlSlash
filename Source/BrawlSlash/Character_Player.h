@@ -55,6 +55,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isExecuting = false;
 
+	ACharacter_Base* elementToHighlight = nullptr;
+
 public:
 
 	// Called to bind functionality to input
