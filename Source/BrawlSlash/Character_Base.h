@@ -15,7 +15,16 @@ enum E_STATE
 	ATTACKING,
 	COUNTERING,
 	EXECUTING,
-	DODGING
+	DODGING,
+
+	HITTEDWEAK,
+	HITTEDSTRONG,
+	ATTACKINGWEAK,
+	ATTACKINGSTRONG,
+	COUNTERED,
+	STUN,
+	EXECUTED,
+	DEAD
 };
 
 UCLASS()
@@ -40,5 +49,5 @@ public:
 	ACharacter_Base();
 
 	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<E_STATE> state;
+	TEnumAsByte<E_STATE> state{ E_STATE ::IDLE};
 };
