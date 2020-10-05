@@ -35,5 +35,5 @@ void ACharacter_Base::Tick(float DeltaTime)
 
 void ACharacter_Base::Attack()
 {
-	isAttacking = true;
+	state = E_STATE::ATTACKING;
 }

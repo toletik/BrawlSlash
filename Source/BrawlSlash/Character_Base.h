@@ -8,6 +8,16 @@
 
 #include "Character_Base.generated.h"
 
+UENUM(BlueprintType)
+enum E_STATE
+{
+	IDLE,
+	ATTACKING,
+	COUNTERING,
+	EXECUTING,
+	DODGING
+};
+
 UCLASS()
 class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
 {
@@ -16,10 +26,6 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_High
 	float health = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
-
-
-
-
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,6 +39,6 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isAttacking = false;
+	UPROPERTY(BlueprintReadWrite)
+	TEnumAsByte<E_STATE> state;
 };

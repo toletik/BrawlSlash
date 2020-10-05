@@ -18,8 +18,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,6 +35,7 @@ protected:
 	//Buttons
 	void Counter();
 	void Execution();
+	void Dodge();
 
 	IInterface_Highlightable* elementToHighlight = nullptr;
 	void SetElementToHighlight(IInterface_Highlightable* ptr)
@@ -71,11 +70,4 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
-
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isCountering = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isExecuting = false;
 };

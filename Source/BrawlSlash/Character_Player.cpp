@@ -66,8 +66,7 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("Counter", IE_Pressed, this, &ACharacter_Player::Counter);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
-
-	
+	PlayerInputComponent->BindAction("Dodge", IE_Pressed, this, &ACharacter_Player::Dodge);
 }
 
 // Called when the game starts or when spawned
@@ -89,7 +88,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -102,7 +101,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -130,11 +129,17 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Counter()
 {
-	isCountering = true;
+	state = E_STATE::COUNTERING;
 }
+
 void ACharacter_Player::Execution()
 {
-	isExecuting = true;
+	state = E_STATE::EXECUTING;
+}
+
+void ACharacter_Player::Dodge()
+{
+	state = E_STATE::DODGING;
 }
 
 void ACharacter_Player::UpdateElementToHighlight()
