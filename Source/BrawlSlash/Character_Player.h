@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
+#include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
 UCLASS()
@@ -36,6 +37,8 @@ protected:
 	void Counter();
 	void Execution();
 	void Dodge();
+
+	UMyGameInstance* gameInstance;
 
 	IInterface_Highlightable* elementToHighlight = nullptr;
 	void SetElementToHighlight(IInterface_Highlightable* ptr)
