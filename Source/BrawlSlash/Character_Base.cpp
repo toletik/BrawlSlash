@@ -29,5 +29,4 @@ void ACharacter_Base::Tick(float DeltaTime)
 void ACharacter_Base::Attack()
 {
 	isAttacking = true;
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Attack");
 }

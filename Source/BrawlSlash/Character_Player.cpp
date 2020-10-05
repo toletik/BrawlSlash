@@ -127,12 +127,9 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 void ACharacter_Player::Counter()
 {
 	isCountering = true;
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Counter");
 }
 
 void ACharacter_Player::Execution()
 {
 	isExecuting = true;
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Execution");
 }
-

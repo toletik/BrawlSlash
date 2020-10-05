@@ -30,6 +30,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float baseLookUpRate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isCountering = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isExecuting = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -48,12 +54,6 @@ protected:
 	//Buttons
 	void Counter();
 	void Execution();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isCountering = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isExecuting = false;
 
 public:
 

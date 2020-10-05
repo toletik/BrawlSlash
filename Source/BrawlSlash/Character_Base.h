@@ -15,14 +15,12 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
 
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isAttacking = false;
-
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isAttacking = false;
 
 protected:
 	// Called when the game starts or when spawned
