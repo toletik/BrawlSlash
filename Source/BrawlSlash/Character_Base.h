@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/Interface_Highlightable.h"
+
 #include "Character_Base.generated.h"
 
 UCLASS()
-class BRAWLSLASH_API ACharacter_Base : public ACharacter
+class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
 {
 	GENERATED_BODY()
 
@@ -15,12 +17,9 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
 
-public:
-	// Sets default values for this character's properties
-	ACharacter_Base();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool isAttacking = false;
+
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,7 +27,12 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
 	virtual void Attack();
 
+public:
+	// Sets default values for this character's properties
+	ACharacter_Base();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool isAttacking = false;
 };

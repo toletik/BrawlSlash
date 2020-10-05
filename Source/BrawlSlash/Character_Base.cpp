@@ -3,6 +3,9 @@
 
 #include "Character_Base.h"
 
+#include "Components/SkeletalMeshComponent.h"
+#include "Materials/MaterialInterface.h"
+
 // Sets default values
 ACharacter_Base::ACharacter_Base()
 {
@@ -16,7 +19,11 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	USkeletalMeshComponent* mesh = GetMesh();
+	UMaterialInterface* mat = mesh->GetMaterial(0);
+	matDynamic = mesh->CreateDynamicMaterialInstance(0, mat);
+
 }
 
 // Called every frame

@@ -8,6 +8,9 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
+
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -42,20 +45,6 @@ ACharacter_Player::ACharacter_Player()
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 }
 
-// Called when the game starts or when spawned
-void ACharacter_Player::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ACharacter_Player::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -81,11 +70,26 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 }
 
+// Called when the game starts or when spawned
+void ACharacter_Player::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void ACharacter_Player::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateElementToHighlight();
+}
+
 
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -98,7 +102,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (!isAttacking && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -128,8 +132,29 @@ void ACharacter_Player::Counter()
 {
 	isCountering = true;
 }
-
 void ACharacter_Player::Execution()
 {
 	isExecuting = true;
+}
+
+void ACharacter_Player::UpdateElementToHighlight()
+{
+	//check if something in the way
+	FHitResult hit;
+	FCollisionQueryParams raycastParams;
+	raycastParams.AddIgnoredActor(this);
+	FVector direction{ GetInputAxisValue("MoveForward"), GetInputAxisValue("MoveRight"), 0 };
+	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
+
+	//if Touched something and it can be highlighted
+	if (hit.GetActor() != nullptr && Cast<IInterface_Highlightable>(hit.GetActor()) != NULL)
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
+		SetElementToHighlight(Cast<IInterface_Highlightable>(hit.GetActor()));
+	}
+	else
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
+		SetElementToHighlight(nullptr);
+	}
 }
