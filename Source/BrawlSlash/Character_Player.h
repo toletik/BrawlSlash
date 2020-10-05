@@ -18,24 +18,12 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-public:
-	// Sets default values for this character's properties
-	ACharacter_Player();
-
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseLookUpRate;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 
 	//Left Joystick
 	void MoveForward(float Value);
@@ -55,9 +43,31 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool isExecuting = false;
 
-	ACharacter_Base* elementToHighlight = nullptr;
+	IInterface_Highlightable* elementToHighlight = nullptr;
+	void SetElementToHighlight(IInterface_Highlightable* ptr)
+	{
+		if (elementToHighlight != nullptr)
+			elementToHighlight->SetIfNeedToGlow(false);
+
+		elementToHighlight = ptr;
+
+		if (elementToHighlight != nullptr)
+			elementToHighlight->SetIfNeedToGlow(true);
+	};
+
+	void UpdateElementToHighlight();
 
 public:
+	// Sets default values for this character's properties
+	ACharacter_Player();
+
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float baseTurnRate;
+
+	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float baseLookUpRate;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -66,5 +76,4 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
-
 };

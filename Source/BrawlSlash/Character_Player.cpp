@@ -8,6 +8,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -81,42 +82,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
-	//GetInputAxisValue("MoveForward");
-	//GetInputAxisValue("MoveRight");
-
-	
-	//check if something in the way
-	FHitResult hit;
-	FCollisionQueryParams raycastParams;
-	raycastParams.AddIgnoredActor(this);
-	FVector direction {GetInputAxisValue("MoveForward"), GetInputAxisValue("MoveRight"), 0};
-	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
-	
-	if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("highlightable"))
-	{
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
-
-		if (Cast<ACharacter_Base>(hit.GetActor()) != NULL)
-		{
-			if(elementToHighlight != nullptr)
-				elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 0);
-
-			elementToHighlight = Cast<ACharacter_Base>(hit.GetActor());
-			elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 1);
-		}
-	}
-	else
-	{
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
-
-		if (elementToHighlight != nullptr)
-			elementToHighlight->matDynamic->SetScalarParameterValue("needToGlow", 0);
-
-		elementToHighlight = nullptr;
-	}
-
-
+	UpdateElementToHighlight();
 }
 
 
@@ -167,10 +133,31 @@ void ACharacter_Player::Counter()
 	isCountering = true;
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Counter");
 }
-
 void ACharacter_Player::Execution()
 {
 	isExecuting = true;
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Execution");
 }
 
+void ACharacter_Player::UpdateElementToHighlight()
+{
+	//check if something in the way
+	FHitResult hit;
+	FCollisionQueryParams raycastParams;
+	raycastParams.AddIgnoredActor(this);
+	FVector direction{ GetInputAxisValue("MoveForward"), GetInputAxisValue("MoveRight"), 0 };
+	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
+
+	//if Touched something and it can be highlighted
+	if (hit.GetActor() != nullptr && Cast<IInterface_Highlightable>(hit.GetActor()) != NULL)
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
+		SetElementToHighlight(Cast<IInterface_Highlightable>(hit.GetActor()));
+	}
+	else
+	{
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
+		SetElementToHighlight(nullptr);
+	}
+
+}

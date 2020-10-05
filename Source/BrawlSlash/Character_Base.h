@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Materials/MaterialInstanceDynamic.h"
+#include "Interfaces/Interface_Highlightable.h"
 
 #include "Character_Base.generated.h"
 
 UCLASS()
-class BRAWLSLASH_API ACharacter_Base : public ACharacter
+class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
 {
 	GENERATED_BODY()
 
@@ -26,8 +26,6 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
-
-	UMaterialInstanceDynamic* matDynamic = nullptr;
 
 protected:
 	// Called when the game starts or when spawned
