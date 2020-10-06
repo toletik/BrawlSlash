@@ -74,6 +74,7 @@ void ACharacter_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 }
 
 // Called every frame
@@ -118,12 +119,12 @@ void ACharacter_Player::MoveRight(float Value)
 void ACharacter_Player::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
 }
 
 //Buttons
