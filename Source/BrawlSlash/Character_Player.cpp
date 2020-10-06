@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
+#include "Components/SkeletalMeshComponent.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -83,13 +84,23 @@ void ACharacter_Player::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateElementToHighlight();
+
+	if (state == E_STATE::DASHING && dashTarget)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::SanitizeFloat((dashTarget->GetActorLocation() - GetActorLocation()).Size()));
+		if ((dashTarget->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		{
+			state = E_STATE::ATTACKING;
+			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+		}
+	}
 }
 
 
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (state != E_STATE::ATTACKING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -102,7 +113,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (state != E_STATE::ATTACKING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -128,6 +139,19 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 }
 
 //Buttons
+void ACharacter_Player::Attack()
+{
+	state = E_STATE::ATTACKING;
+
+	if (elementToHighlight)
+	{
+		state = E_STATE::DASHING;
+		dashTarget = Cast<ACharacter>(elementToHighlight);
+		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+		LaunchCharacter((dashTarget->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+	}
+}
+
 void ACharacter_Player::Counter()
 {
 	state = E_STATE::COUNTERING;

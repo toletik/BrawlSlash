@@ -19,6 +19,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
+	ACharacter* dashTarget;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +36,7 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
+	virtual void Attack() override;
 	void Counter();
 	void Execution();
 	void Dodge();
