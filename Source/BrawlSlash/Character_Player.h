@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
+#include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
 UCLASS()
@@ -17,6 +18,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
+
+	ACharacter* dashTarget;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,9 +36,12 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
+	virtual void Attack() override;
 	void Counter();
 	void Execution();
 	void Dodge();
+
+	UMyGameInstance* gameInstance;
 
 	IInterface_Highlightable* elementToHighlight = nullptr;
 	void SetElementToHighlight(IInterface_Highlightable* ptr)
