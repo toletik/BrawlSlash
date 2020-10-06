@@ -6,5 +6,5 @@
 EBTNodeResult::Type UTask_Strafe::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 
-	return EBTNodeResult::Aborted;
+	return EBTNodeResult::Succeeded;
 }

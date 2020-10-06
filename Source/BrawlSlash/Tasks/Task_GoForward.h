@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "Task_GoToInnerCircle.generated.h"
+#include "Task_GoForward.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRAWLSLASH_API UTask_GoToInnerCircle : public UBTTaskNode
+class BRAWLSLASH_API UTask_GoForward : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
