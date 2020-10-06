@@ -24,4 +24,13 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
+
+	bool isInInnerCircle{ false };
+	bool needToAttack{ false };
+
+	float ratioAttackWeak{ 0 };
+	float ratioAttackStrong{ 0 };
+
+	float remainingTimeStun{ 0.f };
+	float remainingTimeRecovery{ 0.f };
 };

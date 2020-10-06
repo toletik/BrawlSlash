@@ -3,8 +3,23 @@
 
 #include "Decorator_NeedToGoCloser.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
+#include "AIController.h"
+#include "../Character_EnemyBase.h"
+
 bool UDecorator_NeedToGoCloser::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
+	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
+	FVector enemyPos = OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation();
+	FVector playerPos = OwnerComp.GetBlackboardComponent()->GetValueAsVector("playerPos");
+	FVector playerToSelf = enemyPos - playerPos;
 
-	return true;
+	//get distance
+	float distanceFromPlayer = playerToSelf.Size();
+
+	if ((enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusMedium")) ||
+		(!enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusBig")))
+		return true;
+
+	return false;
 }
