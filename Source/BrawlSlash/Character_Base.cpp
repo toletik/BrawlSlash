@@ -39,6 +39,10 @@ void ACharacter_Base::BeginPlay()
 void ACharacter_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//need to be put in takeDamage
+	if (health <= 0)
+		state = E_STATE::DEAD;
 }
 
 void ACharacter_Base::Attack()
@@ -66,5 +70,11 @@ void ACharacter_Base::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 void ACharacter_Base::TakeDamage(int damage)
 {
 	health -= damage;
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, GetName().Append(" : ").Append(FString::FromInt(health)));
+
+	if (health > 0)
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, GetName().Append(" : ").Append(FString::FromInt(health)));
+	else
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, GetName().Append(" : ").Append(FString::FromInt(health)));
+
+
 }
