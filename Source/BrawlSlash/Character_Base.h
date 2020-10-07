@@ -15,7 +15,20 @@ enum E_STATE
 	ATTACKING,
 	COUNTERING,
 	EXECUTING,
-	DODGING
+	DODGING,
+	DASHING,
+
+
+	HITTED_WEAK,
+	HITTED_STRONG,
+	HITTED_STUN,
+	HITTED_RECO,
+	ATTACKING_WEAK,
+	ATTACKING_STRONG,
+	COUNTERED,
+	STUN,
+	EXECUTED,
+	DEAD
 };
 
 UCLASS()
@@ -26,6 +39,14 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_High
 	float health = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBox;
+
+	UFUNCTION()
+	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void TakeDamage(int damage);
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,5 +61,15 @@ public:
 	ACharacter_Base();
 
 	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<E_STATE> state;
+	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	float walkSpeed{ 600 };
+
+	UFUNCTION(BlueprintCallable)
+	void BeginAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttack();
 };
