@@ -16,7 +16,19 @@ enum E_STATE
 	COUNTERING,
 	EXECUTING,
 	DODGING,
-	DASHING
+	DASHING,
+
+
+	HITTED_WEAK,
+	HITTED_STRONG,
+	HITTED_STUN,
+	HITTED_RECO,
+	ATTACKING_WEAK,
+	ATTACKING_STRONG,
+	COUNTERED,
+	STUN,
+	EXECUTED,
+	DEAD
 };
 
 UCLASS()
@@ -41,5 +53,10 @@ public:
 	ACharacter_Base();
 
 	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<E_STATE> state;
+	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float walkSpeed{ 600 };
+
 };
