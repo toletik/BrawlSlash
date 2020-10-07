@@ -36,7 +36,7 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	virtual void Attack() override;
+	void Attack();
 	void Counter();
 	void Execution();
 	void Dodge();
@@ -60,6 +60,8 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+	bool canCombo = false;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)

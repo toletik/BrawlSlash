@@ -41,11 +41,6 @@ void ACharacter_Base::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACharacter_Base::Attack()
-{
-	state = E_STATE::ATTACKING;
-}
-
 void ACharacter_Base::BeginAttack()
 {
 	attackBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

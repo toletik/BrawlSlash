@@ -18,6 +18,9 @@ enum E_STATE
 	DODGING,
 	DASHING,
 
+	COMBO1,
+	COMBO2,
+	COMBO3,
 
 	HITTED_WEAK,
 	HITTED_STRONG,
@@ -34,7 +37,7 @@ enum E_STATE
 UCLASS()
 class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
 {
-	GENERATED_BODY()
+	GENERATED_BODY() 
 
 	float health = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
@@ -54,15 +57,12 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack();
-
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float walkSpeed{ 600 };

@@ -62,8 +62,7 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
 	//Buttons
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Dodge", IE_Pressed, this, &ACharacter_Player::Dodge);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("Counter", IE_Pressed, this, &ACharacter_Player::Counter);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
@@ -89,7 +88,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 	{
 		if ((dashTarget->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
 		{
-			state = E_STATE::ATTACKING;
+			state = E_STATE::COMBO1;
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		}
 	}
@@ -140,8 +139,6 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
-	state = E_STATE::ATTACKING;
-
 	if (elementToHighlight)
 	{
 		state = E_STATE::DASHING;
@@ -149,6 +146,15 @@ void ACharacter_Player::Attack()
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		LaunchCharacter((dashTarget->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 	}
+
+	else if (state == E_STATE::COMBO1 && canCombo)
+		state = E_STATE::COMBO2;
+
+	else if (state == E_STATE::COMBO2 && canCombo)
+		state = E_STATE::COMBO3;
+
+	else
+		state = E_STATE::COMBO1;
 }
 
 void ACharacter_Player::Counter()
