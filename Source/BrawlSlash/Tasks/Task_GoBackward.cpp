@@ -3,13 +3,20 @@
 
 #include "Task_GoBackward.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 
 EBTNodeResult::Type UTask_GoBackward::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	APawn* enemy = OwnerComp.GetAIOwner()->GetPawn();
+	FVector enemyPos = enemy->GetActorLocation();
+	FVector playerPos = OwnerComp.GetBlackboardComponent()->GetValueAsVector("playerPos");
+	FVector selfToPlayer = playerPos - enemyPos;
+	selfToPlayer.Normalize();
 
-	OwnerComp.GetAIOwner()->MoveToLocation(enemy->GetActorLocation() - enemy->GetActorForwardVector() * 50);
+
+	OwnerComp.GetAIOwner()->MoveToLocation(enemy->GetActorLocation() - selfToPlayer * 100);
+
 
 	return EBTNodeResult::Succeeded;
 }

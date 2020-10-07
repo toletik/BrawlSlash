@@ -21,7 +21,7 @@ bool UDecorator_IfNotSeePlayer::CalculateRawConditionValue(UBehaviorTreeComponen
 	raycastParams.AddIgnoredActor(enemy);
 	GetWorld()->LineTraceSingleByChannel(hit, enemyPos, playerPos, ECC_Pawn, raycastParams);
 
-	if ( hit.GetActor()->ActorHasTag("Player") )
+	if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Player") )
 		return false;
 
 	return true;

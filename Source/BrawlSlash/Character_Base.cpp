@@ -3,6 +3,7 @@
 
 #include "Character_Base.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInterface.h"
 
@@ -19,6 +20,8 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
 	USkeletalMeshComponent* mesh = GetMesh();
 	UMaterialInterface* mat = mesh->GetMaterial(0);
