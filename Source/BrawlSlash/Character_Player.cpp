@@ -87,7 +87,6 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 	if (state == E_STATE::DASHING && dashTarget)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::SanitizeFloat((dashTarget->GetActorLocation() - GetActorLocation()).Size()));
 		if ((dashTarget->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
 		{
 			state = E_STATE::ATTACKING;
@@ -173,18 +172,18 @@ void ACharacter_Player::UpdateElementToHighlight()
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(this);
-	FVector direction{ GetInputAxisValue("MoveForward"), GetInputAxisValue("MoveRight"), 0 };
-	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
+	float coeff = abs(GetInputAxisValue("MoveForward")) + abs(GetInputAxisValue("MoveRight"));
+	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + GetActorForwardVector() * coeff * 800, ECC_Pawn, raycastParams);
 
 	//if Touched something and it can be highlighted
 	if (hit.GetActor() != nullptr && Cast<IInterface_Highlightable>(hit.GetActor()) != NULL)
 	{
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * coeff * 800, FColor::Green, false, 0.05, 0, 5);
 		SetElementToHighlight(Cast<IInterface_Highlightable>(hit.GetActor()));
 	}
 	else
 	{
-		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * coeff * 800, FColor::Red, false, 0.05, 0, 5);
 		SetElementToHighlight(nullptr);
 	}
 }

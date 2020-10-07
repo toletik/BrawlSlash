@@ -40,6 +40,14 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_High
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBox;
+
+	UFUNCTION()
+	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void TakeDamage(int damage);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,4 +67,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float walkSpeed{ 600 };
 
+	UFUNCTION(BlueprintCallable)
+	void BeginAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttack();
 };
