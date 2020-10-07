@@ -56,7 +56,7 @@ public:
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float walkSpeed{ 600 };
 
 };
