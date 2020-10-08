@@ -37,6 +37,7 @@ protected:
 
 	//Buttons
 	virtual void Attack() override;
+	void TakeDamage(int damage) override;
 	void Counter();
 	void Execution();
 	void Dodge();
