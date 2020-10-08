@@ -27,8 +27,9 @@ public:
 
 	bool isInInnerCircle{ false };
 	bool needToAttack{ false };
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackWeak{ 0 };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackStrong{ 0 };
 
 	float remainingTimeStun{ 0.f };

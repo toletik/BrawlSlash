@@ -16,6 +16,6 @@ bool UDecorator_IfIsCloseToPlayer::CalculateRawConditionValue(UBehaviorTreeCompo
 	//get distance
 	float distanceFromPlayer = playerToSelf.Size();
 
-	return (distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("rangeCloseToPlayer"));
+	return (distanceFromPlayer < OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusCloseToPlayer"));
 
 }
