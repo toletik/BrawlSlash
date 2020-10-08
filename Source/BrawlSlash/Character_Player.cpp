@@ -98,7 +98,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::COMBO1 && state != E_STATE::COMBO2 && state != E_STATE::COMBO3 && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -111,7 +111,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::COMBO1 && state != E_STATE::COMBO2 && state != E_STATE::COMBO3 && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
