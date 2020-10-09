@@ -46,16 +46,24 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_High
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* attackBox;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBoxStrong;
+
 	UFUNCTION()
 	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	void TakeDamage(int damage);
+	UFUNCTION()
+	void AttackStrongOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void Attack();
+
+	virtual void TakeDamage(int damage);
 
 public:
 	// Sets default values for this character's properties
@@ -73,4 +81,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void EndAttack();
+
+	UFUNCTION(BlueprintCallable)
+		void BeginAttackStrong();
+
+	UFUNCTION(BlueprintCallable)
+		void EndAttackStrong();
 };

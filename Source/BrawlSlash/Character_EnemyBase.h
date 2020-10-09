@@ -21,6 +21,8 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void TakeDamage(int damage) override;
+
 public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
@@ -35,3 +37,5 @@ public:
 	float remainingTimeStun{ 0.f };
 	float remainingTimeRecovery{ 0.f };
 };
+
+

@@ -157,6 +157,12 @@ void ACharacter_Player::Attack()
 		state = E_STATE::COMBO1;
 }
 
+void ACharacter_Player::TakeDamage(int damage)
+{
+	Super::TakeDamage(damage);
+
+}
+
 void ACharacter_Player::Counter()
 {
 	state = E_STATE::COUNTERING;
