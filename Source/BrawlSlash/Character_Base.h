@@ -15,17 +15,45 @@ enum E_STATE
 	ATTACKING,
 	COUNTERING,
 	EXECUTING,
-	DODGING
+	DODGING,
+	DASHING,
+
+	COMBO1,
+	COMBO2,
+	COMBO3,
+
+	HITTED_WEAK,
+	HITTED_STRONG,
+	HITTED_STUN,
+	HITTED_RECO,
+	ATTACKING_WEAK,
+	ATTACKING_STRONG,
+	COUNTERED,
+	STUN,
+	EXECUTED,
+	DEAD
 };
 
 UCLASS()
 class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
 {
-	GENERATED_BODY()
+	GENERATED_BODY() 
 
 	float health = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBoxStrong;
+
+	UFUNCTION()
+	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void AttackStrongOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,12 +61,28 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack();
+	virtual void TakeDamage(int damage);
 
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
 	UPROPERTY(BlueprintReadWrite)
-	TEnumAsByte<E_STATE> state;
+	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	float walkSpeed{ 600 };
+
+	UFUNCTION(BlueprintCallable)
+	void BeginAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttack();
+
+	UFUNCTION(BlueprintCallable)
+		void BeginAttackStrong();
+
+	UFUNCTION(BlueprintCallable)
+		void EndAttackStrong();
 };

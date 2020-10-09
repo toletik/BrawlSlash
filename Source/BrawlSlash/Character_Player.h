@@ -19,6 +19,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
+	ACharacter* dashTarget;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,6 +36,8 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
+	void Attack();
+	void TakeDamage(int damage) override;
 	void Counter();
 	void Execution();
 	void Dodge();
@@ -57,6 +61,8 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+	bool canCombo = false;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
