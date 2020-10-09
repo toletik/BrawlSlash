@@ -18,6 +18,9 @@ ACharacter_Base::ACharacter_Base()
 
 	attackBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBox"));
 	attackBox->SetupAttachment(RootComponent);
+
+	attackBoxStrong = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBoxStrong"));
+	attackBoxStrong->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +36,8 @@ void ACharacter_Base::BeginPlay()
 
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackStrongOverlap);
+	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame
@@ -42,12 +47,10 @@ void ACharacter_Base::Tick(float DeltaTime)
 
 	//need to be put in takeDamage
 	if (health <= 0)
+	{
+		SetActorEnableCollision(false);
 		state = E_STATE::DEAD;
-}
-
-void ACharacter_Base::Attack()
-{
-	state = E_STATE::ATTACKING;
+	}
 }
 
 void ACharacter_Base::BeginAttack()
@@ -60,11 +63,29 @@ void ACharacter_Base::EndAttack()
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void ACharacter_Base::BeginAttackStrong()
+{
+	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void ACharacter_Base::EndAttackStrong()
+{
+	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+
 void ACharacter_Base::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if ((OtherActor->ActorHasTag("Player") && ActorHasTag("Enemy"))
 	||  (OtherActor->ActorHasTag("Enemy") && ActorHasTag("Player")))
 		Cast<ACharacter_Base>(OtherActor)->TakeDamage(1);
+}
+
+void ACharacter_Base::AttackStrongOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if ((OtherActor->ActorHasTag("Player") && ActorHasTag("Enemy"))
+		|| (OtherActor->ActorHasTag("Enemy") && ActorHasTag("Player")))
+		Cast<ACharacter_Base>(OtherActor)->TakeDamage(10);
 }
 
 void ACharacter_Base::TakeDamage(int damage)

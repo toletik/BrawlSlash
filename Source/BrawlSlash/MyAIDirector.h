@@ -13,7 +13,16 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, category = AI)
-	TArray<ACharacter_EnemyBase*> enemies;
+	TArray<ACharacter_EnemyBase*> enemies;	
+	
+
+	TArray<ACharacter_EnemyBase*> enemiesInInner;
+
+	UPROPERTY(EditAnywhere, category = AI)
+	float numberOfEnemiesInInner;
+
+	float currentNumberOfEnemiesInInner{0};
+
 	UPROPERTY(EditAnywhere, category = AI)
 	float timeBetweenAttacks;
 
@@ -28,6 +37,10 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void UpdateDead();
 
+	void UpdatePosition();
+
+	void UpdateAttack(float DeltaTime);
 
 };
