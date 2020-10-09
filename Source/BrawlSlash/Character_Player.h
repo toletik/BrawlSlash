@@ -36,7 +36,7 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	virtual void Attack() override;
+	void Attack();
 	void TakeDamage(int damage) override;
 	void Counter();
 	void Execution();

@@ -61,8 +61,6 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Attack();
-
 	virtual void TakeDamage(int damage);
 
 public:
