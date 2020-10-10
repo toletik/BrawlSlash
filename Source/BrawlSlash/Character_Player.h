@@ -21,6 +21,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	ACharacter* dashTarget;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int actualCombo = 0;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,6 +43,8 @@ protected:
 	void TakeDamage(int damage) override;
 	void Counter();
 	void Execution();
+	void StartAiming();
+	void StopAiming();
 	void Dodge();
 
 	UMyGameInstance* gameInstance;
@@ -62,7 +67,15 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
+	FTimerHandle timerHandler;
+
 	bool canCombo = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float comboTime = 1.0f;
+
+	UFUNCTION()
+	void StopCombo();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
