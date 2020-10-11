@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
+#include "Character_EnemyBase.h"
 #include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
@@ -24,6 +25,11 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
+	bool isCamActive{ false };
+	FVector initialPos;
+	FRotator previousCamPosition;
+	FRotator realCamRotation;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,12 +46,15 @@ protected:
 
 	//Buttons
 	void Attack();
-	void TakeDamage(int damage) override;
+	void TakeHit(int damage) override;
 	void Counter();
 	void Execution();
 	void StartAiming();
 	void StopAiming();
 	void Dodge();
+
+	void TestRandomStart();
+	void TestRandomEnd();
 
 	UMyGameInstance* gameInstance;
 
@@ -66,6 +75,9 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+
+	ACharacter_EnemyBase* FocusedEnemy{ nullptr };
 
 	FTimerHandle timerHandler;
 

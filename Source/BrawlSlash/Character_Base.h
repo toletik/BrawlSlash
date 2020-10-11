@@ -58,7 +58,7 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void TakeDamage(int damage);
+	virtual void TakeHit(int damage);
 
 public:
 	// Sets default values for this character's properties

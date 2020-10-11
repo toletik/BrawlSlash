@@ -21,9 +21,9 @@ ACharacter_EnemyBase::ACharacter_EnemyBase()
 
 }
 
-void ACharacter_EnemyBase::TakeDamage(int damage)
+void ACharacter_EnemyBase::TakeHit(int damage)
 {
-	Super::TakeDamage(damage);
+	Super::TakeHit(damage);
 
 	if (state == E_STATE::IDLE)
 		state = E_STATE::HITTED_WEAK;
