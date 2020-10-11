@@ -12,6 +12,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
+#include "Character_EnemyBase.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -82,12 +84,15 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (target)
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
+
 	if (state == E_STATE::AIMING)
 		UpdateElementToHighlight();
 
-	if (state == E_STATE::DASHING && dashTarget)
+	if (state == E_STATE::DASHING && target)
 	{
-		if ((dashTarget->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		if ((target->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
 		{
 			Attack();
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
@@ -180,9 +185,9 @@ void ACharacter_Player::StopAiming()
 	if (elementToHighlight)
 	{
 		state = E_STATE::DASHING;
-		dashTarget = Cast<ACharacter>(elementToHighlight);
+		target = Cast<ACharacter_EnemyBase>(elementToHighlight);
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((dashTarget->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 	}
 	
 	else
@@ -208,7 +213,10 @@ void ACharacter_Player::UpdateElementToHighlight()
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(this);
-	FVector direction = GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector;
+
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
 
 	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
 

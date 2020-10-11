@@ -19,7 +19,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-	ACharacter* dashTarget;
+	class ACharacter_EnemyBase* target = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
