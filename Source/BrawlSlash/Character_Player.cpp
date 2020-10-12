@@ -88,7 +88,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (target)
+	if (target && GetVelocity().Size() < 0.5f)
 		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
 
 	if (state == E_STATE::AIMING)
