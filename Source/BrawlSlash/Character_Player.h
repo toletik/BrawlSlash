@@ -25,10 +25,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
-	bool isCamActive{ false };
-	FVector initialPos;
-	FRotator previousCamPosition;
-	FRotator realCamRotation;
 
 protected:
 	// Called when the game starts or when spawned
@@ -76,7 +72,6 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
-
 	ACharacter_EnemyBase* FocusedEnemy{ nullptr };
 
 	FTimerHandle timerHandler;
@@ -89,14 +84,6 @@ public:
 	UFUNCTION()
 	void StopCombo();
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseLookUpRate;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -104,4 +91,31 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
+
+
+	//Camera Variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float rotationSpeedHorizontal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float rotationSpeedVertical;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float verticalAngleMax;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float verticalAngleMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float distanceFromPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	FRotator initialRotation {0, 0, 0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float positionLerpSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float positionLerpLimitRange;
+
 };
