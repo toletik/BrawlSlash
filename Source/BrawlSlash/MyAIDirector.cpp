@@ -5,6 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AMyAIDirector::AMyAIDirector()
@@ -27,17 +28,10 @@ void AMyAIDirector::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
 		return;
-
-
-
-	GEngine->AddOnScreenDebugMessage(-10, 0.5f, FColor::Blue, FString::FromInt(enemiesInInner.Num()) );
-
-	for (int i = 0; i < enemiesInInner.Num() - 1 ; ++i)
-		GEngine->AddOnScreenDebugMessage(-i - 7 , 0.5f, FColor::Purple, enemiesInInner[i]->GetName());
-		
-
+	
 	UpdateDead();
 
 	UpdatePosition();
