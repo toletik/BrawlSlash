@@ -25,6 +25,15 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float timeToStartAiming = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int firstComboDamage = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int secondComboDamage = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int thirdComboDamage = 3;
+
 	bool isCamActive{ false };
 	FVector initialPos;
 	FRotator previousCamPosition;
@@ -59,7 +68,6 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	void Attack();
 	void TakeHit(int damage) override;
 	void Execution();
 	void StartAiming();
@@ -88,6 +96,10 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+	void Attack();
+
+	bool needToAttack = false;
 
 	class ACharacter_EnemyBase* target = nullptr;
 

@@ -88,8 +88,6 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString("Mobility Points : ").Append(FString::FromInt(currentMobilityPoints)));
-
 	if (target)
 		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
 
@@ -153,21 +151,39 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
-	if (state != E_STATE::AIMING && state != E_STATE::ATTACKING)
+	if (state != E_STATE::AIMING)
 	{
-		currentMobilityPoints += onAttackMobilityPoints;
-		if (currentMobilityPoints > maxMobilityPoints)
-			currentMobilityPoints = maxMobilityPoints;
+		if (state == E_STATE::ATTACKING && canCombo)
+			needToAttack = true;
 
-		state = E_STATE::ATTACKING;
-		if (canCombo)
-		{
-			GetWorldTimerManager().ClearTimer(timerHandler);
-			canCombo = false;
-			actualCombo++;
-		}
 		else
-			actualCombo = 1;
+		{
+			currentMobilityPoints += onAttackMobilityPoints;
+			if (currentMobilityPoints > maxMobilityPoints)
+				currentMobilityPoints = maxMobilityPoints;
+
+			state = E_STATE::ATTACKING;
+			if (needToAttack || canCombo)
+			{
+				GetWorldTimerManager().ClearTimer(timerHandler);
+				canCombo = false;
+				needToAttack = false;
+
+				actualCombo++;
+
+				if (actualCombo == 2)
+					toDoDamage = secondComboDamage;
+
+				else
+					toDoDamage = thirdComboDamage;
+			}
+
+			else
+			{
+				actualCombo = 1;
+				toDoDamage = firstComboDamage;
+			}
+		}
 	}
 }
 

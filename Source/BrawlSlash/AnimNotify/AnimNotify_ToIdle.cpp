@@ -3,6 +3,7 @@
 
 #include "AnimNotify_ToIdle.h"
 #include "../Character_Base.h"
+#include "../Character_Player.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequenceBase.h"
 
@@ -12,4 +13,9 @@ void UAnimNotify_ToIdle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 
 	if (character)
 		character->state = E_STATE::IDLE;
+
+	ACharacter_Player* player = Cast<ACharacter_Player>(character);
+
+	if (player && player->needToAttack)
+		player->Attack();
 }
