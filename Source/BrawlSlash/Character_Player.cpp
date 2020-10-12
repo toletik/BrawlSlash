@@ -64,12 +64,9 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
 	//Buttons
-	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartAiming);
-	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopAiming);
-	PlayerInputComponent->BindAction("TestRandom", IE_Pressed, this, &ACharacter_Player::TestRandomStart);
-	PlayerInputComponent->BindAction("TestRandom", IE_Released, this, &ACharacter_Player::TestRandomEnd);
+	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartTeleport);
+	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopTeleport);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
-	PlayerInputComponent->BindAction("Counter", IE_Pressed, this, &ACharacter_Player::Counter);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
 }
 
@@ -89,13 +86,17 @@ void ACharacter_Player::BeginPlay()
 	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camManager->ViewPitchMin = -verticalAngleMax;
 	camManager->ViewPitchMax = -verticalAngleMin;
+	
+	currentMobilityPoints = maxMobilityPoints;
 }
 
 // Called every frame
 void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	if (target)
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
 
 	if (state == E_STATE::AIMING)
 		UpdateElementToHighlight();
@@ -157,15 +158,37 @@ void ACharacter_Player::Attack()
 {
 	if (state != E_STATE::AIMING)
 	{
-		state = E_STATE::ATTACKING;
-		if (canCombo)
-		{
-			GetWorldTimerManager().ClearTimer(timerHandler);
-			canCombo = false;
-			actualCombo++;
-		}
+		if (state == E_STATE::ATTACKING && canCombo)
+			needToAttack = true;
+
 		else
-			actualCombo = 1;
+		{
+			currentMobilityPoints += onAttackMobilityPoints;
+			if (currentMobilityPoints > maxMobilityPoints)
+				currentMobilityPoints = maxMobilityPoints;
+
+			state = E_STATE::ATTACKING;
+			if (needToAttack || canCombo)
+			{
+				GetWorldTimerManager().ClearTimer(timerHandler);
+				canCombo = false;
+				needToAttack = false;
+
+				actualCombo++;
+
+				if (actualCombo == 2)
+					toDoDamage = secondComboDamage;
+
+				else
+					toDoDamage = thirdComboDamage;
+			}
+
+			else
+			{
+				actualCombo = 1;
+				toDoDamage = firstComboDamage;
+			}
+		}
 	}
 }
 
@@ -173,11 +196,6 @@ void ACharacter_Player::TakeHit(int damage)
 {
 	Super::TakeHit(damage);
 
-}
-
-void ACharacter_Player::Counter()
-{
-	state = E_STATE::COUNTERING;
 }
 
 void ACharacter_Player::Execution()
@@ -190,23 +208,39 @@ void ACharacter_Player::StartAiming()
 	state = E_STATE::AIMING;
 }
 
-void ACharacter_Player::StopAiming()
+void ACharacter_Player::StartTeleport()
 {
-	if (elementToHighlight)
-	{
-		state = E_STATE::DASHING;
-		target = Cast<ACharacter_EnemyBase>(elementToHighlight);
-		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-	}
-	
-	else
-		state = E_STATE::IDLE;
+	GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::StartAiming, timeToStartAiming, false);
 }
 
-void ACharacter_Player::Dodge()
+void ACharacter_Player::StopTeleport()
 {
-	state = E_STATE::DODGING;
+	if (state == E_STATE::AIMING)
+	{
+		if (elementToHighlight && currentMobilityPoints - onTpHitMobilityPoints >= 0)
+		{
+			currentMobilityPoints -= onTpHitMobilityPoints;
+
+			state = E_STATE::DASHING;
+			target = Cast<ACharacter_EnemyBase>(elementToHighlight);
+			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+			LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		}
+
+		else
+			state = E_STATE::IDLE;
+	}
+
+	else
+	{
+		GetWorldTimerManager().ClearTimer(timerHandler);
+
+		if (target && currentMobilityPoints - onDodgeMobilityPoints >= 0)
+		{
+			SetActorLocation(target->GetActorLocation() - target->GetActorForwardVector() * 200.0f);
+			currentMobilityPoints -= onDodgeMobilityPoints;
+		}
+	}
 }
 
 void ACharacter_Player::StopCombo()

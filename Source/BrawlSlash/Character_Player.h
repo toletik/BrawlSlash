@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
-#include "Character_EnemyBase.h"
 #include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
@@ -20,11 +19,34 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-	class ACharacter_EnemyBase* target = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float timeToStartAiming = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int firstComboDamage = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int secondComboDamage = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int thirdComboDamage = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int maxMobilityPoints = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onAttackMobilityPoints = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onDodgeMobilityPoints = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onTpHitMobilityPoints = 2;
+
+	int currentMobilityPoints;
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,13 +63,11 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	void Attack();
 	void TakeHit(int damage) override;
-	void Counter();
 	void Execution();
 	void StartAiming();
-	void StopAiming();
-	void Dodge();
+	void StartTeleport();
+	void StopTeleport();
 
 	void TestRandomStart();
 	void TestRandomEnd();
@@ -72,7 +92,11 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
-	ACharacter_EnemyBase* FocusedEnemy{ nullptr };
+	void Attack();
+
+	bool needToAttack = false;
+
+	class ACharacter_EnemyBase* target = nullptr;
 
 	FTimerHandle timerHandler;
 

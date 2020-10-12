@@ -53,14 +53,23 @@ void AMyAIDirector::UpdateDead()
 {
 	for (int i = enemiesInInner.Num() - 1; i >= 0; --i)
 		if (enemiesInInner[i]->state == E_STATE::DEAD)
-			enemiesInInner.RemoveAt(i);
+		{
+			if (playerReference->target == enemiesInInner[i])
+				playerReference->target = nullptr;
 
+			enemiesInInner[i]->SetIfNeedToGlow(false);
+			enemiesInInner.RemoveAt(i);
+		}
 
 	for (int i = enemies.Num() - 1; i >= 0; --i)
 		if (enemies[i]->state == E_STATE::DEAD)
+		{
+			if (playerReference->target == enemies[i])
+				playerReference->target = nullptr;
+
+			enemies[i]->SetIfNeedToGlow(false);
 			enemies.RemoveAt(i);
-
-
+		}
 }
 
 

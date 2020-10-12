@@ -36,7 +36,7 @@ void ACharacter_Base::BeginPlay()
 
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackStrongOverlap);
+	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
 	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -77,15 +77,11 @@ void ACharacter_Base::EndAttackStrong()
 void ACharacter_Base::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if ((OtherActor->ActorHasTag("Player") && ActorHasTag("Enemy"))
-	||  (OtherActor->ActorHasTag("Enemy") && ActorHasTag("Player")))
-		Cast<ACharacter_Base>(OtherActor)->TakeHit(1);
-}
-
-void ACharacter_Base::AttackStrongOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if ((OtherActor->ActorHasTag("Player") && ActorHasTag("Enemy"))
 		|| (OtherActor->ActorHasTag("Enemy") && ActorHasTag("Player")))
-		Cast<ACharacter_Base>(OtherActor)->TakeHit(10);
+	{
+		Cast<ACharacter_Base>(OtherActor)->TakeHit(toDoDamage);
+		toDoDamage = 0;
+	}
 }
 
 void ACharacter_Base::TakeHit(int damage)
