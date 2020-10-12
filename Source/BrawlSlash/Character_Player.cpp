@@ -13,18 +13,18 @@
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "Character_EnemyBase.h"
-#include "Kismet/KismetMathLibrary.h"
 
+#include "Kismet/KismetMathLibrary.h"
+#include "Math/UnrealMathUtility.h"
+
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	// set our turn rates for input
-	baseTurnRate = 45.f;
-	baseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -40,12 +40,12 @@ ACharacter_Player::ACharacter_Player()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	cameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	cameraBoom->SetupAttachment(RootComponent);
-	cameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	cameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+
 	// Create a follow camera
-	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera")); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); 
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 }
 
@@ -77,9 +77,17 @@ void ACharacter_Player::BeginPlay()
 	Super::BeginPlay();
 	
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
-	initialPos = followCamera->GetRelativeLocation();
-	previousCamPosition = Controller->GetControlRotation();
-	realCamRotation = Controller->GetControlRotation();
+
+	cameraBoom->TargetArmLength = distanceFromPlayer;
+	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName);
+	Controller->SetControlRotation(initialRotation);
+	cameraBoom->CameraLagSpeed = positionLerpSpeed;
+	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
+
+	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camManager->ViewPitchMin = -verticalAngleMax;
+	camManager->ViewPitchMax = -verticalAngleMin;
+	
 	currentMobilityPoints = maxMobilityPoints;
 }
 
@@ -138,14 +146,12 @@ void ACharacter_Player::MoveRight(float Value)
 void ACharacter_Player::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
-	//realCamRotation.Yaw += Rate * baseTurnRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
+	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
-	//realCamRotation.Pitch += Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f);
+	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
 }
 
 //Buttons
@@ -276,12 +282,9 @@ void ACharacter_Player::UpdateElementToHighlight()
 void ACharacter_Player::TestRandomStart()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "Start");
-	isCamActive = true;
-	previousCamPosition = Controller->GetControlRotation();
 
 }
 void ACharacter_Player::TestRandomEnd()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
-	isCamActive = false;
 }
