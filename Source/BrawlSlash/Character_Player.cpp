@@ -96,6 +96,9 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (target != nullptr)
+	    Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));\
+
 	if (target && GetVelocity().Size() < 0.5f)
 		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
 
