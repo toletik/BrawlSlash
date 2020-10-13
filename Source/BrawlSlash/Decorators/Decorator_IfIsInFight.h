@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTDecorator.h"
-#include "Decorator_IfNeedToAttack.generated.h"
+#include "Decorator_IfIsInFight.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRAWLSLASH_API UDecorator_IfNeedToAttack : public UBTDecorator
+class BRAWLSLASH_API UDecorator_IfIsInFight : public UBTDecorator
 {
 	GENERATED_BODY()
-	
+
 	bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 };

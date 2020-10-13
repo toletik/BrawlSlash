@@ -29,3 +29,20 @@ void ACharacter_EnemyBase::TakeHit(int damage)
 		state = E_STATE::HITTED_WEAK;
 
 }
+
+void ACharacter_EnemyBase::SetAttackState()
+{
+	float ratio = FMath::RandRange(0, 100);
+
+	if (ratio <= ratioAttackWeak)
+	{
+		needToAttackWeak = true;
+		toDoDamage = weakDamage;
+	}
+
+	else if (ratio <= ratioAttackWeak + ratioAttackStrong)
+	{
+		state = E_STATE::ATTACKING_STRONG;
+		toDoDamage = strongDamage;
+	}
+}

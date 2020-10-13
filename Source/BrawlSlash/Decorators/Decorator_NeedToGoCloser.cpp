@@ -17,8 +17,8 @@ bool UDecorator_NeedToGoCloser::CalculateRawConditionValue(UBehaviorTreeComponen
 	//get distance
 	float distanceFromPlayer = playerToSelf.Size();
 
-	if ((enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusMedium")) ||
-		(!enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusBig")))
+	if ((enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusInnerCircle")) ||
+		(!enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusBackCircle")))
 		return true;
 
 	return false;
