@@ -48,6 +48,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	int currentMobilityPoints;
 
+	class USceneComponent* cone;
+	class UMaterialInstanceDynamic* coneMat = nullptr;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -96,7 +99,8 @@ public:
 
 	bool needToAttack = false;
 
-	class ACharacter_EnemyBase* target = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	AActor* target = nullptr;
 
 	FTimerHandle timerHandler;
 
@@ -108,6 +112,9 @@ public:
 	UFUNCTION()
 	void StopCombo();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChangeFocus();
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
