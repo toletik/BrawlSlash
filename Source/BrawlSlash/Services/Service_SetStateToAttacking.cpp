@@ -13,8 +13,14 @@ void UService_SetStateToAttacking::TickNode(UBehaviorTreeComponent& OwnerComp, u
 	float ratio = FMath::RandRange(0, 100);
 
 	if (ratio <= enemy->ratioAttackWeak)
+	{
 		enemy->state = E_STATE::ATTACKING_WEAK;
-	else if (ratio <= enemy->ratioAttackWeak + enemy->ratioAttackStrong)
-		enemy->state = E_STATE::ATTACKING_STRONG;
+		enemy->toDoDamage = enemy->weakDamage;
+	}
 
+	else if (ratio <= enemy->ratioAttackWeak + enemy->ratioAttackStrong)
+	{
+		enemy->state = E_STATE::ATTACKING_STRONG;
+		enemy->toDoDamage = enemy->strongDamage;
+	}
 }

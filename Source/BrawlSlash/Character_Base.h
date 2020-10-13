@@ -13,14 +13,9 @@ enum E_STATE
 {
 	IDLE,
 	ATTACKING,
-	COUNTERING,
 	EXECUTING,
-	DODGING,
 	DASHING,
-
-	COMBO1,
-	COMBO2,
-	COMBO3,
+	AIMING,
 
 	HITTED_WEAK,
 	HITTED_STRONG,
@@ -52,16 +47,13 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_High
 	UFUNCTION()
 	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION()
-	void AttackStrongOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void TakeDamage(int damage);
+	virtual void TakeHit(int damage);
 
 public:
 	// Sets default values for this character's properties
@@ -70,9 +62,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float walkSpeed{ 600 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	int toDoDamage{ 0 };
 
 	UFUNCTION(BlueprintCallable)
 	void BeginAttack();
@@ -81,8 +75,8 @@ public:
 	void EndAttack();
 
 	UFUNCTION(BlueprintCallable)
-		void BeginAttackStrong();
+	void BeginAttackStrong();
 
 	UFUNCTION(BlueprintCallable)
-		void EndAttackStrong();
+	void EndAttackStrong();
 };

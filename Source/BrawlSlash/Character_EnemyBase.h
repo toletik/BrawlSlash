@@ -21,7 +21,7 @@ protected:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void TakeDamage(int damage) override;
+	void TakeHit(int damage) override;
 
 public:
 	// Sets default values for this character's properties
@@ -31,8 +31,15 @@ public:
 	bool needToAttack{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackWeak{ 0 };
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackStrong{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	int weakDamage{ 1 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	int strongDamage{ 2 };
 
 	float remainingTimeStun{ 0.f };
 	float remainingTimeRecovery{ 0.f };

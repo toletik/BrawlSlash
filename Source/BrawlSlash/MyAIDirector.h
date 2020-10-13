@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Character_Player.h"
 #include "Character_EnemyBase.h"
 #include "MyAIDirector.generated.h"
 
@@ -12,16 +13,17 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 {
 	GENERATED_BODY()
 
+	ACharacter_Player* playerReference {nullptr};
+
 	UPROPERTY(EditAnywhere, category = AI)
 	TArray<ACharacter_EnemyBase*> enemies;	
 	
-
 	TArray<ACharacter_EnemyBase*> enemiesInInner;
+
 
 	UPROPERTY(EditAnywhere, category = AI)
 	float numberOfEnemiesInInner;
 
-	float currentNumberOfEnemiesInInner{0};
 
 	UPROPERTY(EditAnywhere, category = AI)
 	float timeBetweenAttacks;
@@ -36,10 +38,12 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
 	void UpdateDead();
 
 	void UpdatePosition();
+
+	//void UpdateFocus();
 
 	void UpdateAttack(float DeltaTime);
 

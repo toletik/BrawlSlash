@@ -3,6 +3,9 @@
 
 #include "MyAIDirector.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+
 // Sets default values
 AMyAIDirector::AMyAIDirector()
 {
@@ -16,6 +19,7 @@ void AMyAIDirector::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	playerReference = Cast<ACharacter_Player>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 // Called every frame
@@ -25,6 +29,8 @@ void AMyAIDirector::Tick(float DeltaTime)
 
 	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
 		return;
+
+
 
 	GEngine->AddOnScreenDebugMessage(-10, 0.5f, FColor::Blue, FString::FromInt(enemiesInInner.Num()) );
 
@@ -36,6 +42,8 @@ void AMyAIDirector::Tick(float DeltaTime)
 
 	UpdatePosition();
 
+	//UpdateFocus();
+
 	UpdateAttack(DeltaTime);
 
 }
@@ -45,15 +53,25 @@ void AMyAIDirector::UpdateDead()
 {
 	for (int i = enemiesInInner.Num() - 1; i >= 0; --i)
 		if (enemiesInInner[i]->state == E_STATE::DEAD)
-			enemiesInInner.RemoveAt(i);
+		{
+			if (playerReference->target == enemiesInInner[i])
+				playerReference->target = nullptr;
 
+			enemiesInInner[i]->SetIfNeedToGlow(false);
+			enemiesInInner.RemoveAt(i);
+		}
 
 	for (int i = enemies.Num() - 1; i >= 0; --i)
 		if (enemies[i]->state == E_STATE::DEAD)
+		{
+			if (playerReference->target == enemies[i])
+				playerReference->target = nullptr;
+
+			enemies[i]->SetIfNeedToGlow(false);
 			enemies.RemoveAt(i);
-
-
+		}
 }
+
 
 void AMyAIDirector::UpdatePosition()
 {
@@ -62,7 +80,6 @@ void AMyAIDirector::UpdatePosition()
 			if (!enemies[i]->isInInnerCircle)
 			{
 				enemies[i]->isInInnerCircle = true;
-				enemies[i]->SetIfNeedToGlow(true);
 
 				enemiesInInner.Add(enemies[i]);
 
@@ -70,7 +87,29 @@ void AMyAIDirector::UpdatePosition()
 			}
 	
 }
+/*
+void AMyAIDirector::UpdateFocus()
+{
+	float distanceFromPlayer{ INFINITY };
+	ACharacter_EnemyBase* newFocus{ nullptr };
 
+	for (int i = enemiesInInner.Num() - 1; i >= 0; --i)
+	{
+		if ((enemiesInInner[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < distanceFromPlayer)
+		{
+			distanceFromPlayer = (enemiesInInner[i]->GetActorLocation() - playerReference->GetActorLocation()).Size();
+			newFocus = enemiesInInner[i];
+		}
+	}
+
+	if(playerReference->FocusedEnemy != nullptr)
+		playerReference->FocusedEnemy->SetIfNeedToGlow(false);
+
+	playerReference->FocusedEnemy = newFocus;
+
+	playerReference->FocusedEnemy->SetIfNeedToGlow(true);
+
+}*/
 
 void AMyAIDirector::UpdateAttack(float DeltaTime)
 {
