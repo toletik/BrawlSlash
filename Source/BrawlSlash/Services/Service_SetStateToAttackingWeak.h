@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Service_NeedToAttackToFalse.generated.h"
+#include "Service_SetStateToAttackingWeak.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRAWLSLASH_API UService_NeedToAttackToFalse : public UBTService
+class BRAWLSLASH_API UService_SetStateToAttackingWeak : public UBTService
 {
 	GENERATED_BODY()
-	
+
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

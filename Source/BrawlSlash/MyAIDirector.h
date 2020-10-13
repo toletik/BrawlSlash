@@ -20,15 +20,16 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	
 	TArray<ACharacter_EnemyBase*> enemiesInInner;
 
-
 	UPROPERTY(EditAnywhere, category = AI)
 	float numberOfEnemiesInInner;
-
 
 	UPROPERTY(EditAnywhere, category = AI)
 	float timeBetweenAttacks;
 
 	float remainingTimeForNextAttack;
+
+	bool isInFight{ false };
+	float radiusFromPlayerToStartFight{ 0 };
 
 	// Sets default values for this actor's properties
 	AMyAIDirector();
@@ -39,9 +40,11 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	void UpdateIfNeedToStartFight();
+
 	void UpdateDead();
 
-	void UpdatePosition();
+	void UpdateIfIsInInner();
 
 	//void UpdateFocus();
 

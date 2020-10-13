@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "Service_SetStateToAttacking.generated.h"
+#include "Service_NeedToAttackWeakToFalse.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRAWLSLASH_API UService_SetStateToAttacking : public UBTService
+class BRAWLSLASH_API UService_NeedToAttackWeakToFalse : public UBTService
 {
 	GENERATED_BODY()
 	

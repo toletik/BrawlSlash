@@ -19,9 +19,8 @@ void AMyAIController::BeginPlay()
 
 	//Set Values for the BlackBoard
 	Blackboard->SetValueAsFloat("radiusCloseToPlayer", radiusCloseToPlayer);
-	Blackboard->SetValueAsFloat("radiusSmall", radiusSmall);
-	Blackboard->SetValueAsFloat("radiusMedium", radiusMedium);
-	Blackboard->SetValueAsFloat("radiusBig", radiusBig);
+	Blackboard->SetValueAsFloat("radiusInnerCircle", radiusInnerCircle);
+	Blackboard->SetValueAsFloat("radiusBackCircle", radiusBackCircle);
 	
 }
 

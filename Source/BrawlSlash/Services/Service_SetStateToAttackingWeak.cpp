@@ -1,13 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Decorator_IfNeedToAttack.h"
+#include "Service_SetStateToAttackingWeak.h"
 
 #include "AIController.h"
 #include "../Character_EnemyBase.h"
 
-bool UDecorator_IfNeedToAttack::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
+void UService_SetStateToAttackingWeak::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
-	return enemy->needToAttack;
+
+	enemy->state = E_STATE::ATTACKING_WEAK;
 }

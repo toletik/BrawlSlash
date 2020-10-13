@@ -27,8 +27,17 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
+	void SetAttackState();
+
+	float remainingTimeStun{ 0.f };
+	float remainingTimeRecovery{ 0.f };
+
 	bool isInInnerCircle{ false };
-	bool needToAttack{ false };
+
+	bool needToAttackWeak{ false };
+
+	bool isInFight{ false };
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackWeak{ 0 };
 
@@ -40,9 +49,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	int strongDamage{ 2 };
-
-	float remainingTimeStun{ 0.f };
-	float remainingTimeRecovery{ 0.f };
 };
 
 
