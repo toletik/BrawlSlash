@@ -13,19 +13,18 @@
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "Character_EnemyBase.h"
-#include "Kismet/KismetMathLibrary.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "Math/UnrealMathUtility.h"
+
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	// set our turn rates for input
-	baseTurnRate = 45.f;
-	baseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -41,12 +40,12 @@ ACharacter_Player::ACharacter_Player()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	cameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	cameraBoom->SetupAttachment(RootComponent);
-	cameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	cameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+
 	// Create a follow camera
-	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera")); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); 
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 }
 
@@ -66,12 +65,9 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
 	//Buttons
-	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartAiming);
-	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopAiming);
-	PlayerInputComponent->BindAction("TestRandom", IE_Pressed, this, &ACharacter_Player::TestRandomStart);
-	PlayerInputComponent->BindAction("TestRandom", IE_Released, this, &ACharacter_Player::TestRandomEnd);
+	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartTeleport);
+	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopTeleport);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
-	PlayerInputComponent->BindAction("Counter", IE_Pressed, this, &ACharacter_Player::Counter);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
 }
 
@@ -81,42 +77,34 @@ void ACharacter_Player::BeginPlay()
 	Super::BeginPlay();
 	
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
-	initialPos = followCamera->GetRelativeLocation();
-	previousCamPosition = Controller->GetControlRotation();
-	realCamRotation = Controller->GetControlRotation();
+
+	cameraBoom->TargetArmLength = distanceFromPlayer;
+	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName);
+	Controller->SetControlRotation(initialRotation);
+	cameraBoom->CameraLagSpeed = positionLerpSpeed;
+	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
+
+	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camManager->ViewPitchMin = -verticalAngleMax;
+	camManager->ViewPitchMax = -verticalAngleMin;
+	
+	currentMobilityPoints = maxMobilityPoints;
 }
 
 // Called every frame
 void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//if (target)
-	//	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
-
-	//followCamera->SetWorldLocation(GetActorLocation() + initialPos);
-	//if (isCamActive)
-	//	Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(/*GetActorUpVector() * -100 + *//*GetActorForwardVector() * 100*/GetActorRightVector()).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
-	//else
-	//	Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), previousCamPosition, GetWorld()->GetDeltaSeconds(), 2));
-
-	//if (FocusedEnemy != nullptr)
-	//	Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(FocusedEnemy->GetActorLocation() - GetActorLocation() ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
-
-	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (-GetActorForwardVector()).RotateAngleAxis(Controller->GetControlRotation().Yaw , GetActorUpVector()) * 800, FColor::Cyan, false, 0.05, 0, 5);
-	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (-GetActorForwardVector()).RotateAngleAxis(-Controller->GetControlRotation().Pitch, GetActorRightVector()) * 800, FColor::Cyan, false, 0.05, 0, 5);
-	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (-GetActorForwardVector()).RotateAngleAxis(-Controller->GetControlRotation().Pitch, GetActorRightVector()).RotateAngleAxis(Controller->GetControlRotation().Yaw, GetActorUpVector()) * 800 + (-GetActorForwardVector()).RotateAngleAxis(-Controller->GetControlRotation().Pitch, GetActorRightVector()) * 800, FColor::Purple, false, 0.05, 0, 5);
-
 	
+	if (target != nullptr)
+	    Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));\
 
-	//GEngine->AddOnScreenDebugMessage(-17, 0.5f, FColor::Cyan, GetName().Append("Pitch").Append(FString::FromInt(Controller->GetControlRotation().Pitch)));
-	//GEngine->AddOnScreenDebugMessage(-18, 0.5f, FColor::Cyan, GetName().Append("Yaw").Append(FString::FromInt(Controller->GetControlRotation().Yaw)));
-	//GEngine->AddOnScreenDebugMessage(-19, 0.5f, FColor::Cyan, GetName().Append("Roll").Append(FString::FromInt(Controller->GetControlRotation().Roll)));
-
-
+	if (target && GetVelocity().Size() < 0.5f)
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
 
 	if (state == E_STATE::AIMING)
 		UpdateElementToHighlight();
+
 	if (state == E_STATE::DASHING && target)
 	{
 		if ((target->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
@@ -161,14 +149,12 @@ void ACharacter_Player::MoveRight(float Value)
 void ACharacter_Player::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * baseTurnRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
-	//realCamRotation.Yaw += Rate * baseTurnRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
+	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
-	//realCamRotation.Pitch += Rate * baseLookUpRate * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f);
+	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
 }
 
 //Buttons
@@ -176,15 +162,37 @@ void ACharacter_Player::Attack()
 {
 	if (state != E_STATE::AIMING)
 	{
-		state = E_STATE::ATTACKING;
-		if (canCombo)
-		{
-			GetWorldTimerManager().ClearTimer(timerHandler);
-			canCombo = false;
-			actualCombo++;
-		}
+		if (state == E_STATE::ATTACKING && canCombo)
+			needToAttack = true;
+
 		else
-			actualCombo = 1;
+		{
+			currentMobilityPoints += onAttackMobilityPoints;
+			if (currentMobilityPoints > maxMobilityPoints)
+				currentMobilityPoints = maxMobilityPoints;
+
+			state = E_STATE::ATTACKING;
+			if (needToAttack || canCombo)
+			{
+				GetWorldTimerManager().ClearTimer(timerHandler);
+				canCombo = false;
+				needToAttack = false;
+
+				actualCombo++;
+
+				if (actualCombo == 2)
+					toDoDamage = secondComboDamage;
+
+				else
+					toDoDamage = thirdComboDamage;
+			}
+
+			else
+			{
+				actualCombo = 1;
+				toDoDamage = firstComboDamage;
+			}
+		}
 	}
 }
 
@@ -192,11 +200,6 @@ void ACharacter_Player::TakeHit(int damage)
 {
 	Super::TakeHit(damage);
 
-}
-
-void ACharacter_Player::Counter()
-{
-	state = E_STATE::COUNTERING;
 }
 
 void ACharacter_Player::Execution()
@@ -209,23 +212,39 @@ void ACharacter_Player::StartAiming()
 	state = E_STATE::AIMING;
 }
 
-void ACharacter_Player::StopAiming()
+void ACharacter_Player::StartTeleport()
 {
-	if (elementToHighlight)
-	{
-		state = E_STATE::DASHING;
-		target = Cast<ACharacter_EnemyBase>(elementToHighlight);
-		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-	}
-	
-	else
-		state = E_STATE::IDLE;
+	GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::StartAiming, timeToStartAiming, false);
 }
 
-void ACharacter_Player::Dodge()
+void ACharacter_Player::StopTeleport()
 {
-	state = E_STATE::DODGING;
+	if (state == E_STATE::AIMING)
+	{
+		if (elementToHighlight && currentMobilityPoints - onTpHitMobilityPoints >= 0)
+		{
+			currentMobilityPoints -= onTpHitMobilityPoints;
+
+			state = E_STATE::DASHING;
+			target = Cast<ACharacter_EnemyBase>(elementToHighlight);
+			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+			LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		}
+
+		else
+			state = E_STATE::IDLE;
+	}
+
+	else
+	{
+		GetWorldTimerManager().ClearTimer(timerHandler);
+
+		if (target && currentMobilityPoints - onDodgeMobilityPoints >= 0)
+		{
+			SetActorLocation(target->GetActorLocation() - target->GetActorForwardVector() * 200.0f);
+			currentMobilityPoints -= onDodgeMobilityPoints;
+		}
+	}
 }
 
 void ACharacter_Player::StopCombo()
@@ -266,12 +285,9 @@ void ACharacter_Player::UpdateElementToHighlight()
 void ACharacter_Player::TestRandomStart()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "Start");
-	isCamActive = true;
-	previousCamPosition = Controller->GetControlRotation();
 
 }
 void ACharacter_Player::TestRandomEnd()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
-	isCamActive = false;
 }

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
-#include "Character_EnemyBase.h"
 #include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
@@ -20,15 +19,34 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-	class ACharacter_EnemyBase* target = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
-	bool isCamActive{ false };
-	FVector initialPos;
-	FRotator previousCamPosition;
-	FRotator realCamRotation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float timeToStartAiming = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int firstComboDamage = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int secondComboDamage = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int thirdComboDamage = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int maxMobilityPoints = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onAttackMobilityPoints = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onDodgeMobilityPoints = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	int onTpHitMobilityPoints = 2;
+
+	int currentMobilityPoints;
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,13 +63,11 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	void Attack();
 	void TakeHit(int damage) override;
-	void Counter();
 	void Execution();
 	void StartAiming();
-	void StopAiming();
-	void Dodge();
+	void StartTeleport();
+	void StopTeleport();
 
 	void TestRandomStart();
 	void TestRandomEnd();
@@ -76,8 +92,11 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
+	void Attack();
 
-	ACharacter_EnemyBase* FocusedEnemy{ nullptr };
+	bool needToAttack = false;
+
+	class ACharacter_EnemyBase* target = nullptr;
 
 	FTimerHandle timerHandler;
 
@@ -89,14 +108,6 @@ public:
 	UFUNCTION()
 	void StopCombo();
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float baseLookUpRate;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -104,4 +115,31 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
+
+
+	//Camera Variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float rotationSpeedHorizontal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float rotationSpeedVertical;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float verticalAngleMax;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float verticalAngleMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float distanceFromPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	FRotator initialRotation {0, 0, 0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float positionLerpSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float positionLerpLimitRange;
+
 };
