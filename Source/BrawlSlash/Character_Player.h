@@ -22,7 +22,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float timeToStartAiming = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
@@ -98,6 +98,9 @@ public:
 	void Attack();
 
 	bool needToAttack = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	AActor* focus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* target = nullptr;

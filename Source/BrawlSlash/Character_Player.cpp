@@ -71,10 +71,10 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
 
-	cone = Cast<USceneComponent>(GetComponentsByTag(USceneComponent::StaticClass(), "Cone")[0]);
-	UStaticMeshComponent* coneMesh = Cast<UStaticMeshComponent>(cone->GetAttachChildren()[0]);
-	UMaterialInterface* mat = coneMesh->GetMaterial(0);
-	coneMat = coneMesh->CreateDynamicMaterialInstance(0, mat);
+	//cone = Cast<USceneComponent>(GetComponentsByTag(USceneComponent::StaticClass(), "Cone")[0]);
+	//UStaticMeshComponent* coneMesh = Cast<UStaticMeshComponent>(cone->GetAttachChildren()[0]);
+	//UMaterialInterface* mat = coneMesh->GetMaterial(0);
+	//coneMat = coneMesh->CreateDynamicMaterialInstance(0, mat);
 }
 
 // Called when the game starts or when spawned
@@ -102,18 +102,18 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (target != nullptr)
-	    Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));\
+	if (focus != nullptr)
+	    Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));\
 
-	if (target && GetVelocity().Size() < 0.5f)
-		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target->GetActorLocation()));
+	if (focus && GetVelocity().Size() < 0.5f)
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation()));
 
 	if (state == E_STATE::AIMING)
 		UpdateElementToHighlight();
 
-	if (state == E_STATE::DASHING && target)
+	if (state == E_STATE::DASHING && focus)
 	{
-		if ((target->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		if ((focus->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
 		{
 			Attack();
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
@@ -232,23 +232,25 @@ void ACharacter_Player::StopTeleport()
 			currentMobilityPoints -= onTpHitMobilityPoints;
 
 			state = E_STATE::DASHING;
-			target = Cast<AActor>(elementToHighlight);
+			focus = Cast<AActor>(elementToHighlight);
 			ChangeFocus();
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			LaunchCharacter((target->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 		}
 
 		else
 			state = E_STATE::IDLE;
+
+		target = nullptr;
 	}
 
 	else
 	{
 		GetWorldTimerManager().ClearTimer(timerHandler);
 
-		if (target && currentMobilityPoints - onDodgeMobilityPoints >= 0)
+		if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
 		{
-			SetActorLocation(target->GetActorLocation() - target->GetActorForwardVector() * 200.0f);
+			SetActorLocation(focus->GetActorLocation() - focus->GetActorForwardVector() * 200.0f);
 			currentMobilityPoints -= onDodgeMobilityPoints;
 		}
 	}
@@ -273,7 +275,8 @@ void ACharacter_Player::UpdateElementToHighlight()
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
 
-	cone->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
+	if (cone)
+		cone->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
 
 	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
 
@@ -284,6 +287,9 @@ void ACharacter_Player::UpdateElementToHighlight()
 			coneMat->SetScalarParameterValue("Green", 1);
 
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
+
+		target = hit.GetActor();
+
 		SetElementToHighlight(Cast<IInterface_Highlightable>(hit.GetActor()));
 	}
 	else
