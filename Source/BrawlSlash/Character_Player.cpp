@@ -97,7 +97,7 @@ void ACharacter_Player::BeginPlay()
 
 	coneMesh->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::ConeBeginOverlap);
 	coneMesh->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::ConeEndOverlap);
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	coneMesh->SetVisibility(false);
 }
 
@@ -106,9 +106,18 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	 //if (focus != nullptr)
-	 //    Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));\
+	if (!isInFight)
+	{
+		FVector direction = GetActorLocation() - followCamera->GetComponentLocation();
+		direction.Z = 0;
+		direction.Normalize();
 
+		coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
+
+		if (target)
+			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+	}
+	     
 	//Look at focus while idle
 	if (focus && GetVelocity().Size() < 0.5f)
 	{
@@ -117,7 +126,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		SetActorRotation(temp);
 	}
 
-	if (state == E_STATE::AIMING)
+	if (state == E_STATE::AIMING && isInFight)
 		UpdateTarget();
 
 	if (state == E_STATE::DASHING && focus)
@@ -231,7 +240,7 @@ void ACharacter_Player::Execution()
 void ACharacter_Player::StartAiming()
 {
 	state = E_STATE::AIMING;
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	coneMesh->SetVisibility(true);
 }
 
@@ -270,7 +279,7 @@ void ACharacter_Player::StopTeleport()
 		}
 	}
 
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	coneMesh->SetVisibility(false);
 	target = nullptr;
 }
