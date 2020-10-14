@@ -56,13 +56,13 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 		{
 			isInFight = true;
 
+			playerReference->isInFight = true;
+
 			for (int j = 0; j <= enemies.Num() - 1; ++j)
 				enemies[j]->isInFight = true;
 
 			return;
 		}
-
-
 }
 
 void AMyAIDirector::UpdateDead()
@@ -70,22 +70,23 @@ void AMyAIDirector::UpdateDead()
 	for (int i = enemiesInInner.Num() - 1; i >= 0; --i)
 		if (enemiesInInner[i]->state == E_STATE::DEAD)
 		{
-			if (playerReference->target == enemiesInInner[i])
-				playerReference->target = nullptr;
+			if (playerReference->focus == enemiesInInner[i])
+				playerReference->focus = nullptr;
 
-			enemiesInInner[i]->SetIfNeedToGlow(false);
 			enemiesInInner.RemoveAt(i);
 		}
 	
 	for (int i = enemies.Num() - 1; i >= 0; --i)
 		if (enemies[i]->state == E_STATE::DEAD)
 		{
-			if (playerReference->target == enemies[i])
-				playerReference->target = nullptr;
+			if (playerReference->focus == enemies[i])
+				playerReference->focus = nullptr;
 
-			enemies[i]->SetIfNeedToGlow(false);
 			enemies.RemoveAt(i);
 		}
+
+	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
+		playerReference->isInFight = false;
 }
 
 

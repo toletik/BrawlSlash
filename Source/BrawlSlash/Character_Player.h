@@ -48,6 +48,16 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	int currentMobilityPoints;
 
+	class USceneComponent*			coneJoint;
+	class UStaticMeshComponent*		coneMesh;
+	class UMaterialInstanceDynamic* coneMat;
+	TArray<AActor*>					overlappedTargets;
+
+	UFUNCTION()
+	void ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -65,28 +75,16 @@ protected:
 	//Buttons
 	void TakeHit(int damage) override;
 	void Execution();
-	void StartAiming();
 	void StartTeleport();
 	void StopTeleport();
+	void StartAiming();
 
 	void TestRandomStart();
 	void TestRandomEnd();
 
 	UMyGameInstance* gameInstance;
 
-	IInterface_Highlightable* elementToHighlight = nullptr;
-	void SetElementToHighlight(IInterface_Highlightable* ptr)
-	{
-		if (elementToHighlight != nullptr)
-			elementToHighlight->SetIfNeedToGlow(false);
-
-		elementToHighlight = ptr;
-
-		if (elementToHighlight != nullptr)
-			elementToHighlight->SetIfNeedToGlow(true);
-	};
-
-	void UpdateElementToHighlight();
+	void UpdateTarget();
 
 public:
 	// Sets default values for this character's properties
@@ -149,4 +147,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float positionLerpLimitRange;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float fightAngle = 45.0f;
 };
+

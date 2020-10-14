@@ -8,7 +8,7 @@
 #include "Actor_Highlightable.generated.h"
 
 UCLASS()
-class BRAWLSLASH_API AActor_Highlightable : public AActor, public IInterface_Highlightable
+class BRAWLSLASH_API AActor_Highlightable : public AActor
 {
 	GENERATED_BODY()
 	

@@ -30,10 +30,6 @@ void ACharacter_Base::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
-	USkeletalMeshComponent* mesh = GetMesh();
-	UMaterialInterface* mat = mesh->GetMaterial(0);
-	matDynamic = mesh->CreateDynamicMaterialInstance(0, mat);
-
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);

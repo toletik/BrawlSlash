@@ -18,13 +18,6 @@ void AActor_Highlightable::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(GetComponentsByClass(UStaticMeshComponent::StaticClass())[0]);
-	if (mesh)
-	{
-		UMaterialInterface* mat = mesh->GetMaterial(0);
-		if (mat)
-			matDynamic = mesh->CreateDynamicMaterialInstance(0, mat);
-	}
 }
 
 // Called every frame

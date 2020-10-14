@@ -14,6 +14,7 @@ enum E_STATE
 	IDLE,
 	ATTACKING,
 	EXECUTING,
+	DODGING,
 	DASHING,
 	AIMING,
 
@@ -30,7 +31,7 @@ enum E_STATE
 };
 
 UCLASS()
-class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Highlightable
+class BRAWLSLASH_API ACharacter_Base : public ACharacter
 {
 	GENERATED_BODY() 
 
@@ -61,6 +62,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
+
+	bool isInFight{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float walkSpeed{ 600 };

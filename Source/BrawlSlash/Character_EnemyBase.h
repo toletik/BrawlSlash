@@ -36,8 +36,6 @@ public:
 
 	bool needToAttackWeak{ false };
 
-	bool isInFight{ false };
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float ratioAttackWeak{ 0 };
 
