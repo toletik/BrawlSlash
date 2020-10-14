@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "Actor_Highlightable.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInterface.h"
-#include "Actor_Highlightable.h"
 
 // Sets default values
 AActor_Highlightable::AActor_Highlightable()

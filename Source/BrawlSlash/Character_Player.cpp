@@ -70,11 +70,6 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopTeleport);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
-
-	//cone = Cast<USceneComponent>(GetComponentsByTag(USceneComponent::StaticClass(), "Cone")[0]);
-	//UStaticMeshComponent* coneMesh = Cast<UStaticMeshComponent>(cone->GetAttachChildren()[0]);
-	//UMaterialInterface* mat = coneMesh->GetMaterial(0);
-	//coneMat = coneMesh->CreateDynamicMaterialInstance(0, mat);
 }
 
 // Called when the game starts or when spawned
@@ -85,7 +80,6 @@ void ACharacter_Player::BeginPlay()
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 
 	cameraBoom->TargetArmLength = distanceFromPlayer;
-	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName);
 	Controller->SetControlRotation(initialRotation);
 	cameraBoom->CameraLagSpeed = positionLerpSpeed;
 	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
@@ -275,17 +269,11 @@ void ACharacter_Player::UpdateElementToHighlight()
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
 
-	if (cone)
-		cone->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
-
 	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction * 800, ECC_Pawn, raycastParams);
 
 	//if Touched something and it can be highlighted
 	if (hit.GetActor() != nullptr && Cast<IInterface_Highlightable>(hit.GetActor()) != NULL)
 	{
-		if (coneMat != nullptr)
-			coneMat->SetScalarParameterValue("Green", 1);
-
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Green, false, 0.05, 0, 5);
 
 		target = hit.GetActor();
@@ -294,9 +282,6 @@ void ACharacter_Player::UpdateElementToHighlight()
 	}
 	else
 	{
-		if (coneMat != nullptr)
-			coneMat->SetScalarParameterValue("Green", 0);
-
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + direction * 800, FColor::Red, false, 0.05, 0, 5);
 		SetElementToHighlight(nullptr);
 	}
