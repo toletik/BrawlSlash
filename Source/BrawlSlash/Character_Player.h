@@ -52,7 +52,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int currentMobilityPoints;
 
 	class USceneComponent*			coneJoint;
-	class UStaticMeshComponent*		coneMesh;
 	class UMaterialInstanceDynamic* coneMat;
 	TArray<AActor*>					overlappedTargets;
 
@@ -94,6 +93,8 @@ public:
 	ACharacter_Player();
 
 	void Attack();
+
+	class UStaticMeshComponent* coneMesh;
 
 	bool needToAttack = false;
 

@@ -83,11 +83,4 @@ void ACharacter_Base::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 void ACharacter_Base::TakeHit(int damage)
 {
 	health -= damage;
-
-	if (health > 0)
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, GetName().Append(" : ").Append(FString::FromInt(health)));
-	else
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, GetName().Append(" : ").Append(FString::FromInt(health)));
-
-
 }

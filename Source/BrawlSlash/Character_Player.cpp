@@ -14,6 +14,7 @@
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "Character_EnemyBase.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
@@ -97,7 +98,6 @@ void ACharacter_Player::BeginPlay()
 
 	coneMesh->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::ConeBeginOverlap);
 	coneMesh->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::ConeEndOverlap);
-	//coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	coneMesh->SetVisibility(false);
 }
 
@@ -106,6 +106,9 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (state == E_STATE::DEAD)
+		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
+
 	if (!isInFight)
 	{
 		FVector direction = GetActorLocation() - followCamera->GetComponentLocation();
@@ -243,6 +246,8 @@ void ACharacter_Player::TakeHit(int damage)
 	Super::TakeHit(damage);
 
 	state = E_STATE::HITTED_WEAK;
+	coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	coneMesh->SetVisibility(false);
 }
 
 void ACharacter_Player::Execution()
@@ -253,7 +258,7 @@ void ACharacter_Player::Execution()
 void ACharacter_Player::StartAiming()
 {
 	state = E_STATE::AIMING;
-	//coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	coneMesh->SetVisibility(true);
 }
 
@@ -306,9 +311,13 @@ void ACharacter_Player::StopTeleport()
 			SetActorEnableCollision(false);
 			currentMobilityPoints -= onDodgeMobilityPoints;
 		}
+
+		else
+			state = E_STATE::IDLE;
 	}
 
-	//coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (isInFight)
+		coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	coneMesh->SetVisibility(false);
 	target = nullptr;
 }

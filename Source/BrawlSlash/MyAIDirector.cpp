@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AMyAIDirector::AMyAIDirector()
@@ -57,6 +58,7 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 			isInFight = true;
 
 			playerReference->isInFight = true;
+			playerReference->coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			for (int j = 0; j <= enemies.Num() - 1; ++j)
 				enemies[j]->isInFight = true;
@@ -75,7 +77,7 @@ void AMyAIDirector::UpdateDead()
 
 			enemiesInInner.RemoveAt(i);
 		}
-	
+
 	for (int i = enemies.Num() - 1; i >= 0; --i)
 		if (enemies[i]->state == E_STATE::DEAD)
 		{
@@ -86,7 +88,10 @@ void AMyAIDirector::UpdateDead()
 		}
 
 	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
+	{
 		playerReference->isInFight = false;
+		playerReference->coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 }
 
 
