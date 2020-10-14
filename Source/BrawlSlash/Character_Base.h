@@ -14,6 +14,7 @@ enum E_STATE
 	IDLE,
 	ATTACKING,
 	EXECUTING,
+	PREPARINGTELEPORT,
 	DODGING,
 	DASHING,
 	AIMING,
@@ -63,6 +64,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Characteristics")
 	bool isInFight{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")

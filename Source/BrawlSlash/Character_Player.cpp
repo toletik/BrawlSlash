@@ -129,6 +129,15 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 	}
 
+	if (state == E_STATE::DODGING && focus)
+	{
+		if ((focus->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		{
+			state = E_STATE::IDLE;
+			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+		}
+	}
+
 	if (isInFight)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
 }
@@ -237,6 +246,7 @@ void ACharacter_Player::StartAiming()
 
 void ACharacter_Player::StartTeleport()
 {
+	state = E_STATE::PREPARINGTELEPORT;
 	GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::StartAiming, timeToStartAiming, false);
 }
 
@@ -265,7 +275,9 @@ void ACharacter_Player::StopTeleport()
 
 		if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
 		{
-			SetActorLocation(focus->GetActorLocation() - focus->GetActorForwardVector() * 200.0f);
+			state = E_STATE::DODGING;
+			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 			currentMobilityPoints -= onDodgeMobilityPoints;
 		}
 	}

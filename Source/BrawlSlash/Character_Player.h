@@ -46,6 +46,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	int onTpHitMobilityPoints = 2;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	float dodgingRecoveryDuration = 1.0f;
+
 	int currentMobilityPoints;
 
 	class USceneComponent*			coneJoint;
