@@ -103,6 +103,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* target = nullptr;
 
+	class ACharacter_EnemyBase* startupEnemy = nullptr;
+
 	FTimerHandle timerHandler;
 
 	bool canCombo = false;

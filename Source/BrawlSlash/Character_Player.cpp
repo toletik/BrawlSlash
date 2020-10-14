@@ -126,15 +126,19 @@ void ACharacter_Player::Tick(float DeltaTime)
 		{
 			Attack();
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+			SetActorEnableCollision(true);
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		}
 	}
 
-	if (state == E_STATE::DODGING && focus)
+	if ((state == E_STATE::BYPASSING || E_STATE::DODGING) && focus)
 	{
-		if ((focus->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		if ((focus->GetActorLocation() - focus->GetActorForwardVector() * 100.0f - GetActorLocation()).Size() < 100.0f)
 		{
 			state = E_STATE::IDLE;
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+			SetActorEnableCollision(true);
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		}
 	}
 
@@ -146,7 +150,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -159,7 +163,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -259,10 +263,11 @@ void ACharacter_Player::StopTeleport()
 			currentMobilityPoints -= onTpHitMobilityPoints;
 
 			state = E_STATE::DASHING;
-			focus = Cast<AActor>(target);
+			focus = target;
 			ChangeFocus();
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+			SetActorEnableCollision(false);
 		}
 
 		else
@@ -273,11 +278,23 @@ void ACharacter_Player::StopTeleport()
 	{
 		GetWorldTimerManager().ClearTimer(timerHandler);
 
-		if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
+		if (startupEnemy && currentMobilityPoints - onDodgeMobilityPoints >= 0)
 		{
 			state = E_STATE::DODGING;
+			focus = Cast<AActor>(startupEnemy);
+			ChangeFocus();
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+			SetActorEnableCollision(false);
+			currentMobilityPoints -= onDodgeMobilityPoints;
+		}
+
+		if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
+		{
+			state = E_STATE::BYPASSING;
+			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+			SetActorEnableCollision(false);
 			currentMobilityPoints -= onDodgeMobilityPoints;
 		}
 	}
