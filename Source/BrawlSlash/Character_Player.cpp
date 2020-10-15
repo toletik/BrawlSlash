@@ -282,6 +282,8 @@ void ACharacter_Player::StopTeleport()
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 			SetActorEnableCollision(false);
+			if (coneJoint)
+				coneJoint->SetWorldRotation(FQuat::Identity);
 		}
 
 		else
