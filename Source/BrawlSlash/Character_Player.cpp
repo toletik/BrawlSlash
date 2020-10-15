@@ -80,10 +80,9 @@ void ACharacter_Player::BeginPlay()
 	
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 
-	cameraBoom->TargetArmLength = distanceFromPlayer;
 	Controller->SetControlRotation(initialRotation);
-	cameraBoom->CameraLagSpeed = positionLerpSpeed;
 	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
+	SetCameraStatsNav();
 
 	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camManager->ViewPitchMin = -verticalAngleMax;
@@ -106,10 +105,18 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (state == E_STATE::DEAD)
-		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
 
-	if (!isInFight)
+	if (focus)
+		GEngine->AddOnScreenDebugMessage(-37, 1.0f, FColor::Blue, focus->GetName() );
+
+
+	//camera	
+	if (isInFight)
+	{
+		SetCameraStatsFight();
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
+	}
+		else
 	{
 		FVector direction = GetActorLocation() - followCamera->GetComponentLocation();
 		direction.Z = 0;
@@ -118,16 +125,23 @@ void ACharacter_Player::Tick(float DeltaTime)
 		coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
 
 		if (target)
+		{
+			SetCameraStatsLookAt();
 			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
-	}
+		}
+		else
+			SetCameraStatsNav();
+}
+			
+
+
 	
 	if (state == E_STATE::AIMING && isInFight)
 		UpdateTarget();
 
-	if (isInFight)
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
+	if (state == E_STATE::DEAD)
+		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
 
-	     
 	//Look at focus while idle
 	if (focus && GetVelocity().Size() < 0.5f)
 	{
@@ -135,7 +149,6 @@ void ACharacter_Player::Tick(float DeltaTime)
 		temp.Pitch = 0;
 		SetActorRotation(temp);
 	}
-
 
 	if (state == E_STATE::DASHING && focus)
 	{
@@ -148,7 +161,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 	}
 
-	if ((state == E_STATE::BYPASSING || E_STATE::DODGING) && focus)
+	if ((state == E_STATE::BYPASSING || state == E_STATE::DODGING) && focus)
 	{
 		if ((focus->GetActorLocation() - focus->GetActorForwardVector() * 100.0f - GetActorLocation()).Size() < 100.0f)
 		{
@@ -159,7 +172,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 	}
 
-	}
+}
 
 
 //Left Joystick
@@ -258,12 +271,6 @@ void ACharacter_Player::Execution()
 	state = E_STATE::EXECUTING;
 }
 
-void ACharacter_Player::StartAiming()
-{
-	state = E_STATE::AIMING;
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	coneMesh->SetVisibility(true);
-}
 
 void ACharacter_Player::StartTeleport()
 {
@@ -271,10 +278,20 @@ void ACharacter_Player::StartTeleport()
 	GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::StartAiming, timeToStartAiming, false);
 }
 
+void ACharacter_Player::StartAiming()
+{
+	state = E_STATE::AIMING;
+	coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	coneMesh->SetVisibility(true);
+}
+
 void ACharacter_Player::StopTeleport()
-{	
+{
+	GEngine->AddOnScreenDebugMessage(-25, 1.0f, FColor::Cyan, "1");
+	//dash
 	if (state == E_STATE::AIMING)
 	{
+		GEngine->AddOnScreenDebugMessage(-26, 1.0f, FColor::Cyan, "2");
 		if (target && currentMobilityPoints - onTpHitMobilityPoints >= 0)
 		{
 			currentMobilityPoints -= onTpHitMobilityPoints;
@@ -285,13 +302,15 @@ void ACharacter_Player::StopTeleport()
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 			SetActorEnableCollision(false);
-			
+
+			GEngine->AddOnScreenDebugMessage(-27, 1.0f, FColor::Cyan, "DASH");
+
 			coneJoint->SetWorldRotation(FQuat::Identity);
 		}
 		else
 			state = E_STATE::IDLE;
 	}
-
+	//tp
 	else
 	{
 		GetWorldTimerManager().ClearTimer(timerHandler);
@@ -321,7 +340,10 @@ void ACharacter_Player::StopTeleport()
 	}
 
 	if (isInFight)
+	{
 		coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GEngine->AddOnScreenDebugMessage(-47, 1.0f, FColor::Red, "Desactivate Cone");
+	}
 
 	coneMesh->SetVisibility(false);
 	target = nullptr;
@@ -356,6 +378,9 @@ void ACharacter_Player::ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AA
 	{
 		overlappedTargets.Add(OtherActor);
 		target = OtherActor;
+
+		//if(!isInFight)
+		//	focus = OtherActor;
 	}
 }
 void ACharacter_Player::ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -364,8 +389,11 @@ void ACharacter_Player::ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AAct
 	{
 		overlappedTargets.Remove(OtherActor);
 		
-		if (target && target == OtherActor)
+		if (target == OtherActor)
 			target = nullptr;
+
+		//if (!isInFight && focus == OtherActor)
+		//	focus = nullptr;
 	}
 }
 
@@ -377,4 +405,24 @@ void ACharacter_Player::TestRandomStart()
 void ACharacter_Player::TestRandomEnd()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
+}
+
+
+void ACharacter_Player::SetCameraStatsNav()
+{
+	cameraBoom->TargetArmLength = distanceNav;
+	cameraBoom->CameraLagSpeed = LerpSpeedNav;
+	followCamera->SetFieldOfView(fovNav);
+}
+void ACharacter_Player::SetCameraStatsLookAt()
+{
+	cameraBoom->TargetArmLength = distanceLookAt;
+	cameraBoom->CameraLagSpeed = LerpSpeedLookAt;
+	followCamera->SetFieldOfView(fovLookAt);
+}
+void ACharacter_Player::SetCameraStatsFight()
+{
+	cameraBoom->TargetArmLength = distanceFight;
+	cameraBoom->CameraLagSpeed = LerpSpeedFight;
+	followCamera->SetFieldOfView(fovFight);
 }

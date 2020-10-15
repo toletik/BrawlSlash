@@ -59,6 +59,7 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 
 			playerReference->isInFight = true;
 			playerReference->coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			playerReference->focus = enemies[i];
 
 			for (int j = 0; j <= enemies.Num() - 1; ++j)
 				enemies[j]->isInFight = true;
@@ -72,19 +73,29 @@ void AMyAIDirector::UpdateDead()
 	for (int i = enemiesInInner.Num() - 1; i >= 0; --i)
 		if (enemiesInInner[i]->state == E_STATE::DEAD)
 		{
+			bool needToSetNewFocus = false;
+
 			if (playerReference->focus == enemiesInInner[i])
-				playerReference->focus = nullptr;
+				needToSetNewFocus = true;
 
 			enemiesInInner.RemoveAt(i);
+
+			if (needToSetNewFocus)
+				SetFocusToClosestEnemy();
 		}
 
 	for (int i = enemies.Num() - 1; i >= 0; --i)
 		if (enemies[i]->state == E_STATE::DEAD)
 		{
+			bool needToSetNewFocus = false;
+
 			if (playerReference->focus == enemies[i])
-				playerReference->focus = nullptr;
+				needToSetNewFocus = true;
 
 			enemies.RemoveAt(i);
+
+			if (needToSetNewFocus)
+				SetFocusToClosestEnemy();
 		}
 
 	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
@@ -167,6 +178,29 @@ void AMyAIDirector::UpdateFocus()
 	playerReference->FocusedEnemy->SetIfNeedToGlow(true);
 
 }*/
+
+void AMyAIDirector::SetFocusToClosestEnemy()
+{
+	float distanceFromPlayer{ INFINITY };
+	ACharacter_EnemyBase* newFocus{ nullptr };
+
+	for (int i = 0; i <= enemiesInInner.Num() - 1; ++i)
+		if ((enemiesInInner[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < distanceFromPlayer)
+		{
+			distanceFromPlayer = (enemiesInInner[i]->GetActorLocation() - playerReference->GetActorLocation()).Size();
+			newFocus = enemiesInInner[i];
+		}
+
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+		if ((enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < distanceFromPlayer)
+		{
+			distanceFromPlayer = (enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size();
+			newFocus = enemies[i];
+		}
+
+	playerReference->focus = newFocus;
+}
 
 void AMyAIDirector::UpdateAttack(float DeltaTime)
 {

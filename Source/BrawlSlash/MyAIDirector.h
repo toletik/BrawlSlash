@@ -47,6 +47,7 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	void UpdateIfIsInInner();
 
 	//void UpdateFocus();
+	void SetFocusToClosestEnemy();
 
 	void UpdateAttack(float DeltaTime);
 

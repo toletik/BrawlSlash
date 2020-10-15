@@ -130,32 +130,68 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
 
 
-	//Camera Variables
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	//Camera OverAll
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationSpeedHorizontal;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationSpeedVertical;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float verticalAngleMax;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float verticalAngleMin;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	float distanceFromPlayer;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	FRotator initialRotation {0, 0, 0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	float positionLerpSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float positionLerpLimitRange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+
+	//Cam Nav
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float distanceNav;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float LerpSpeedNav;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float fovNav;
+
+	void SetCameraStatsNav();
+
+	//Cam LookAt
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float distanceLookAt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float LerpSpeedLookAt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float fovLookAt;
+
+	void SetCameraStatsLookAt();
+
+	//Cam Fight
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float distanceFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float LerpSpeedFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float fovFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float fightAngle = 45.0f;
+
+	void SetCameraStatsFight();
+
+
+
+
+
 };
 
