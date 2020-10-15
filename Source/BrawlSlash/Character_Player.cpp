@@ -120,6 +120,13 @@ void ACharacter_Player::Tick(float DeltaTime)
 		if (target)
 			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
 	}
+	
+	if (state == E_STATE::AIMING && isInFight)
+		UpdateTarget();
+
+	if (isInFight)
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
+
 	     
 	//Look at focus while idle
 	if (focus && GetVelocity().Size() < 0.5f)
@@ -129,8 +136,6 @@ void ACharacter_Player::Tick(float DeltaTime)
 		SetActorRotation(temp);
 	}
 
-	if (state == E_STATE::AIMING && isInFight)
-		UpdateTarget();
 
 	if (state == E_STATE::DASHING && focus)
 	{
@@ -154,9 +159,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 	}
 
-	if (isInFight)
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
-}
+	}
 
 
 //Left Joystick
@@ -282,10 +285,9 @@ void ACharacter_Player::StopTeleport()
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 			SetActorEnableCollision(false);
-			if (coneJoint)
-				coneJoint->SetWorldRotation(FQuat::Identity);
+			
+			coneJoint->SetWorldRotation(FQuat::Identity);
 		}
-
 		else
 			state = E_STATE::IDLE;
 	}
@@ -320,6 +322,7 @@ void ACharacter_Player::StopTeleport()
 
 	if (isInFight)
 		coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	coneMesh->SetVisibility(false);
 	target = nullptr;
 }
@@ -338,19 +341,13 @@ void ACharacter_Player::UpdateTarget()
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
 
-	if (coneJoint)
-		coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
+	coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
 
 	if (target)
-	{
-		if (coneMat)
-			coneMat->SetScalarParameterValue("Green", 1);
-	}
+		coneMat->SetScalarParameterValue("Green", 1);
 	else
-	{
-		if (coneMat)
-			coneMat->SetScalarParameterValue("Green", 0);
-	}
+		coneMat->SetScalarParameterValue("Green", 0);
+	
 }
 
 void ACharacter_Player::ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

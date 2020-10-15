@@ -49,7 +49,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float dodgingRecoveryDuration = 1.0f;
 
-	int currentMobilityPoints;
 
 	class USceneComponent*			coneJoint;
 	class UMaterialInstanceDynamic* coneMat;
@@ -97,6 +96,9 @@ public:
 	class UStaticMeshComponent* coneMesh;
 
 	bool needToAttack = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int currentMobilityPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* focus = nullptr;

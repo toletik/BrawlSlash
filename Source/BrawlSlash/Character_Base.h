@@ -37,7 +37,9 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter
 {
 	GENERATED_BODY() 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float health = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 5.0f;
 
