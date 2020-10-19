@@ -2,6 +2,7 @@
 
 
 #include "Character_Player.h"
+#include "MyAIDirector.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -69,6 +70,10 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	//Buttons
 	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartBypass);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
+	PlayerInputComponent->BindAction("FocusNextEnemy", IE_Pressed, this, &ACharacter_Player::GetNextFocus);
+	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -93,11 +98,6 @@ void ACharacter_Player::BeginPlay()
 void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-
-	if (focus)
-		GEngine->AddOnScreenDebugMessage(-37, 1.0f, FColor::Blue, focus->GetName() );
-
 
 	//camera	
 	if (isInFight)
@@ -105,13 +105,8 @@ void ACharacter_Player::Tick(float DeltaTime)
 		SetCameraStatsFight();
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
 	}
-
 	else
 	{
-		FVector direction = GetActorLocation() - followCamera->GetComponentLocation();
-		direction.Z = 0;
-		direction.Normalize();
-
 		if (focus)
 		{
 			SetCameraStatsLookAt();
@@ -122,7 +117,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 	}
 			
 	if (state == E_STATE::DEAD)
-		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld()) ) );
 
 	//Look at focus while idle
 	if (focus && GetVelocity().Size() < 0.5f)
@@ -310,6 +305,7 @@ void ACharacter_Player::Bypass()
 		state = E_STATE::IDLE;
 }
 
+
 void ACharacter_Player::StopCombo()
 {
 	GetWorldTimerManager().ClearTimer(timerHandler);
@@ -318,12 +314,6 @@ void ACharacter_Player::StopCombo()
 	state = E_STATE::IDLE;
 }
 
-void ACharacter_Player::UpdateTarget()
-{
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
-}
 
 void ACharacter_Player::TestRandomStart()
 {
@@ -333,6 +323,17 @@ void ACharacter_Player::TestRandomStart()
 void ACharacter_Player::TestRandomEnd()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
+}
+
+void ACharacter_Player::GetNextFocus()
+{
+	if (currentEnemyGroup)
+		currentEnemyGroup->SetFocusToNextEnemy();
+}
+void ACharacter_Player::GetPreviousFocus()
+{
+	if (currentEnemyGroup)
+		currentEnemyGroup->SetFocusToPreviousEnemy();
 }
 
 void ACharacter_Player::SetCameraStatsNav()

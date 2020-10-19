@@ -31,14 +31,14 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	bool isInFight{ false };
 	float radiusFromPlayerToStartFight{ 0 };
 
+
 	// Sets default values for this actor's properties
 	AMyAIDirector();
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
 	
 	void UpdateIfNeedToStartFight();
 
@@ -46,9 +46,13 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	void UpdateIfIsInInner();
 
-	//void UpdateFocus();
 	void SetFocusToClosestEnemy();
 
 	void UpdateAttack(float DeltaTime);
+
+public:
+	void SetFocusToNextEnemy();
+
+	void SetFocusToPreviousEnemy();
 
 };
