@@ -7,6 +7,7 @@
 #include "MyGameInstance.h"
 #include "Character_Player.generated.h"
 
+
 UCLASS()
 class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 {
@@ -80,12 +81,18 @@ protected:
 	void StopTeleport();
 	void StartAiming();
 
+	void GetNextFocus();
+	void GetPreviousFocus();
+
+
 	void TestRandomStart();
 	void TestRandomEnd();
 
 	UMyGameInstance* gameInstance;
 
-	void UpdateTarget();
+	///////////////////////////////////////
+	void UpdateFocus();
+	////////////////////////////////////
 
 public:
 	// Sets default values for this character's properties
@@ -101,10 +108,15 @@ public:
 	int currentMobilityPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	AActor* focus = nullptr;
+	class AMyAIDirector* currentEnemyGroup = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	AActor* focus = nullptr;
+
+	///////////////////////////////////////
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* target = nullptr;
+	////////////////////////////////////////////////
 
 	class ACharacter_EnemyBase* startupEnemy = nullptr;
 

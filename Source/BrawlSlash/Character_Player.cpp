@@ -2,6 +2,7 @@
 
 
 #include "Character_Player.h"
+#include "MyAIDirector.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -71,6 +72,10 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopTeleport);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
+	PlayerInputComponent->BindAction("FocusNextEnemy", IE_Pressed, this, &ACharacter_Player::GetNextFocus);
+	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -137,7 +142,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 	
 	if (state == E_STATE::AIMING && isInFight)
-		UpdateTarget();
+		UpdateFocus();
 
 	if (state == E_STATE::DEAD)
 		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
@@ -349,6 +354,24 @@ void ACharacter_Player::StopTeleport()
 	target = nullptr;
 }
 
+void ACharacter_Player::GetNextFocus()
+{
+	GEngine->AddOnScreenDebugMessage(-27, 1.0f, FColor::Blue, "Right Trigger");
+
+	//if (currentEnemyGroup)
+	//	currentEnemyGroup->SetFocusToNextEnemy();
+
+}
+void ACharacter_Player::GetPreviousFocus()
+{
+
+	GEngine->AddOnScreenDebugMessage(-37, 1.0f, FColor::Blue, "Left Trigger");
+
+	//if (currentEnemyGroup)
+	//	currentEnemyGroup->SetFocusToPrevioustEnemy();
+}
+
+
 void ACharacter_Player::StopCombo()
 {
 	GetWorldTimerManager().ClearTimer(timerHandler);
@@ -357,7 +380,8 @@ void ACharacter_Player::StopCombo()
 	state = E_STATE::IDLE;
 }
 
-void ACharacter_Player::UpdateTarget()
+///////////////////////////////////
+void ACharacter_Player::UpdateFocus()
 {
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -396,6 +420,8 @@ void ACharacter_Player::ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AAct
 		//	focus = nullptr;
 	}
 }
+/////////////////////////////////////////////
+
 
 void ACharacter_Player::TestRandomStart()
 {
