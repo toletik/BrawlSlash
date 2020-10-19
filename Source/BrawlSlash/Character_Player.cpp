@@ -112,7 +112,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 	
 
 	if (focus)
-		GEngine->AddOnScreenDebugMessage(-37, 1.0f, FColor::Blue, focus->GetName() );
+		GEngine->AddOnScreenDebugMessage(-18, 1.0f, FColor::Blue, focus->GetName() );
 
 
 	//camera	
@@ -354,22 +354,7 @@ void ACharacter_Player::StopTeleport()
 	target = nullptr;
 }
 
-void ACharacter_Player::GetNextFocus()
-{
-	GEngine->AddOnScreenDebugMessage(-27, 1.0f, FColor::Blue, "Right Trigger");
 
-	//if (currentEnemyGroup)
-	//	currentEnemyGroup->SetFocusToNextEnemy();
-
-}
-void ACharacter_Player::GetPreviousFocus()
-{
-
-	GEngine->AddOnScreenDebugMessage(-37, 1.0f, FColor::Blue, "Left Trigger");
-
-	//if (currentEnemyGroup)
-	//	currentEnemyGroup->SetFocusToPrevioustEnemy();
-}
 
 
 void ACharacter_Player::StopCombo()
@@ -402,9 +387,6 @@ void ACharacter_Player::ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AA
 	{
 		overlappedTargets.Add(OtherActor);
 		target = OtherActor;
-
-		//if(!isInFight)
-		//	focus = OtherActor;
 	}
 }
 void ACharacter_Player::ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -433,6 +415,16 @@ void ACharacter_Player::TestRandomEnd()
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
 }
 
+void ACharacter_Player::GetNextFocus()
+{
+	if (currentEnemyGroup)
+		currentEnemyGroup->SetFocusToNextEnemy();
+}
+void ACharacter_Player::GetPreviousFocus()
+{
+	if (currentEnemyGroup)
+		currentEnemyGroup->SetFocusToPreviousEnemy();
+}
 
 void ACharacter_Player::SetCameraStatsNav()
 {
