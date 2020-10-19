@@ -127,9 +127,15 @@ void ACharacter_Player::Tick(float DeltaTime)
 		SetActorRotation(temp);
 	}
 
+	if (isGoingToStickPoint && focus && (focus->GetActorLocation() - GetActorLocation()).Size() - stickPoint > 100.0f)
+	{
+		isGoingToStickPoint = false;
+		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+	}
+
 	if (state == E_STATE::DASHING && focus)
 	{
-		if ((focus->GetActorLocation() - GetActorLocation()).Size() < 100.0f)
+		if ((focus->GetActorLocation() - GetActorLocation()).Size() < stickPoint)
 		{
 			Attack();
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
@@ -140,7 +146,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 	if (state == E_STATE::BYPASSING && focus)
 	{
-		if ((focus->GetActorLocation() - focus->GetActorForwardVector() * 100.0f - GetActorLocation()).Size() < 100.0f)
+		if ((focus->GetActorLocation() - focus->GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
 		{
 			state = E_STATE::IDLE;
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
@@ -216,6 +222,16 @@ void ACharacter_Player::Attack()
 		{
 			currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 			state = E_STATE::ATTACKING;
+
+			if (focus)
+			{
+				FVector direction = focus->GetActorLocation() - GetActorLocation();
+				direction.Normalize();
+				direction *= stickPoint * 10.0f;
+				GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+				LaunchCharacter(direction, true, true);
+				isGoingToStickPoint = true;
+			}
 
 			if (needToAttack || canCombo)
 			{

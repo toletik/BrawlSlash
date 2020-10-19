@@ -36,7 +36,10 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int dashHitDamage = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float distanceToDash = 100.0f;
+	float distanceToDash = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float stickPoint = 300.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	int maxMobilityPoints = 10;
@@ -55,6 +58,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float dodgingRecoveryDuration = 1.0f;
+
+	bool isGoingToStickPoint = false;
 
 protected:
 	// Called when the game starts or when spawned
