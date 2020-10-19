@@ -23,9 +23,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int actualCombo = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float timeToStartAiming = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int firstComboDamage = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
@@ -33,6 +30,12 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int thirdComboDamage = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	int dashHitDamage = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float distanceToDash = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	int maxMobilityPoints = 10;
@@ -47,17 +50,10 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int onTpHitMobilityPoints = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
+	float preparingTeleportDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float dodgingRecoveryDuration = 1.0f;
-
-
-	class USceneComponent*			coneJoint;
-	class UMaterialInstanceDynamic* coneMat;
-	TArray<AActor*>					overlappedTargets;
-
-	UFUNCTION()
-	void ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	// Called when the game starts or when spawned
@@ -75,10 +71,10 @@ protected:
 
 	//Buttons
 	void TakeHit(int damage) override;
-	void Execution();
-	void StartTeleport();
-	void StopTeleport();
-	void StartAiming();
+	void StartTeleport(E_STATE teleportState);
+	void StartBypass();
+	void Bypass();
+	void DashHit();
 
 	void TestRandomStart();
 	void TestRandomEnd();
@@ -93,8 +89,6 @@ public:
 
 	void Attack();
 
-	class UStaticMeshComponent* coneMesh;
-
 	bool needToAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -105,8 +99,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* target = nullptr;
-
-	class ACharacter_EnemyBase* startupEnemy = nullptr;
 
 	FTimerHandle timerHandler;
 

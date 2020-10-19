@@ -58,7 +58,6 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 			isInFight = true;
 
 			playerReference->isInFight = true;
-			playerReference->coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			playerReference->focus = enemies[i];
 
 			for (int j = 0; j <= enemies.Num() - 1; ++j)
@@ -101,7 +100,6 @@ void AMyAIDirector::UpdateDead()
 	if (enemies.Num() == 0 && enemiesInInner.Num() == 0)
 	{
 		playerReference->isInFight = false;
-		playerReference->coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 }
 

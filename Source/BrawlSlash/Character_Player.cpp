@@ -67,10 +67,8 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
 	//Buttons
-	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartTeleport);
-	PlayerInputComponent->BindAction("Tp", IE_Released, this, &ACharacter_Player::StopTeleport);
+	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartBypass);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
-	PlayerInputComponent->BindAction("Execution", IE_Pressed, this, &ACharacter_Player::Execution);
 }
 
 // Called when the game starts or when spawned
@@ -89,15 +87,6 @@ void ACharacter_Player::BeginPlay()
 	camManager->ViewPitchMax = -verticalAngleMin;
 	
 	currentMobilityPoints = maxMobilityPoints;
-
-	coneJoint = Cast<USceneComponent>(GetComponentsByTag(USceneComponent::StaticClass(), "Cone")[0]);
-	coneMesh = Cast<UStaticMeshComponent>(coneJoint->GetChildComponent(0));
-	UMaterialInterface* coneTempMat = coneMesh->GetMaterial(0);
-	coneMat = coneMesh->CreateDynamicMaterialInstance(0, coneTempMat);
-
-	coneMesh->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::ConeBeginOverlap);
-	coneMesh->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::ConeEndOverlap);
-	coneMesh->SetVisibility(false);
 }
 
 // Called every frame
@@ -116,29 +105,22 @@ void ACharacter_Player::Tick(float DeltaTime)
 		SetCameraStatsFight();
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
 	}
-		else
+
+	else
 	{
 		FVector direction = GetActorLocation() - followCamera->GetComponentLocation();
 		direction.Z = 0;
 		direction.Normalize();
 
-		coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
-
-		if (target)
+		if (focus)
 		{
 			SetCameraStatsLookAt();
-			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(target->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
 		}
 		else
 			SetCameraStatsNav();
-}
+	}
 			
-
-
-	
-	if (state == E_STATE::AIMING && isInFight)
-		UpdateTarget();
-
 	if (state == E_STATE::DEAD)
 		UGameplayStatics::OpenLevel(GetWorld(), "Map_Remy");
 
@@ -161,7 +143,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 	}
 
-	if ((state == E_STATE::BYPASSING || state == E_STATE::DODGING) && focus)
+	if (state == E_STATE::BYPASSING && focus)
 	{
 		if ((focus->GetActorLocation() - focus->GetActorForwardVector() * 100.0f - GetActorLocation()).Size() < 100.0f)
 		{
@@ -171,14 +153,13 @@ void ACharacter_Player::Tick(float DeltaTime)
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		}
 	}
-
 }
 
 
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -191,7 +172,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::AIMING && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -219,9 +200,6 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
-	if (state == E_STATE::AIMING)
-		return;
-	
 	if (state == E_STATE::ATTACKING)
 	{
 		if(canCombo)
@@ -229,30 +207,43 @@ void ACharacter_Player::Attack()
 	}
 	else
 	{
-		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
-		state = E_STATE::ATTACKING;
-
-		if (needToAttack || canCombo)
+		if (state == E_STATE::DASHING)
 		{
-			GetWorldTimerManager().ClearTimer(timerHandler);
-			canCombo = false;
-			needToAttack = false;
-
-			actualCombo++;
-
-
-			//make an array of combodamage and [actualcombo]
-			if (actualCombo == 2)
-				toDoDamage = secondComboDamage;
-
-			else
-				toDoDamage = thirdComboDamage;
+			StopCombo();
+			toDoDamage = dashHitDamage;
+			state = E_STATE::ATTACKING;
 		}
+
+		else if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > distanceToDash)
+			StartTeleport(E_STATE::DASHING);
 
 		else
 		{
-			actualCombo = 1;
-			toDoDamage = firstComboDamage;
+			currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
+			state = E_STATE::ATTACKING;
+
+			if (needToAttack || canCombo)
+			{
+				GetWorldTimerManager().ClearTimer(timerHandler);
+				canCombo = false;
+				needToAttack = false;
+
+				actualCombo++;
+
+
+				//make an array of combodamage and [actualcombo]
+				if (actualCombo == 2)
+					toDoDamage = secondComboDamage;
+
+				else
+					toDoDamage = thirdComboDamage;
+			}
+
+			else
+			{
+				actualCombo = 1;
+				toDoDamage = firstComboDamage;
+			}
 		}
 	}
 }
@@ -262,91 +253,61 @@ void ACharacter_Player::TakeHit(int damage)
 	Super::TakeHit(damage);
 
 	state = E_STATE::HITTED_WEAK;
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	coneMesh->SetVisibility(false);
-}
-
-void ACharacter_Player::Execution()
-{
-	state = E_STATE::EXECUTING;
 }
 
 
-void ACharacter_Player::StartTeleport()
+void ACharacter_Player::StartBypass()
 {
+	StartTeleport(E_STATE::BYPASSING);
+}
+
+void ACharacter_Player::StartTeleport(E_STATE teleportState)
+{
+	if (!focus || state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING || state == E_STATE::ATTACKING)
+		return;
+
 	state = E_STATE::PREPARINGTELEPORT;
-	GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::StartAiming, timeToStartAiming, false);
+
+	if (teleportState == E_STATE::BYPASSING)
+		GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::Bypass, preparingTeleportDuration, false);
+
+	if (teleportState == E_STATE::DASHING)
+		GetWorldTimerManager().SetTimer(timerHandler, this, &ACharacter_Player::DashHit, preparingTeleportDuration, false);
 }
 
-void ACharacter_Player::StartAiming()
+void ACharacter_Player::DashHit()
 {
-	state = E_STATE::AIMING;
-	coneMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	coneMesh->SetVisibility(true);
-}
+	GetWorldTimerManager().ClearTimer(timerHandler);
 
-void ACharacter_Player::StopTeleport()
-{
-	GEngine->AddOnScreenDebugMessage(-25, 1.0f, FColor::Cyan, "1");
-	//dash
-	if (state == E_STATE::AIMING)
+	if (focus && currentMobilityPoints - onTpHitMobilityPoints >= 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-26, 1.0f, FColor::Cyan, "2");
-		if (target && currentMobilityPoints - onTpHitMobilityPoints >= 0)
-		{
-			currentMobilityPoints -= onTpHitMobilityPoints;
+		currentMobilityPoints -= onTpHitMobilityPoints;
 
-			state = E_STATE::DASHING;
-			focus = target;
-			ChangeFocus();
-			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-			SetActorEnableCollision(false);
-
-			GEngine->AddOnScreenDebugMessage(-27, 1.0f, FColor::Cyan, "DASH");
-
-			coneJoint->SetWorldRotation(FQuat::Identity);
-		}
-		else
-			state = E_STATE::IDLE;
+		state = E_STATE::DASHING;
+		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		SetActorEnableCollision(false);
 	}
-	//tp
+
 	else
+		state = E_STATE::IDLE;
+}
+
+void ACharacter_Player::Bypass()
+{
+	GetWorldTimerManager().ClearTimer(timerHandler);
+
+	if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
 	{
-		GetWorldTimerManager().ClearTimer(timerHandler);
-
-		if (startupEnemy && currentMobilityPoints - onDodgeMobilityPoints >= 0)
-		{
-			state = E_STATE::DODGING;
-			focus = Cast<AActor>(startupEnemy);
-			ChangeFocus();
-			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-			SetActorEnableCollision(false);
-			currentMobilityPoints -= onDodgeMobilityPoints;
-		}
-
-		if (focus && currentMobilityPoints - onDodgeMobilityPoints >= 0)
-		{
-			state = E_STATE::BYPASSING;
-			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-			SetActorEnableCollision(false);
-			currentMobilityPoints -= onDodgeMobilityPoints;
-		}
-
-		else
-			state = E_STATE::IDLE;
+		state = E_STATE::BYPASSING;
+		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		SetActorEnableCollision(false);
+		currentMobilityPoints -= onDodgeMobilityPoints;
 	}
 
-	if (isInFight)
-	{
-		coneMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GEngine->AddOnScreenDebugMessage(-47, 1.0f, FColor::Red, "Desactivate Cone");
-	}
-
-	coneMesh->SetVisibility(false);
-	target = nullptr;
+	else
+		state = E_STATE::IDLE;
 }
 
 void ACharacter_Player::StopCombo()
@@ -362,39 +323,6 @@ void ACharacter_Player::UpdateTarget()
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	FVector direction = YawRotation.RotateVector(GetInputAxisValue("MoveForward") * FVector::ForwardVector + GetInputAxisValue("MoveRight") * FVector::RightVector);
-
-	coneJoint->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, direction));
-
-	if (target)
-		coneMat->SetScalarParameterValue("Green", 1);
-	else
-		coneMat->SetScalarParameterValue("Green", 0);
-	
-}
-
-void ACharacter_Player::ConeBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor->ActorHasTag("Target"))
-	{
-		overlappedTargets.Add(OtherActor);
-		target = OtherActor;
-
-		//if(!isInFight)
-		//	focus = OtherActor;
-	}
-}
-void ACharacter_Player::ConeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherActor->ActorHasTag("Target"))
-	{
-		overlappedTargets.Remove(OtherActor);
-		
-		if (target == OtherActor)
-			target = nullptr;
-
-		//if (!isInFight && focus == OtherActor)
-		//	focus = nullptr;
-	}
 }
 
 void ACharacter_Player::TestRandomStart()
@@ -406,7 +334,6 @@ void ACharacter_Player::TestRandomEnd()
 {
 	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
 }
-
 
 void ACharacter_Player::SetCameraStatsNav()
 {
