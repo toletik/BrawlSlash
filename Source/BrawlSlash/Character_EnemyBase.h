@@ -13,7 +13,9 @@ UCLASS()
 class BRAWLSLASH_API ACharacter_EnemyBase : public ACharacter_Base
 {
 	GENERATED_BODY()
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* attackCircle;
 
 protected:
 	// Called when the game starts or when spawned
@@ -27,11 +29,18 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
+	UFUNCTION(BlueprintCallable)
+	void BeginAttackCircle();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttackCircle();
+
 	void SetAttackState();
 
 	float remainingTimeStun{ 0.f };
 	float remainingTimeRecovery{ 0.f };
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
 	bool isInInnerCircle{ false };
 
 	bool needToAttackWeak{ false };

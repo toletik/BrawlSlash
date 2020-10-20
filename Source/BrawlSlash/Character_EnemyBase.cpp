@@ -2,12 +2,14 @@
 
 
 #include "Character_EnemyBase.h"
-
+#include "Components/SphereComponent.h"
 
 // Called when the game starts or when spawned
 void ACharacter_EnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+	attackCircle->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
+	attackCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 // Called every frame
 void ACharacter_EnemyBase::Tick(float DeltaTime)
@@ -18,7 +20,8 @@ void ACharacter_EnemyBase::Tick(float DeltaTime)
 // Sets default values for this character's properties
 ACharacter_EnemyBase::ACharacter_EnemyBase()
 {
-
+	attackCircle = CreateDefaultSubobject<USphereComponent>(TEXT("AttackCircle"));
+	attackCircle->SetupAttachment(RootComponent);
 }
 
 void ACharacter_EnemyBase::TakeHit(int damage)
@@ -45,4 +48,14 @@ void ACharacter_EnemyBase::SetAttackState()
 		state = E_STATE::ATTACKING_STRONG;
 		toDoDamage = strongDamage;
 	}
+}
+
+void ACharacter_EnemyBase::BeginAttackCircle()
+{
+	attackCircle->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void ACharacter_EnemyBase::EndAttackCircle()
+{
+	attackCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
