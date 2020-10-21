@@ -104,37 +104,52 @@ void ACharacter_Player::Tick(float DeltaTime)
 	if (isInFight)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
 	else if (focus)
-			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
 			
 	//Look at focus while idle
-	if (focus && GetVelocity().Size() < 0.5f)
+	if ((focus && GetVelocity().Size() < 0.5f && state == E_STATE::IDLE) || state == E_STATE::PREPARINGTELEPORT)
 	{
 		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
 		temp.Pitch = 0;
 		SetActorRotation(temp);
 	}
 
-	if (isGoingToStickPoint && focus && (focus->GetActorLocation() - GetActorLocation()).Size() - stickPoint > 100.0f)
+	if (isGoingToStickPoint && focus)
 	{
-		isGoingToStickPoint = false;
-		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+		FVector direction = focus->GetActorLocation() - GetActorLocation();
+		
+		if (direction.Size() < stickRange && direction.Size() - stickRange > stickPoint && state == E_STATE::ATTACKING)
+			AddMovementInput(direction, 1.0f);
+		else
+			isGoingToStickPoint = false;
 	}
 
 	//clean one day
-	if (state == E_STATE::DASHING && focus && (focus->GetActorLocation() - GetActorLocation()).Size() < stickPoint)
+	if (state == E_STATE::DASHING && focus)
 	{
-		Attack();
-		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
-		SetActorEnableCollision(true);
-		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		FHitResult hit;
+		FCollisionQueryParams raycastParams;
+		raycastParams.AddIgnoredActor(this);
+		FVector direction = focus->GetActorLocation() - GetActorLocation();
+		direction.Normalize();
+		direction *= stickPoint;
+		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction, ECC_Pawn, raycastParams);
+
+		if (hit.GetActor() != nullptr && hit.GetActor() == focus)
+		{
+			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+			SetActorEnableCollision(true);
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
+			Attack();
+		}
 	}
 
-	if (state == E_STATE::BYPASSING && focus && (focus->GetActorLocation() - focus->GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
+	if (state == E_STATE::BYPASSING && focus && (focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
 	{
-		state = E_STATE::IDLE;
 		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		SetActorEnableCollision(true);
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		state = E_STATE::IDLE;
 	}
 }
 
@@ -217,14 +232,7 @@ void ACharacter_Player::Attack()
 			state = E_STATE::ATTACKING;
 
 			if (focus)
-			{
-				FVector direction = focus->GetActorLocation() - GetActorLocation();
-				direction.Normalize();
-				direction *= stickPoint * 10.0f;
-				GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-				LaunchCharacter(direction, true, true);
 				isGoingToStickPoint = true;
-			}
 
 			if (needToAttack || canCombo)
 			{
@@ -293,11 +301,12 @@ void ACharacter_Player::Bypass()
 
 	if (focus && currentMobilityPoints - onDashBackMobilityPoints >= 0)
 	{
+		currentMobilityPoints -= onDashBackMobilityPoints;
+
 		state = E_STATE::BYPASSING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
 		SetActorEnableCollision(false);
-		currentMobilityPoints -= onDashBackMobilityPoints;
 	}
 
 	else
