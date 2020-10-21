@@ -192,4 +192,15 @@ public:
 	float fightAngle = 45.0f;
 
 	void SetCameraStatsFight();
+
+
+
+	//////////////////////////////////////////////////////////////
+	//DEBUG
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	float debugInnerCircleRadius = 400;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	float debugBackCircleRadius = 800;
+
 };

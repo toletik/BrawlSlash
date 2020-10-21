@@ -19,4 +19,11 @@ public:
 	bool isXRevert{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isYRevert{ false };
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector lastCheckPointPos {0, 0, 0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool firstTimeInLevel {true};
 };
