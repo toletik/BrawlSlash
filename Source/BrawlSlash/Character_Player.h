@@ -42,7 +42,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	float maxDistanceToDash = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickPoint = 300.0f;
+	float stickPoint = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	int maxMobilityPoints = 10;
@@ -189,4 +189,15 @@ public:
 	float fightAngle = 45.0f;
 
 	void SetCameraStatsFight();
+
+
+
+	//////////////////////////////////////////////////////////////
+	//DEBUG
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	float debugInnerCircleRadius = 400;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	float debugBackCircleRadius = 800;
+
 };

@@ -123,18 +123,20 @@ void ACharacter_Player::Tick(float DeltaTime)
 	//clean one day
 	if (state == E_STATE::DASHING && focus && (focus->GetActorLocation() - GetActorLocation()).Size() < stickPoint)
 	{
-		Attack();
 		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		SetActorEnableCollision(true);
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		currentEnemyGroup->UpdateIfIsInInner();
+		Attack();
 	}
 
 	if (state == E_STATE::BYPASSING && focus && (focus->GetActorLocation() - focus->GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
 	{
-		state = E_STATE::IDLE;
 		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		SetActorEnableCollision(true);
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		currentEnemyGroup->UpdateIfIsInInner();
+		state = E_STATE::IDLE;
 	}
 }
 
@@ -154,7 +156,7 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 //Left Joystick
 void ACharacter_Player::MoveForward(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::DEAD && state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -167,7 +169,7 @@ void ACharacter_Player::MoveForward(float Value)
 }
 void ACharacter_Player::MoveRight(float Value)
 {
-	if (state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
+	if (state != E_STATE::DEAD && state != E_STATE::ATTACKING && state != E_STATE::PREPARINGTELEPORT && state != E_STATE::DASHING && state != E_STATE::BYPASSING && (Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();

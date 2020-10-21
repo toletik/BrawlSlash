@@ -54,16 +54,20 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 		{
 			isInFight = true;
 
-			playerReference->isInFight = true;
-			playerReference->currentEnemyGroup = this;
-			playerReference->focus = enemies[i];
-			playerReference->SetCameraStatsFight();
-
 			for (int j = 0; j <= enemies.Num() - 1; ++j)
 				enemies[j]->isInFight = true;
 
 			UpdateIfIsInInner();
 
+
+			AMyAIController* tempController = Cast<AMyAIController>(enemies[i]->GetController());
+
+			playerReference->isInFight = true;
+			playerReference->currentEnemyGroup = this;
+			playerReference->focus = enemies[i];
+			playerReference->SetCameraStatsFight();
+			playerReference->debugInnerCircleRadius = tempController->radiusInnerCircle;
+			playerReference->debugBackCircleRadius = tempController->radiusBackCircle;
 			return;
 		}
 	}
