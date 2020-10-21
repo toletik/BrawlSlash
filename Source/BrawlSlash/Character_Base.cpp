@@ -18,9 +18,6 @@ ACharacter_Base::ACharacter_Base()
 
 	attackBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBox"));
 	attackBox->SetupAttachment(RootComponent);
-
-	attackBoxStrong = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBoxStrong"));
-	attackBoxStrong->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -30,10 +27,7 @@ void ACharacter_Base::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
-	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Base::AttackOverlap);
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame
@@ -59,28 +53,13 @@ void ACharacter_Base::EndAttack()
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ACharacter_Base::BeginAttackStrong()
-{
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-}
-
-void ACharacter_Base::EndAttackStrong()
-{
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
-
-void ACharacter_Base::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if ((OtherActor->ActorHasTag("Player") && ActorHasTag("Enemy"))
-		|| (OtherActor->ActorHasTag("Enemy") && ActorHasTag("Player")))
-	{
-		Cast<ACharacter_Base>(OtherActor)->TakeHit(toDoDamage);
-		toDoDamage = 0;
-	}
-}
-
-void ACharacter_Base::TakeHit(int damage)
+void ACharacter_Base::TakeHit(int damage, E_STATE attackerState)
 {
 	health -= damage;
+
+	if (attackerState == E_STATE::ATTACKING_WEAK || attackerState == E_STATE::ATTACKING)
+		state = E_STATE::HITTED_WEAK;
+
+	else if (attackerState == E_STATE::ATTACKING_STRONG)
+		state = E_STATE::HITTED_STRONG;
 }

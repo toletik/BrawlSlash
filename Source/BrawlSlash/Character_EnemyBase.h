@@ -17,13 +17,15 @@ class BRAWLSLASH_API ACharacter_EnemyBase : public ACharacter_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* attackCircle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBoxStrong;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	void TakeHit(int damage) override;
+	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
 public:
 	// Sets default values for this character's properties
@@ -35,9 +37,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndAttackCircle();
 
+	UFUNCTION(BlueprintCallable)
+	void BeginAttackStrong();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttackStrong();
+
 	void SetAttackState();
 
-	float remainingTimeStun{ 0.f };
 	float remainingTimeRecovery{ 0.f };
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
