@@ -36,7 +36,10 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int dashHitDamage = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float distanceToDash = 1000.0f;
+	float minDistanceToDash = 900.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float maxDistanceToDash = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float stickPoint = 300.0f;
@@ -48,24 +51,30 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int onAttackMobilityPoints = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int onDodgeMobilityPoints = 1;
+	int onDashBackMobilityPoints = 1;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int onTpHitMobilityPoints = 2;
+	int onDashHitMobilityPoints = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	float preparingTeleportDuration = 0.3f;
+	float preparingDashDuration = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	float dodgingRecoveryDuration = 1.0f;
+	float dashBackRecoveryDuration = 1.0f;
 
 	bool isGoingToStickPoint = false;
 
+	UMyGameInstance* gameInstance;
+
 protected:
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
 	//Left Joystick
 	void MoveForward(float Value);
@@ -76,7 +85,6 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	void TakeHit(int damage) override;
 	void StartTeleport(E_STATE teleportState);
 	void StartBypass();
 	void Bypass();
@@ -85,11 +93,8 @@ protected:
 	void GetNextFocus();
 	void GetPreviousFocus();
 
-
 	void TestRandomStart();
 	void TestRandomEnd();
-
-	UMyGameInstance* gameInstance;
 
 public:
 	// Sets default values for this character's properties
@@ -118,17 +123,13 @@ public:
 	UFUNCTION()
 	void StopCombo();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void ChangeFocus();
+	UFUNCTION()
+	void SetFocusNav(AActor* newFocus);
 	
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
-
 
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
@@ -188,10 +189,4 @@ public:
 	float fightAngle = 45.0f;
 
 	void SetCameraStatsFight();
-
-
-
-
-
 };
-
