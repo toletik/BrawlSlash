@@ -18,8 +18,6 @@ class BRAWLSLASH_API AMyAIController : public AAIController
 	UBehaviorTree* behaviorT;
 	UPROPERTY(EditAnywhere, category = AI)
 	float radiusCloseToPlayer;
-	UPROPERTY(EditAnywhere, category = AI)
-	float radiusInnerCircle;
 
 
 
@@ -34,6 +32,8 @@ class BRAWLSLASH_API AMyAIController : public AAIController
 public:
 	UBlackboardComponent* GetBlackboard() { return Blackboard; };
 
+	UPROPERTY(EditAnywhere, category = AI)
+	float radiusInnerCircle;
 	UPROPERTY(EditAnywhere, category = AI)
 	float radiusBackCircle;
 };
