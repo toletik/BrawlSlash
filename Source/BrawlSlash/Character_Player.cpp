@@ -226,6 +226,9 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
+	if (state == E_STATE::BYPASSING)
+		return;
+
 	if (state == E_STATE::ATTACKING)
 	{
 		if(canCombo)
@@ -281,7 +284,7 @@ void ACharacter_Player::StartBypass()
 
 void ACharacter_Player::StartTeleport(E_STATE teleportState)
 {
-	if (!focus || state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING || state == E_STATE::ATTACKING)
+	if (!focus || state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING)
 		return;
 
 	state = E_STATE::PREPARINGTELEPORT;
