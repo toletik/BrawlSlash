@@ -31,6 +31,13 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
+	bool beingBypassed = false;
+
+	virtual void TakeHit(int damage, E_STATE attackerState) override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HitOther();
+
 	UFUNCTION(BlueprintCallable)
 	void BeginAttackCircle();
 
@@ -63,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	int strongDamage{ 2 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	float rotateSpeedWhenBeingBypassed{ 0.1f };
 };
 
 

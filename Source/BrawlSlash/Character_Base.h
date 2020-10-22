@@ -8,6 +8,47 @@
 
 #include "Character_Base.generated.h"
 
+//print state for debug
+//switch (state) 
+//{
+//case IDLE:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = IDLE");
+//	break;
+//case ATTACKING:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = ATTACKING");
+//	break;
+//case PREPARINGTELEPORT:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = PREPARINGTELEPORT");
+//	break;
+//case BYPASSING:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = BYPASSING");
+//	break;
+//case DASHING:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = DASHING");
+//	break;
+//case HITTED_WEAK:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = HITTED_WEAK");
+//	break;
+//case HITTED_STRONG:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = HITTED_STRONG");
+//	break;
+//case HITTED_RECO:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = HITTED_RECO");
+//	break;
+//case ATTACKING_WEAK:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = ATTACKING_WEAK");
+//	break;
+//case ATTACKING_STRONG:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = ATTACKING_STRONG");
+//	break;
+//case COUNTERED:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = COUNTERED");
+//	break;
+//case DEAD:
+//	GEngine->AddOnScreenDebugMessage(-105, 1.0f, FColor::Red, "state = DEAD");
+//	break;
+//}
+
 UENUM(BlueprintType)
 enum E_STATE
 {
@@ -53,7 +94,7 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
-	void TakeHit(int damage, E_STATE attackerState);
+	virtual void TakeHit(int damage, E_STATE attackerState);
 
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};

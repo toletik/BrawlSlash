@@ -152,6 +152,9 @@ void ACharacter_Player::Tick(float DeltaTime)
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		currentEnemyGroup->UpdateIfIsInInner();
 		state = E_STATE::IDLE;
+		ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
+		if (enemyFocus)
+			enemyFocus->beingBypassed = true;
 	}
 }
 
@@ -166,6 +169,17 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 	}
+}
+
+void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
+{
+	Super::TakeHit(damage, attackerState);
+
+	if (attackerState == E_STATE::ATTACKING_WEAK)
+		state = E_STATE::HITTED_WEAK;
+
+	else if (attackerState == E_STATE::ATTACKING_STRONG)
+		state = E_STATE::HITTED_STRONG;
 }
 
 //Left Joystick

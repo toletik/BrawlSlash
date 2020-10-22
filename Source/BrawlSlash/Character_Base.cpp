@@ -56,10 +56,4 @@ void ACharacter_Base::EndAttack()
 void ACharacter_Base::TakeHit(int damage, E_STATE attackerState)
 {
 	health -= damage;
-
-	if (attackerState == E_STATE::ATTACKING_WEAK || attackerState == E_STATE::ATTACKING)
-		state = E_STATE::HITTED_WEAK;
-
-	else if (attackerState == E_STATE::ATTACKING_STRONG)
-		state = E_STATE::HITTED_STRONG;
 }

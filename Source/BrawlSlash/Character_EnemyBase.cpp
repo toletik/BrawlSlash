@@ -44,6 +44,16 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 	}
 }
 
+void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
+{
+	Super::TakeHit(damage, attackerState);
+
+	if (state != E_STATE::IDLE)
+		HitOther();
+
+	state = E_STATE::HITTED_WEAK;
+}
+
 void ACharacter_EnemyBase::SetAttackState()
 {
 	float ratio = FMath::RandRange(0, 100);
