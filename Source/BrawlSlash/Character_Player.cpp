@@ -118,7 +118,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 	{
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
 		
-		if (direction.Size() < stickRange && direction.Size() - stickRange > stickPoint && state == E_STATE::ATTACKING)
+		if (direction.Size() < stickRange && direction.Size() > stickPoint && state == E_STATE::ATTACKING)
 			AddMovementInput(direction, 1.0f);
 		else
 			isGoingToStickPoint = false;
