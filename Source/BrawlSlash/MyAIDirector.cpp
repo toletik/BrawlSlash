@@ -145,6 +145,7 @@ void AMyAIDirector::UpdateIfIsInInner()
 
 void AMyAIDirector::SetFocusToClosestEnemy()
 {
+	AActor* previousFocus = playerReference->focus;
 	//player will get a focus if enemies.Num > 0
 	playerReference->focus = nullptr;
 
@@ -154,7 +155,7 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
-		if (enemies[i] != playerReference->focus && (enemies[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
+		if (enemies[i] != previousFocus && (enemies[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
 		{
 			distanceFromPlayer = (enemies[i]->GetActorLocation() - playerPos).Size();
 			playerReference->focus = enemies[i];

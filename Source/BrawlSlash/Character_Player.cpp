@@ -191,9 +191,9 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 {
 	if (OtherActor->ActorHasTag("Focusable"))
 	{
+		focusedActors.Remove(OtherActor);
 		if (!isInFight && focus == OtherActor)
 			SetFocusToClosestFocus();
-		focusedActors.Remove(OtherActor);
 		GEngine->AddOnScreenDebugMessage(-79, 1.0f, FColor::Red, GetDebugName(OtherActor));
 	}
 }
@@ -204,14 +204,17 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	
 	if (enemyCast)
 	{
-		toDoDamage = 0;
-		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 
+
+		GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, GetDebugName(OtherActor).Append(" HITTED ").Append(FString::FromInt(toDoDamage)));
 
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
 			enemyCast->TakeHit(toDoDamage, state);
 		//else
 		//	state = E_STATE::PUSHED_BACK;
+
+		toDoDamage = 0;
+		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 	}
 }
 
@@ -376,7 +379,7 @@ void ACharacter_Player::StopCombo()
 void ACharacter_Player::SetFocusNav(AActor* newFocus)
 {
 	//when set to !nullptr call overlap end
-	//focus = newFocus;
+	focus = newFocus;
 	
 	if (!isInFight)
 	{
@@ -445,7 +448,7 @@ void ACharacter_Player::SetFocusToClosestFocus()
 
 	for (int i = 0; i <= focusedActors.Num() - 1; ++i)
 	{
-		if (focusedActors[i] != focus && (focusedActors[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
+		if ((focusedActors[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
 		{
 			distanceFromPlayer = (focusedActors[i]->GetActorLocation() - playerPos).Size();
 			SetFocusNav(focusedActors[i]);
