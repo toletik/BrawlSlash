@@ -104,7 +104,6 @@ void ACharacter_Player::BeginPlay()
 	//Focus Detector
 	focusDetector->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
 	focusDetector->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
-
 }
 
 // Called every frame
@@ -117,25 +116,41 @@ void ACharacter_Player::Tick(float DeltaTime)
 		isFocusInShortRange = true;
 	else
 		isFocusInShortRange = false;
-		
+
 	//camera	
 	if (isInFight)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
 	else if (focus)
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500 ).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
-			
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+
 	//Look at focus while idle
 	if ((focus && GetVelocity().Size() < 0.5f && state == E_STATE::IDLE) || state == E_STATE::PREPARINGTELEPORT)
 	{
-		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
-		temp.Pitch = 0;
-		SetActorRotation(temp);
+		if (hasChangedFocus && focus)
+		{
+			FVector direction = focus->GetActorLocation() - GetActorLocation();
+			FRotator lookAt = FRotationMatrix::MakeFromX(direction).Rotator();
+			lookAt.Pitch = 0;
+			direction.Normalize();
+
+			if (FVector::DotProduct(GetActorForwardVector(), direction) > 0.99f)
+				hasChangedFocus = false;
+
+			SetActorRotation(FMath::Lerp(GetActorRotation(), lookAt, rotationSpeedWhenChangeFocus));
+		}
+
+		else
+		{
+			FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
+			temp.Pitch = 0;
+			SetActorRotation(temp);
+		}
 	}
 
 	if (isGoingToStickPoint && focus)
 	{
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
-		
+
 		if (direction.Size() < stickRange && direction.Size() > stickPoint && state == E_STATE::ATTACKING)
 			AddMovementInput(direction, 1.0f);
 		else
@@ -151,30 +166,37 @@ void ACharacter_Player::Tick(float DeltaTime)
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
 		direction.Normalize();
 		direction *= stickPoint;
-		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction, ECC_Pawn, raycastParams);
+		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction, ECC_WorldDynamic, raycastParams);
 
 		if (hit.GetActor() != nullptr && hit.GetActor() == focus)
 		{
+			if (isInFight)
+				SetActorEnableCollision(true);
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
-			SetActorEnableCollision(true);
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
-			if(currentEnemyGroup)
+			if (currentEnemyGroup)
 				currentEnemyGroup->UpdateIfIsInInner();
 			Attack();
 		}
 	}
 
-	if (state == E_STATE::BYPASSING && focus && (focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
+	if (state == E_STATE::BYPASSING)
 	{
-		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
-		SetActorEnableCollision(true);
-		GetCharacterMovement()->Velocity = FVector::ZeroVector;
-		if (currentEnemyGroup)
-			currentEnemyGroup->UpdateIfIsInInner();
-		state = E_STATE::IDLE;
-		ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
-		if (enemyFocus)
-			enemyFocus->beingBypassed = true;
+		if (focus && (focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
+		{
+			FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
+			temp.Pitch = 0;
+			SetActorRotation(temp);
+			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+			SetActorEnableCollision(true);
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
+			if (currentEnemyGroup)
+				currentEnemyGroup->UpdateIfIsInInner();
+			state = E_STATE::IDLE;
+			ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
+			if (enemyFocus)
+				enemyFocus->beingBypassed = true;
+		}
 	}
 }
 
@@ -185,7 +207,6 @@ void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* Overlappe
 		if (!isInFight)
 			SetFocusNav(OtherActor);
 		focusedActors.Add(OtherActor);
-		GEngine->AddOnScreenDebugMessage(-78, 1.0f, FColor::Green, GetDebugName(OtherActor));
 	}
 
 }
@@ -197,27 +218,24 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 		focusedActors.Remove(OtherActor);
 		if (!isInFight && focus == OtherActor)
 			SetFocusToClosestFocus();
-		GEngine->AddOnScreenDebugMessage(-79, 1.0f, FColor::Red, GetDebugName(OtherActor));
 	}
 }
 
 void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacter_EnemyBase* enemyCast = Cast<ACharacter_EnemyBase>(OtherActor);
-	
+
 	if (enemyCast)
 	{
-
-
-		GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, GetDebugName(OtherActor).Append(" HITTED ").Append(FString::FromInt(toDoDamage)));
-
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
+		{
 			enemyCast->TakeHit(toDoDamage, state);
+			currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
+		}
 		else
 			state = E_STATE::PUSHED_BACK;
 
 		toDoDamage = 0;
-		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 	}
 }
 
@@ -265,12 +283,12 @@ void ACharacter_Player::MoveRight(float Value)
 void ACharacter_Player::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert? -1.0f : 1.0f) );
+	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f));
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
+	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f));
 }
 
 
@@ -283,7 +301,7 @@ void ACharacter_Player::Attack()
 
 	if (state == E_STATE::ATTACKING)
 	{
-		if(canCombo)
+		if (canCombo)
 			needToAttack = true;
 	}
 	else
@@ -331,7 +349,8 @@ void ACharacter_Player::Attack()
 
 void ACharacter_Player::StartBypass()
 {
-	StartTeleport(E_STATE::BYPASSING);
+	if (isInFight)
+		StartTeleport(E_STATE::BYPASSING);
 }
 
 void ACharacter_Player::StartTeleport(E_STATE teleportState)
@@ -359,7 +378,8 @@ void ACharacter_Player::DashHit()
 		state = E_STATE::DASHING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
-		SetActorEnableCollision(false);
+		if (isInFight)
+			SetActorEnableCollision(false);
 	}
 
 	else
@@ -376,7 +396,7 @@ void ACharacter_Player::Bypass()
 
 		state = E_STATE::BYPASSING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		LaunchCharacter((focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()) * 10.0f, true, true);
 		SetActorEnableCollision(false);
 	}
 
@@ -423,16 +443,28 @@ void ACharacter_Player::TestRandomEnd()
 void ACharacter_Player::GetNextFocus()
 {
 	if (currentEnemyGroup)
+	{
 		currentEnemyGroup->SetFocusToNextEnemy();
+		hasChangedFocus = true;
+	}
 	else if (focus)
+	{
 		SetFocusToNextFocus();
+		hasChangedFocus = true;
+	}
 }
 void ACharacter_Player::GetPreviousFocus()
 {
 	if (currentEnemyGroup)
+	{
 		currentEnemyGroup->SetFocusToPreviousEnemy();
+		hasChangedFocus = true;
+	}
 	else if (focus)
+	{
 		SetFocusToPreviousFocus();
+		hasChangedFocus = true;
+	}
 }
 
 void ACharacter_Player::SetCameraStatsNav()

@@ -78,6 +78,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	bool isGoingToStickPoint = false;
 
+	bool hasChangedFocus = false;
+	
 	UMyGameInstance* gameInstance;
 
 protected:
@@ -151,6 +153,9 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Focus)
+	float rotationSpeedWhenChangeFocus = 0.01f;
 
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
