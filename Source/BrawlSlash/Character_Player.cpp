@@ -210,8 +210,8 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
 			enemyCast->TakeHit(toDoDamage, state);
-		//else
-		//	state = E_STATE::PUSHED_BACK;
+		else
+			state = E_STATE::PUSHED_BACK;
 
 		toDoDamage = 0;
 		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
