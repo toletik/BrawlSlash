@@ -22,6 +22,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -50,6 +51,10 @@ ACharacter_Player::ACharacter_Player()
 	followCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera")); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	followCamera->SetupAttachment(cameraBoom, USpringArmComponent::SocketName); 
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	
+	focusDetector = CreateDefaultSubobject<USphereComponent>(TEXT("focusDetector"));
+	focusDetector->SetupAttachment(RootComponent);
 }
 
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,6 +78,8 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
 
 
+	PlayerInputComponent->BindAction("TestRandom", IE_Pressed, this, &ACharacter_Player::TestRandomStart);
+	PlayerInputComponent->BindAction("TestRandom", IE_Released, this, &ACharacter_Player::TestRandomEnd);
 }
 
 // Called when the game starts or when spawned
@@ -93,6 +100,11 @@ void ACharacter_Player::BeginPlay()
 	currentMobilityPoints = maxMobilityPoints;
 
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
+
+	//Focus Detector
+	focusDetector->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
+	focusDetector->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
+
 }
 
 // Called every frame
@@ -100,6 +112,12 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//Debug
+	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
+		isFocusInShortRange = true;
+	else
+		isFocusInShortRange = false;
+		
 	//camera	
 	if (isInFight)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
@@ -140,7 +158,8 @@ void ACharacter_Player::Tick(float DeltaTime)
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 			SetActorEnableCollision(true);
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
-			currentEnemyGroup->UpdateIfIsInInner();
+			if(currentEnemyGroup)
+				currentEnemyGroup->UpdateIfIsInInner();
 			Attack();
 		}
 	}
@@ -150,8 +169,32 @@ void ACharacter_Player::Tick(float DeltaTime)
 		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		SetActorEnableCollision(true);
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
-		currentEnemyGroup->UpdateIfIsInInner();
+		if (currentEnemyGroup)
+			currentEnemyGroup->UpdateIfIsInInner();
 		state = E_STATE::IDLE;
+	}
+}
+
+void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->ActorHasTag("Focusable"))
+	{
+		if (!isInFight)
+			SetFocusNav(OtherActor);
+		focusedActors.Add(OtherActor);
+		GEngine->AddOnScreenDebugMessage(-78, 1.0f, FColor::Green, GetDebugName(OtherActor));
+	}
+
+}
+
+void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->ActorHasTag("Focusable"))
+	{
+		if (!isInFight && focus == OtherActor)
+			SetFocusToClosestFocus();
+		focusedActors.Remove(OtherActor);
+		GEngine->AddOnScreenDebugMessage(-79, 1.0f, FColor::Red, GetDebugName(OtherActor));
 	}
 }
 
@@ -161,10 +204,14 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	
 	if (enemyCast)
 	{
-		enemyCast->TakeHit(toDoDamage, state);
 		toDoDamage = 0;
-
 		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
+
+
+		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
+			enemyCast->TakeHit(toDoDamage, state);
+		//else
+		//	state = E_STATE::PUSHED_BACK;
 	}
 }
 
@@ -208,6 +255,8 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert? -1.0f : 1.0f) );
 }
+
+
 
 //Buttons
 void ACharacter_Player::Attack()
@@ -326,8 +375,9 @@ void ACharacter_Player::StopCombo()
 
 void ACharacter_Player::SetFocusNav(AActor* newFocus)
 {
-	focus = newFocus;
-
+	//when set to !nullptr call overlap end
+	//focus = newFocus;
+	
 	if (!isInFight)
 	{
 		if (focus)
@@ -339,7 +389,10 @@ void ACharacter_Player::SetFocusNav(AActor* newFocus)
 
 void ACharacter_Player::TestRandomStart()
 {
-	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "Start");
+	if (focusedActors.Num() > 0)
+		focus = focusedActors[0];
+
+	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, FString::FromInt(focusedActors.Num()) );
 
 }
 void ACharacter_Player::TestRandomEnd()
@@ -351,11 +404,15 @@ void ACharacter_Player::GetNextFocus()
 {
 	if (currentEnemyGroup)
 		currentEnemyGroup->SetFocusToNextEnemy();
+	else if (focus)
+		SetFocusToNextFocus();
 }
 void ACharacter_Player::GetPreviousFocus()
 {
 	if (currentEnemyGroup)
 		currentEnemyGroup->SetFocusToPreviousEnemy();
+	else if (focus)
+		SetFocusToPreviousFocus();
 }
 
 void ACharacter_Player::SetCameraStatsNav()
@@ -375,4 +432,67 @@ void ACharacter_Player::SetCameraStatsFight()
 	cameraBoom->TargetArmLength = distanceFight;
 	cameraBoom->CameraLagSpeed = LerpSpeedFight;
 	followCamera->SetFieldOfView(fovFight);
+}
+
+void ACharacter_Player::SetFocusToClosestFocus()
+{
+	//player will get a focus if focusedActors.Num > 0
+	SetFocusNav(nullptr);
+
+	FVector playerPos = GetActorLocation();
+	float distanceFromPlayer{ INFINITY };
+
+
+	for (int i = 0; i <= focusedActors.Num() - 1; ++i)
+	{
+		if (focusedActors[i] != focus && (focusedActors[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
+		{
+			distanceFromPlayer = (focusedActors[i]->GetActorLocation() - playerPos).Size();
+			SetFocusNav(focusedActors[i]);
+		}
+	}
+}
+
+void ACharacter_Player::SetFocusToNextFocus()
+{
+	FVector playerPos = GetActorLocation();
+	FVector vectorReference = focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= focusedActors.Num() - 1; ++i)
+	{
+		if (focusedActors[i] != focus)
+		{
+			FVector playerToFocus = focusedActors[i]->GetActorLocation() - playerPos;
+			float FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+
+			if (FocusAngle < smallestAngle)
+			{
+				smallestAngle = FocusAngle;
+				SetFocusNav(focusedActors[i]);
+			}
+		}
+	}
+}
+
+void ACharacter_Player::SetFocusToPreviousFocus()
+{
+	FVector playerPos = GetActorLocation();
+	FVector vectorReference = focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= focusedActors.Num() - 1; ++i)
+	{
+		if (focusedActors[i] != focus)
+		{
+			FVector playerToFocus = focusedActors[i]->GetActorLocation() - playerPos;
+			float FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+
+			if (FocusAngle < smallestAngle)
+			{
+				smallestAngle = FocusAngle;
+				SetFocusNav(focusedActors[i]);
+			}
+		}
+	}
 }

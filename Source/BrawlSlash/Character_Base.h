@@ -16,6 +16,7 @@ enum E_STATE
 	PREPARINGTELEPORT,
 	BYPASSING,
 	DASHING,
+	PUSHED_BACK,
 
 	HITTED_WEAK,
 	HITTED_STRONG,
@@ -31,11 +32,7 @@ class BRAWLSLASH_API ACharacter_Base : public ACharacter
 {
 	GENERATED_BODY() 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float health = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
-	float maxHealth = 5.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,6 +45,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* attackBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float health = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 5.0f;
 
 public:
 	// Sets default values for this character's properties
