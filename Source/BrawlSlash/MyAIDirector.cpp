@@ -41,7 +41,8 @@ void AMyAIDirector::Tick(float DeltaTime)
 	{
 		UpdateDead();
 
-		UpdateAttack(DeltaTime);
+		//Backup of Enemy Attack System V1
+		//UpdateAttack(DeltaTime);
 	}
 }
 
@@ -79,15 +80,11 @@ void AMyAIDirector::UpdateDead()
 	{
 		if (enemies[i]->state == E_STATE::DEAD)
 		{
-			bool needToSetNewFocus = false;
-
 			if (playerReference->focus == enemies[i])
-				needToSetNewFocus = true;
+				SetFocusToClosestEnemy();
 
 			enemies.RemoveAt(i);
 
-			if (needToSetNewFocus)
-				SetFocusToClosestEnemy();
 
 			UpdateIfIsInInner();
 		}
@@ -98,6 +95,7 @@ void AMyAIDirector::UpdateDead()
 		playerReference->isInFight = false;
 		playerReference->currentEnemyGroup = nullptr;
 		playerReference->SetCameraStatsNav();
+		playerReference->SetFocusToClosestFocus();
 	}
 }
 
@@ -147,6 +145,7 @@ void AMyAIDirector::UpdateIfIsInInner()
 
 void AMyAIDirector::SetFocusToClosestEnemy()
 {
+	AActor* previousFocus = playerReference->focus;
 	//player will get a focus if enemies.Num > 0
 	playerReference->focus = nullptr;
 
@@ -156,7 +155,7 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
-		if ((enemies[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
+		if (enemies[i] != previousFocus && (enemies[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
 		{
 			distanceFromPlayer = (enemies[i]->GetActorLocation() - playerPos).Size();
 			playerReference->focus = enemies[i];
