@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character_Player.h"
@@ -112,6 +112,9 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (currentInvincibleTime >= 0)
+		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
+
 	//Debug
 	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
 		isFocusInShortRange = true;
@@ -207,8 +210,6 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	
 	if (enemyCast)
 	{
-
-
 		GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, GetDebugName(OtherActor).Append(" HITTED ").Append(FString::FromInt(toDoDamage)));
 
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
@@ -223,6 +224,9 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 {
+	if (currentInvincibleTime >= 0)
+		return;
+
 	Super::TakeHit(damage, attackerState);
 
 	if (attackerState == E_STATE::ATTACKING_WEAK)
@@ -230,6 +234,8 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 
 	else if (attackerState == E_STATE::ATTACKING_STRONG)
 		state = E_STATE::HITTED_STRONG;
+
+	currentInvincibleTime = invincibleTime;
 }
 
 //Left Joystick

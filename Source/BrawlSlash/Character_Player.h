@@ -152,6 +152,14 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float invincibleTime {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float currentInvincibleTime{0};
+
+
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationSpeedHorizontal;
