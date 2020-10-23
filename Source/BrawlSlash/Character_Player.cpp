@@ -112,6 +112,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//Update Invincible Time if Needed
 	if (currentInvincibleTime >= 0)
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
 
