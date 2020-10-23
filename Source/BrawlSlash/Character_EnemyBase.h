@@ -115,21 +115,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float shieldTimeActive {0};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeActive{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float shieldTimeToDeActivate {0};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeToDeActivate{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float shieldTimeDeActivate {0};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeDeActivate{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float shieldTimeToActivate {0};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeToActivate{ 0 };
 	///////////////////////////////////////////////////////////////////////////
 
