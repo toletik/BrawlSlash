@@ -14,7 +14,6 @@ ACharacter_Base::ACharacter_Base()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	health = maxHealth;
 
 	attackBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBox"));
 	attackBox->SetupAttachment(RootComponent);
@@ -24,6 +23,8 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
+
+	health = maxHealth;
 
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 
@@ -56,10 +57,4 @@ void ACharacter_Base::EndAttack()
 void ACharacter_Base::TakeHit(int damage, E_STATE attackerState)
 {
 	health -= damage;
-
-	if (attackerState == E_STATE::ATTACKING_WEAK || attackerState == E_STATE::ATTACKING)
-		state = E_STATE::HITTED_WEAK;
-
-	else if (attackerState == E_STATE::ATTACKING_STRONG)
-		state = E_STATE::HITTED_STRONG;
 }

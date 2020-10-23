@@ -25,5 +25,5 @@ public:
 	FVector lastCheckPointPos {0, 0, 0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool firstTimeInLevel {true};
+	bool hasTakenACheckpoint {false};
 };

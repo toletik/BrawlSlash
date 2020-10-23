@@ -20,6 +20,17 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Focus, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* focusDetector;
+
+	TArray<AActor*> focusedActors;
+		
+	UFUNCTION()
+	void FocusDetectorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	int actualCombo = 0;
 
@@ -79,6 +90,7 @@ protected:
 	
 	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
+
 	//Left Joystick
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -102,6 +114,8 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+	virtual void TakeHit(int damage, E_STATE attackerState) override;
 
 	void Attack();
 
@@ -129,6 +143,10 @@ public:
 	UFUNCTION()
 	void SetFocusNav(AActor* newFocus);
 	
+	void SetFocusToClosestFocus();
+	void SetFocusToNextFocus();
+	void SetFocusToPreviousFocus();
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -202,5 +220,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	float debugBackCircleRadius = 800;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	bool isFocusInShortRange{ false };
 };
