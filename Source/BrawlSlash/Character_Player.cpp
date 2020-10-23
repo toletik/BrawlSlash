@@ -172,6 +172,9 @@ void ACharacter_Player::Tick(float DeltaTime)
 		if (currentEnemyGroup)
 			currentEnemyGroup->UpdateIfIsInInner();
 		state = E_STATE::IDLE;
+		ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
+		if (enemyFocus)
+			enemyFocus->beingBypassed = true;
 	}
 }
 
@@ -216,6 +219,17 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		toDoDamage = 0;
 		currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 	}
+}
+
+void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
+{
+	Super::TakeHit(damage, attackerState);
+
+	if (attackerState == E_STATE::ATTACKING_WEAK)
+		state = E_STATE::HITTED_WEAK;
+
+	else if (attackerState == E_STATE::ATTACKING_STRONG)
+		state = E_STATE::HITTED_STRONG;
 }
 
 //Left Joystick
@@ -264,6 +278,9 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
+	if (state == E_STATE::BYPASSING)
+		return;
+
 	if (state == E_STATE::ATTACKING)
 	{
 		if(canCombo)
@@ -319,7 +336,7 @@ void ACharacter_Player::StartBypass()
 
 void ACharacter_Player::StartTeleport(E_STATE teleportState)
 {
-	if (!focus || state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING || state == E_STATE::ATTACKING)
+	if (!focus || state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING)
 		return;
 
 	state = E_STATE::PREPARINGTELEPORT;

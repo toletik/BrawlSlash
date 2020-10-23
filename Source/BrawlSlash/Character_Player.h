@@ -115,6 +115,8 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
+	virtual void TakeHit(int damage, E_STATE attackerState) override;
+
 	void Attack();
 
 	bool needToAttack = false;
