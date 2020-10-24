@@ -94,10 +94,10 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
 	Super::TakeHit(damage, attackerState);
 
-	if (state != E_STATE::IDLE)
+	if (state == E_STATE::IDLE)
+		state = E_STATE::HITTED_WEAK;
+	else
 		HitOther();
-
-	state = E_STATE::HITTED_WEAK;
 }
 
 void ACharacter_EnemyBase::SetAttackState()
