@@ -46,6 +46,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HitOther();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShieldHitted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void LastEnemyInGroup();
+
 	UFUNCTION(BlueprintCallable)
 	void BeginAttackCircle();
 
@@ -64,6 +70,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
 	bool isInInnerCircle{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	bool isAStrongEnemy{ false };
 
 	///////////////////////////////////////////////////////////////////////////
 	//Attack
@@ -139,6 +148,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float rotateSpeedWhenBeingBypassed{ 0.1f };
+
 };
 
 

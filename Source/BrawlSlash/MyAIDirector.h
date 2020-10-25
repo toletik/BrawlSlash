@@ -29,6 +29,7 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	float remainingTimeForNextAttack;
 
 	bool isInFight{ false };
+	bool hasAStrongEnemyInInner{ false };
 	float radiusFromPlayerToStartFight{ 0 };
 
 
@@ -56,4 +57,6 @@ public:
 
 	void SetFocusToPreviousEnemy();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	FRotator rotationForTheFight { 0, 0, 0 };
 };

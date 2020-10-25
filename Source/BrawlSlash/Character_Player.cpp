@@ -123,7 +123,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 	//camera	
 	if (isInFight)
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), (FVector::ForwardVector.RotateAngleAxis(fightAngle, FVector::RightVector)).ToOrientationRotator(), GetWorld()->GetDeltaSeconds(), 2));
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), rotationForFight, GetWorld()->GetDeltaSeconds(), 2));
 	else if (focus)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
 
@@ -237,7 +237,10 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 			currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 		}
 		else
+		{
+			enemyCast->ShieldHitted();
 			state = E_STATE::PUSHED_BACK;
+		}
 
 		toDoDamage = 0;
 	}
@@ -488,11 +491,13 @@ void ACharacter_Player::SetCameraStatsLookAt()
 	cameraBoom->CameraLagSpeed = LerpSpeedLookAt;
 	followCamera->SetFieldOfView(fovLookAt);
 }
-void ACharacter_Player::SetCameraStatsFight()
+void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 {
 	cameraBoom->TargetArmLength = distanceFight;
 	cameraBoom->CameraLagSpeed = LerpSpeedFight;
 	followCamera->SetFieldOfView(fovFight);
+
+	rotationForFight = rotationToAdopt;
 }
 
 void ACharacter_Player::SetFocusToClosestFocus()

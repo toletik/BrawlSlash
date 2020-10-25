@@ -66,7 +66,7 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 			playerReference->isInFight = true;
 			playerReference->currentEnemyGroup = this;
 			playerReference->focus = enemies[i];
-			playerReference->SetCameraStatsFight();
+			playerReference->SetCameraStatsFight(rotationForTheFight);
 			playerReference->debugInnerCircleRadius = tempController->radiusInnerCircle;
 			playerReference->debugBackCircleRadius = tempController->radiusBackCircle;
 			return;
@@ -83,10 +83,13 @@ void AMyAIDirector::UpdateDead()
 			if (playerReference->focus == enemies[i])
 				SetFocusToClosestEnemy();
 
+			if (enemies.Num() == 1)
+				enemies[i]->LastEnemyInGroup();
+
 			enemies.RemoveAt(i);
 
-
 			UpdateIfIsInInner();
+
 		}
 	}
 
@@ -108,14 +111,20 @@ void AMyAIDirector::UpdateIfIsInInner()
 	for (int i = 0; i <= enemiesInInner.Num() - 1; ++i)
 		enemiesInInner[i]->isInInnerCircle = false;
 	enemiesInInner.Empty();
+	hasAStrongEnemyInInner = false;
 
 	//Fill new Array
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
-		if (enemiesInInner.Num() < numberOfEnemiesInInner)
+		if (enemies[i]->isAStrongEnemy && hasAStrongEnemyInInner == true)
+			continue;
+		else if (enemiesInInner.Num() < numberOfEnemiesInInner)
 		{
 			enemies[i]->isInInnerCircle = true;
 			enemiesInInner.Add(enemies[i]);
+
+			if (enemies[i]->isAStrongEnemy)
+				hasAStrongEnemyInInner = true;
 		}
 		else
 		{

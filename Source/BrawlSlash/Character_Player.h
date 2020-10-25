@@ -155,7 +155,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return followCamera; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Focus)
-	float rotationSpeedWhenChangeFocus = 0.01f;
+	float rotationSpeedWhenChangeFocus = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float invincibleTime {0};
@@ -219,9 +219,9 @@ public:
 	float fovFight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float fightAngle = 45.0f;
+	FRotator rotationForFight {0, 0, 0};
 
-	void SetCameraStatsFight();
+	void SetCameraStatsFight(FRotator rotationToAdopt);
 
 
 
