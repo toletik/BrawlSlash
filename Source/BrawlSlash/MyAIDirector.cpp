@@ -171,7 +171,7 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 		}
 	}
 }
-
+/*
 void AMyAIDirector::UpdateAttack(float DeltaTime)
 {
 	remainingTimeForNextAttack -= DeltaTime;
@@ -185,7 +185,7 @@ void AMyAIDirector::UpdateAttack(float DeltaTime)
 		randomEnemy->SetAttackState();
 	}
 }
-
+*/
 void AMyAIDirector::SetFocusToNextEnemy()
 {
 	FVector playerPos = playerReference->GetActorLocation();

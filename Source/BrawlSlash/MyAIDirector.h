@@ -23,8 +23,8 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	UPROPERTY(EditAnywhere, category = AI)
 	float numberOfEnemiesInInner;
 
-	UPROPERTY(EditAnywhere, category = AI)
-	float timeBetweenAttacks;
+	//UPROPERTY(EditAnywhere, category = AI)
+	//float timeBetweenAttacks;
 
 	float remainingTimeForNextAttack;
 
