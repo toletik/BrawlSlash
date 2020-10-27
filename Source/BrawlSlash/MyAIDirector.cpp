@@ -41,6 +41,8 @@ void AMyAIDirector::Tick(float DeltaTime)
 	{
 		UpdateDead();
 
+		//UpdateIfIsRespectingAngularDist();
+
 		//Backup of Enemy Attack System V1
 		//UpdateAttack(DeltaTime);
 	}
@@ -151,7 +153,51 @@ void AMyAIDirector::UpdateIfIsInInner()
 	}
 }
 
+void AMyAIDirector::UpdateIfIsRespectingAngularDist()
+{
+	FVector playerPos = playerReference->GetActorLocation();
 
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		FVector vectorReference = enemies[i]->GetActorLocation() - playerPos;
+		enemies[i]->isRespectingAngularDist = true;
+
+		for (int j = 0; j <= enemies.Num() - 1; ++j)
+		{
+			if (enemies[i] != enemies[j])
+			{
+				FVector playerToEnemy = enemies[j]->GetActorLocation() - playerPos;
+				float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToEnemy)) * 100 : 360 - acos(vectorReference.CosineAngle2D(playerToEnemy)) * 100;
+				GEngine->AddOnScreenDebugMessage(-40 * j + i, 0.5f, FColor::Red, GetDebugName(enemies[i]).Append(" ").Append(FString::FromInt(enemyAngle)));
+
+				if (enemyAngle > angularDisToRespect)
+				{
+					GEngine->AddOnScreenDebugMessage(-30 * j + i, 0.5f, FColor::Purple, GetDebugName(enemies[i]).Append(" ").Append(FString::FromInt(enemyAngle)));
+					enemies[i]->isRespectingAngularDist = false;
+				}
+			}
+		}
+	}
+
+
+	 
+}
+
+/*
+void AMyAIDirector::UpdateAttack(float DeltaTime)
+{
+	remainingTimeForNextAttack -= DeltaTime;
+
+	if (remainingTimeForNextAttack <= 0)
+	{
+		remainingTimeForNextAttack = timeBetweenAttacks;
+
+		ACharacter_EnemyBase* randomEnemy = enemiesInInner[FMath::RandRange(0, enemiesInInner.Num() - 1)];
+		
+		randomEnemy->SetAttackState();
+	}
+}
+*/
 void AMyAIDirector::SetFocusToClosestEnemy()
 {
 	AActor* previousFocus = playerReference->focus;
@@ -171,21 +217,6 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 		}
 	}
 }
-/*
-void AMyAIDirector::UpdateAttack(float DeltaTime)
-{
-	remainingTimeForNextAttack -= DeltaTime;
-
-	if (remainingTimeForNextAttack <= 0)
-	{
-		remainingTimeForNextAttack = timeBetweenAttacks;
-
-		ACharacter_EnemyBase* randomEnemy = enemiesInInner[FMath::RandRange(0, enemiesInInner.Num() - 1)];
-		
-		randomEnemy->SetAttackState();
-	}
-}
-*/
 void AMyAIDirector::SetFocusToNextEnemy()
 {
 	FVector playerPos = playerReference->GetActorLocation();

@@ -68,6 +68,8 @@ public:
 
 	float remainingTimeRecovery{ 0.f };
 
+	bool isRespectingAngularDist{ false };
+
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
 	bool isInInnerCircle{ false };
 
@@ -76,6 +78,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 	//Attack
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool needToAttackWeak{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
@@ -145,6 +148,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeToActivate{ 0 };
 	///////////////////////////////////////////////////////////////////////////
+
+	//Initial Wait
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float initialWaitAttack{ 0.1f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float initialWaitShield{ 0.1f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float rotateSpeedWhenBeingBypassed{ 0.1f };

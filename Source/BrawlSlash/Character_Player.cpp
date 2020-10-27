@@ -97,8 +97,6 @@ void ACharacter_Player::BeginPlay()
 	camManager->ViewPitchMin = -verticalAngleMax;
 	camManager->ViewPitchMax = -verticalAngleMin;
 	
-	currentMobilityPoints = maxMobilityPoints;
-
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
 
 	//Focus Detector
@@ -234,7 +232,6 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
 		{
 			enemyCast->TakeHit(toDoDamage, state);
-			currentMobilityPoints = FMath::Min(currentMobilityPoints + onAttackMobilityPoints, maxMobilityPoints);
 		}
 		else
 		{
@@ -383,9 +380,8 @@ void ACharacter_Player::DashHit()
 {
 	GetWorldTimerManager().ClearTimer(timerHandler);
 
-	if (focus && currentMobilityPoints - onDashHitMobilityPoints >= 0)
+	if (focus)
 	{
-		currentMobilityPoints -= onDashHitMobilityPoints;
 
 		state = E_STATE::DASHING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
@@ -402,9 +398,8 @@ void ACharacter_Player::Bypass()
 {
 	GetWorldTimerManager().ClearTimer(timerHandler);
 
-	if (focus && currentMobilityPoints - onDashBackMobilityPoints >= 0)
+	if (focus)
 	{
-		currentMobilityPoints -= onDashBackMobilityPoints;
 
 		state = E_STATE::BYPASSING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;

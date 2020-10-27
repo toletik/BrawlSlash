@@ -11,7 +11,9 @@ EBTNodeResult::Type UTask_UpdateShieldCoolDowns::ExecuteTask(UBehaviorTreeCompon
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (enemy->currentShieldTimeActive > 0)
+	if (enemy->initialWaitShield > 0)
+		enemy->initialWaitShield -= GetWorld()->GetDeltaSeconds();
+	else if (enemy->currentShieldTimeActive > 0)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "Active");
 		enemy->currentShieldTimeActive -= GetWorld()->GetDeltaSeconds();
