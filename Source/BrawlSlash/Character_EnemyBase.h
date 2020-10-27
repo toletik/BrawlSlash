@@ -39,8 +39,6 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
-	bool beingBypassed = false;
-
 	virtual void TakeHit(int damage, E_STATE attackerState) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -146,9 +144,20 @@ public:
 	float currentShieldTimeToActivate{ 0 };
 	///////////////////////////////////////////////////////////////////////////
 
+	UFUNCTION()
+	void LookAtPlayer();
+
+	FTimerHandle timerHandler;
+
+	bool notLookAtPlayer = false;
+
+	bool rotateBypassed = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float rotateSpeedWhenBeingBypassed{ 0.1f };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	float timeBeforeRotateWhenBeingBypassed{ 2.0f };
 };
 
 

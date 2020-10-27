@@ -169,7 +169,8 @@ void ACharacter_Player::Tick(float DeltaTime)
 		raycastParams.AddIgnoredActor(this);
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
 		direction.Normalize();
-		direction *= stickPoint;
+		if (isInFight)
+			direction *= stickPoint;
 		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction, ECC_WorldDynamic, raycastParams);
 
 		if (hit.GetActor() != nullptr && hit.GetActor() == focus)
@@ -199,7 +200,10 @@ void ACharacter_Player::Tick(float DeltaTime)
 			state = E_STATE::IDLE;
 			ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
 			if (enemyFocus)
-				enemyFocus->beingBypassed = true;
+			{
+				enemyFocus->notLookAtPlayer = true;
+				GetWorldTimerManager().SetTimer(enemyFocus->timerHandler, enemyFocus, &ACharacter_EnemyBase::LookAtPlayer, enemyFocus->timeBeforeRotateWhenBeingBypassed, false);
+			}
 		}
 	}
 }
@@ -389,7 +393,13 @@ void ACharacter_Player::DashHit()
 
 		state = E_STATE::DASHING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((focus->GetActorLocation() - GetActorLocation()) * 10.0f, true, true);
+		FVector direction = focus->GetActorLocation() - GetActorLocation();
+		direction.Normalize();
+		if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
+			direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+		else
+			direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+		LaunchCharacter(direction, true, true);
 		if (isInFight)
 			SetActorEnableCollision(false);
 	}
@@ -408,7 +418,13 @@ void ACharacter_Player::Bypass()
 
 		state = E_STATE::BYPASSING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		LaunchCharacter((focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()) * 10.0f, true, true);
+		FVector direction = focus->GetActorLocation() - GetActorLocation();
+		direction.Normalize();
+		if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
+			direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+		else
+			direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+		LaunchCharacter(direction, true, true);
 		SetActorEnableCollision(false);
 	}
 
