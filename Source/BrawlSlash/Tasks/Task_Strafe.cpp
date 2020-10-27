@@ -17,9 +17,9 @@ EBTNodeResult::Type UTask_Strafe::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	GetWorld()->LineTraceSingleByChannel(hit, enemyPos, enemyPos + enemy->GetActorRightVector() * 100, ECC_Pawn, raycastParams);
 
 	if (hit.Actor == NULL)
-		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorRightVector() * 100);
+		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorRightVector() * 200);
 	else
-		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorForwardVector() * -100);
+		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorForwardVector() * -200);
 
 	return EBTNodeResult::Succeeded;
 }

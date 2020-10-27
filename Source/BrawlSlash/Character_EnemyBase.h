@@ -39,8 +39,6 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
-	bool beingBypassed = false;
-
 	virtual void TakeHit(int damage, E_STATE attackerState) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -68,6 +66,8 @@ public:
 
 	float remainingTimeRecovery{ 0.f };
 
+	bool isRespectingAngularDist{ false };
+
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
 	bool isInInnerCircle{ false };
 
@@ -76,6 +76,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 	//Attack
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool needToAttackWeak{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
@@ -146,9 +147,26 @@ public:
 	float currentShieldTimeToActivate{ 0 };
 	///////////////////////////////////////////////////////////////////////////
 
+	//Initial Wait
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float initialWaitAttack{ 0.1f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float initialWaitShield{ 0.1f };
+	UFUNCTION()
+	void LookAtPlayer();
+
+	FTimerHandle timerHandler;
+
+	bool notLookAtPlayer = false;
+
+	bool rotateBypassed = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float rotateSpeedWhenBeingBypassed{ 0.1f };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	float timeBeforeRotateWhenBeingBypassed{ 2.0f };
 };
 
 

@@ -45,10 +45,11 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	void UpdateDead();
 
+	void UpdateIfIsRespectingAngularDist();
 
 	void SetFocusToClosestEnemy();
 
-	void UpdateAttack(float DeltaTime);
+	//void UpdateAttack(float DeltaTime);
 
 public:
 	void UpdateIfIsInInner();
@@ -59,4 +60,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float angularDisToRespect{ 90 };
 };

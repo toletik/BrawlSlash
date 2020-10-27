@@ -15,7 +15,7 @@ EBTNodeResult::Type UTask_GoBackward::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	selfToPlayer.Normalize();
 
 
-	OwnerComp.GetAIOwner()->MoveToLocation(enemy->GetActorLocation() - selfToPlayer * 100);
+	OwnerComp.GetAIOwner()->MoveToLocation(enemy->GetActorLocation() - selfToPlayer * 200);
 
 
 	return EBTNodeResult::Succeeded;

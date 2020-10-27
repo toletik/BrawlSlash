@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
+#include "TimerManager.h"
 
 // Sets default values
 AMyAIDirector::AMyAIDirector()
@@ -40,6 +41,8 @@ void AMyAIDirector::Tick(float DeltaTime)
 	else
 	{
 		UpdateDead();
+
+		UpdateIfIsRespectingAngularDist();
 
 		//Backup of Enemy Attack System V1
 		//UpdateAttack(DeltaTime);
@@ -144,14 +147,68 @@ void AMyAIDirector::UpdateIfIsInInner()
 			{
 				enemyToRemove->isInInnerCircle = false;
 				enemiesInInner.Remove(enemyToRemove);
+				GetWorldTimerManager().ClearTimer(enemyToRemove->timerHandler);
+				enemyToRemove->LookAtPlayer();
+
 				enemies[i]->isInInnerCircle = true;
 				enemiesInInner.Add(enemies[i]);
 			}
+			else
+			{
+				GetWorldTimerManager().ClearTimer(enemies[i]->timerHandler);
+				enemies[i]->LookAtPlayer();
+			}
 		}
 	}
+
+
 }
 
+void AMyAIDirector::UpdateIfIsRespectingAngularDist()
+{
+	FVector playerPos = playerReference->GetActorLocation();
 
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		FVector vectorReference = enemies[i]->GetActorLocation() - playerPos;
+		vectorReference.Normalize();
+		enemies[i]->isRespectingAngularDist = true;
+
+		for (int j = 0; j <= enemies.Num() - 1; ++j)
+		{
+			if (enemies[i] != enemies[j])
+			{
+				FVector playerToEnemy = enemies[j]->GetActorLocation() - playerPos;
+				playerToEnemy.Normalize();
+				float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z > 0) ? FMath::RadiansToDegrees( acos(vectorReference.CosineAngle2D(playerToEnemy)) ) : 360 - FMath::RadiansToDegrees( acos(vectorReference.CosineAngle2D(playerToEnemy)) );
+
+				if (enemyAngle < angularDisToRespect)
+				{
+					enemies[i]->isRespectingAngularDist = false;
+				}
+			}
+		}
+	}
+
+
+	 
+}
+
+/*
+void AMyAIDirector::UpdateAttack(float DeltaTime)
+{
+	remainingTimeForNextAttack -= DeltaTime;
+
+	if (remainingTimeForNextAttack <= 0)
+	{
+		remainingTimeForNextAttack = timeBetweenAttacks;
+
+		ACharacter_EnemyBase* randomEnemy = enemiesInInner[FMath::RandRange(0, enemiesInInner.Num() - 1)];
+		
+		randomEnemy->SetAttackState();
+	}
+}
+*/
 void AMyAIDirector::SetFocusToClosestEnemy()
 {
 	AActor* previousFocus = playerReference->focus;
@@ -171,21 +228,6 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 		}
 	}
 }
-/*
-void AMyAIDirector::UpdateAttack(float DeltaTime)
-{
-	remainingTimeForNextAttack -= DeltaTime;
-
-	if (remainingTimeForNextAttack <= 0)
-	{
-		remainingTimeForNextAttack = timeBetweenAttacks;
-
-		ACharacter_EnemyBase* randomEnemy = enemiesInInner[FMath::RandRange(0, enemiesInInner.Num() - 1)];
-		
-		randomEnemy->SetAttackState();
-	}
-}
-*/
 void AMyAIDirector::SetFocusToNextEnemy()
 {
 	FVector playerPos = playerReference->GetActorLocation();

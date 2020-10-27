@@ -59,18 +59,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	float stickPoint = 60.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int maxMobilityPoints = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int onAttackMobilityPoints = 1;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int onDashBackMobilityPoints = 1;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	int onDashHitMobilityPoints = 2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float preparingDashDuration = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
@@ -122,10 +110,7 @@ public:
 	void Attack();
 
 	bool needToAttack = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int currentMobilityPoints;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	class AMyAIDirector* currentEnemyGroup = nullptr;
 
@@ -139,8 +124,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float comboTime = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float jumpForceAfterNavDashHit = 1000.0f;
+
 	UFUNCTION()
 	void StopCombo();
+
+	UFUNCTION(BlueprintCallable)
+	void StopDashHit();
 
 	UFUNCTION()
 	void SetFocusNav(AActor* newFocus);
@@ -158,7 +149,10 @@ public:
 	float rotationSpeedWhenChangeFocus = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float invincibleTime {0};
+	float knockbackForceAfterAttackBlocked = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float invincibleTime{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float currentInvincibleTime{0};
