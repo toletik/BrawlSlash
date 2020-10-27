@@ -238,6 +238,7 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		{
 			enemyCast->ShieldHitted();
 			state = E_STATE::PUSHED_BACK;
+			LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);
 		}
 
 		toDoDamage = 0;
@@ -441,7 +442,13 @@ void ACharacter_Player::StopDashHit()
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 	if (currentEnemyGroup)
 		currentEnemyGroup->UpdateIfIsInInner();
-	Attack();
+	if (isInFight)
+		Attack();
+	else
+	{
+		state = E_STATE::IDLE;
+		LaunchCharacter(FVector::UpVector * jumpForceAfterNavDashHit, true, true);
+	}
 }
 
 void ACharacter_Player::SetFocusNav(AActor* newFocus)
