@@ -61,6 +61,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Fight)
-	float angularDisToRespect {40};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float angularDisToRespect{ 90 };
 };
