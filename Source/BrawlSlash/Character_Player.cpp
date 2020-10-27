@@ -175,13 +175,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 		if (hit.GetActor() != nullptr && hit.GetActor() == focus)
 		{
-			if (isInFight)
-				SetActorEnableCollision(true);
-			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
-			GetCharacterMovement()->Velocity = FVector::ZeroVector;
-			if (currentEnemyGroup)
-				currentEnemyGroup->UpdateIfIsInInner();
-			Attack();
+			StopDashHit();
 		}
 	}
 
@@ -306,8 +300,6 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f));
 }
-
-
 
 //Buttons
 void ACharacter_Player::Attack()
@@ -439,6 +431,17 @@ void ACharacter_Player::StopCombo()
 	canCombo = false;
 	actualCombo = 0;
 	state = E_STATE::IDLE;
+}
+
+void ACharacter_Player::StopDashHit()
+{
+	if (isInFight)
+		SetActorEnableCollision(true);
+	GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	if (currentEnemyGroup)
+		currentEnemyGroup->UpdateIfIsInInner();
+	Attack();
 }
 
 void ACharacter_Player::SetFocusNav(AActor* newFocus)

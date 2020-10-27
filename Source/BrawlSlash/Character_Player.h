@@ -142,6 +142,9 @@ public:
 	UFUNCTION()
 	void StopCombo();
 
+	UFUNCTION(BlueprintCallable)
+	void StopDashHit();
+
 	UFUNCTION()
 	void SetFocusNav(AActor* newFocus);
 	
