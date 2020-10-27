@@ -181,11 +181,9 @@ void AMyAIDirector::UpdateIfIsRespectingAngularDist()
 				FVector playerToEnemy = enemies[j]->GetActorLocation() - playerPos;
 				playerToEnemy.Normalize();
 				float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z > 0) ? FMath::RadiansToDegrees( acos(vectorReference.CosineAngle2D(playerToEnemy)) ) : 360 - FMath::RadiansToDegrees( acos(vectorReference.CosineAngle2D(playerToEnemy)) );
-				GEngine->AddOnScreenDebugMessage(-40 * j + i, 0.5f, FColor::Red, GetDebugName(enemies[i]).Append(" ").Append(FString::FromInt(enemyAngle)));
 
 				if (enemyAngle < angularDisToRespect)
 				{
-					GEngine->AddOnScreenDebugMessage(-30 * j + i, 0.5f, FColor::Purple, GetDebugName(enemies[i]).Append(" ").Append(FString::FromInt(enemyAngle)));
 					enemies[i]->isRespectingAngularDist = false;
 				}
 			}
