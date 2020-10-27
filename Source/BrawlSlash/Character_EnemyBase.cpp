@@ -198,3 +198,9 @@ void ACharacter_EnemyBase::ShieldDeActivate()
 		isNextShieldToActivateFront = true;
 	}
 }
+
+void ACharacter_EnemyBase::LookAtPlayer()
+{
+	notLookAtPlayer = false;
+	rotateBypassed = true;
+}

@@ -124,8 +124,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float comboTime = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float jumpForceAfterNavDashHit = 1000.0f;
+
 	UFUNCTION()
 	void StopCombo();
+
+	UFUNCTION(BlueprintCallable)
+	void StopDashHit();
 
 	UFUNCTION()
 	void SetFocusNav(AActor* newFocus);
@@ -143,7 +149,10 @@ public:
 	float rotationSpeedWhenChangeFocus = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float invincibleTime {0};
+	float knockbackForceAfterAttackBlocked = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float invincibleTime{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float currentInvincibleTime{0};
