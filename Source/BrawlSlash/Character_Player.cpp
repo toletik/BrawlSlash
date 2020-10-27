@@ -384,10 +384,15 @@ void ACharacter_Player::DashHit()
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
 		direction.Normalize();
-		if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
-			direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+		if (isInFight)
+		{
+			if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
+				direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+			else
+				direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+		}
 		else
-			direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+			direction *= 10000.0f;
 		LaunchCharacter(direction, true, true);
 		if (isInFight)
 			SetActorEnableCollision(false);
