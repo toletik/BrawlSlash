@@ -54,6 +54,9 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 public:
 	void UpdateIfIsInInner();
 
+	UFUNCTION(BlueprintCallable)
+	void SetEndToFight();
+
 	void SetFocusToNextEnemy();
 
 	void SetFocusToPreviousEnemy();

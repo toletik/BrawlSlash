@@ -52,6 +52,9 @@ void AMyAIDirector::Tick(float DeltaTime)
 
 void AMyAIDirector::UpdateIfNeedToStartFight()
 {
+	if (playerReference->isInSafeZone)
+		return;
+
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
 		if ((enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < radiusFromPlayerToStartFight)
@@ -77,6 +80,20 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 	}
 }
 
+void AMyAIDirector::SetEndToFight()
+{
+	isInFight = false;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+		enemies[i]->isInFight = false;
+
+	playerReference->isInFight = false;
+	playerReference->currentEnemyGroup = nullptr;
+	playerReference->focus = nullptr;
+	playerReference->SetCameraStatsNav();
+	playerReference->SetFocusToClosestFocus();
+}
+
 void AMyAIDirector::UpdateDead()
 {
 	for (int i = enemies.Num() - 1; i >= 0; --i)
@@ -97,12 +114,7 @@ void AMyAIDirector::UpdateDead()
 	}
 
 	if (enemies.Num() == 0)
-	{
-		playerReference->isInFight = false;
-		playerReference->currentEnemyGroup = nullptr;
-		playerReference->SetCameraStatsNav();
-		playerReference->SetFocusToClosestFocus();
-	}
+		SetEndToFight();
 }
 
 
