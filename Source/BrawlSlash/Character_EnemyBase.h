@@ -99,6 +99,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	int strongDamage{ 2 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float pushForceAfterBeingHit = 1000.0f;
 	///////////////////////////////////////////////////////////////////////////
 
 

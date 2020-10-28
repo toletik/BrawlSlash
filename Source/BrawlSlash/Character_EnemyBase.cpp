@@ -94,6 +94,8 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
 	Super::TakeHit(damage, attackerState);
 
+	LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
+
 	if (state == E_STATE::IDLE)
 		state = E_STATE::HITTED_WEAK;
 	else
