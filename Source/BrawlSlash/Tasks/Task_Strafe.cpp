@@ -14,12 +14,12 @@ EBTNodeResult::Type UTask_Strafe::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(enemy);
-	GetWorld()->LineTraceSingleByChannel(hit, enemyPos, enemyPos + enemy->GetActorRightVector() * 100, ECC_Pawn, raycastParams);
+	GetWorld()->LineTraceSingleByChannel(hit, enemyPos, enemyPos + enemy->GetActorRightVector() * 200, ECC_Pawn, raycastParams);
 
 	if (hit.Actor == NULL)
 		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorRightVector() * 200);
-	else
-		OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorForwardVector() * -200);
+	//else
+	//	OwnerComp.GetAIOwner()->MoveToLocation(enemyPos + enemy->GetActorForwardVector() * -200);
 
 	return EBTNodeResult::Succeeded;
 }

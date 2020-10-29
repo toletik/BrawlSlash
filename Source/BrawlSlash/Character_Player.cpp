@@ -74,6 +74,7 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	//Buttons
 	PlayerInputComponent->BindAction("Tp", IE_Pressed, this, &ACharacter_Player::StartBypass);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
+	PlayerInputComponent->BindAxis("TurnRateFixed", this, &ACharacter_Player::TurnAtRateFixed);
 	PlayerInputComponent->BindAction("FocusNextEnemy", IE_Pressed, this, &ACharacter_Player::GetNextFocus);
 	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
 
@@ -89,7 +90,7 @@ void ACharacter_Player::BeginPlay()
 	
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 
-	Controller->SetControlRotation(initialRotation);
+	Controller->SetControlRotation(fixedRotation);
 	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
 	SetCameraStatsNav();
 
@@ -113,18 +114,33 @@ void ACharacter_Player::Tick(float DeltaTime)
 	if (currentInvincibleTime >= 0)
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
 
+	/////////////////////////////////////////////////////
 	//Debug
 	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
 		isFocusInShortRange = true;
 	else
 		isFocusInShortRange = false;
 
+	debugNextFocus = nullptr;
+	debugPreviousFocus = nullptr;
+	if (currentEnemyGroup)
+	{
+		currentEnemyGroup->SetDebugFocusToNextEnemy();
+		currentEnemyGroup->SetDebugFocusToPreviousEnemy();
+	}
+	GEngine->AddOnScreenDebugMessage(-97, 1.0f, FColor::Cyan, FString("next ").Append(GetDebugName(debugNextFocus)) );
+	GEngine->AddOnScreenDebugMessage(-98, 1.0f, FColor::Cyan, FString("previous ").Append(GetDebugName(debugPreviousFocus)) );
+	/////////////////////////////////////////////////////
+
 	//camera	
 	if (isInFight)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), rotationForFight, GetWorld()->GetDeltaSeconds(), 2));
 	else if (focus)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+	else
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds(), 2));
 
+		
 	//Look at focus while idle
 	if ((focus && GetVelocity().Size() < 0.5f && state == E_STATE::IDLE) || state == E_STATE::PREPARINGTELEPORT)
 	{
@@ -298,6 +314,11 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f));
 }
+void ACharacter_Player::TurnAtRateFixed(float Rate)
+{
+	if (!isInFight && !focus)
+		fixedRotation.Yaw += Rate * rotationSpeedHorizontalFixed * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
+}
 
 //Buttons
 void ACharacter_Player::Attack()
@@ -384,10 +405,15 @@ void ACharacter_Player::DashHit()
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
 		direction.Normalize();
-		if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
-			direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+		if (isInFight)
+		{
+			if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
+				direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+			else
+				direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+		}
 		else
-			direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+			direction *= 10000.0f;
 		LaunchCharacter(direction, true, true);
 		if (isInFight)
 			SetActorEnableCollision(false);
@@ -505,12 +531,16 @@ void ACharacter_Player::SetCameraStatsNav()
 	cameraBoom->TargetArmLength = distanceNav;
 	cameraBoom->CameraLagSpeed = LerpSpeedNav;
 	followCamera->SetFieldOfView(fovNav);
+
+	followCamera->SetRelativeLocation({0, 0, 0});
 }
 void ACharacter_Player::SetCameraStatsLookAt()
 {
 	cameraBoom->TargetArmLength = distanceLookAt;
 	cameraBoom->CameraLagSpeed = LerpSpeedLookAt;
 	followCamera->SetFieldOfView(fovLookAt);
+
+	followCamera->SetRelativeLocation({0, 0, 300});
 }
 void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 {
@@ -518,6 +548,7 @@ void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 	cameraBoom->CameraLagSpeed = LerpSpeedFight;
 	followCamera->SetFieldOfView(fovFight);
 
+	followCamera->SetRelativeLocation({ 0, 0, 0 });
 	rotationForFight = rotationToAdopt;
 }
 
