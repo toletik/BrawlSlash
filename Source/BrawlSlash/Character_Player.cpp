@@ -323,7 +323,7 @@ void ACharacter_Player::TurnAtRateFixed(float Rate)
 //Buttons
 void ACharacter_Player::Attack()
 {
-	if (state == E_STATE::BYPASSING)
+	if (state == E_STATE::BYPASSING || (state == E_STATE::DASHING && GetActorEnableCollision() == false))
 		return;
 
 	if (state == E_STATE::ATTACKING)
@@ -429,7 +429,6 @@ void ACharacter_Player::Bypass()
 
 	if (focus)
 	{
-
 		state = E_STATE::BYPASSING;
 		GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 		FVector direction = focus->GetActorLocation() - GetActorLocation();
@@ -501,6 +500,9 @@ void ACharacter_Player::TestRandomEnd()
 
 void ACharacter_Player::GetNextFocus()
 {
+	if (state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING || state == E_STATE::ATTACKING)
+		return;
+
 	if (currentEnemyGroup)
 	{
 		currentEnemyGroup->SetFocusToNextEnemy();
@@ -514,6 +516,9 @@ void ACharacter_Player::GetNextFocus()
 }
 void ACharacter_Player::GetPreviousFocus()
 {
+	if (state == E_STATE::PREPARINGTELEPORT || state == E_STATE::BYPASSING || state == E_STATE::DASHING || state == E_STATE::ATTACKING)
+		return;
+
 	if (currentEnemyGroup)
 	{
 		currentEnemyGroup->SetFocusToPreviousEnemy();

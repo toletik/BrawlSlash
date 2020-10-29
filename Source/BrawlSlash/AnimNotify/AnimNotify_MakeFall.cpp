@@ -10,5 +10,5 @@ void UAnimNotify_MakeFall::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	ACharacter_Player* player = Cast<ACharacter_Player>(MeshComp->GetOwner());
 
 	if (player)
-		player->state = E_STATE::PUSHED_BACK;
+		player->state = E_STATE::PROJECTED;
 }
