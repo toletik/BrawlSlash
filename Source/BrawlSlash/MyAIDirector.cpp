@@ -283,3 +283,47 @@ void AMyAIDirector::SetFocusToPreviousEnemy()
 		}
 	}
 }
+
+void AMyAIDirector::SetDebugFocusToNextEnemy()
+{
+	FVector playerPos = playerReference->GetActorLocation();
+	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		if (enemies[i] != playerReference->focus)
+		{
+			FVector playerToEnemy = enemies[i]->GetActorLocation() - playerPos;
+			float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(playerToEnemy));
+
+			if (enemyAngle < smallestAngle)
+			{
+				smallestAngle = enemyAngle;
+				playerReference->debugNextFocus = enemies[i];
+			}
+		}
+	}
+}
+
+void AMyAIDirector::SetDebugFocusToPreviousEnemy()
+{
+	FVector playerPos = playerReference->GetActorLocation();
+	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		if (enemies[i] != playerReference->focus)
+		{
+			FVector playerToEnemy = enemies[i]->GetActorLocation() - playerPos;
+			float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(playerToEnemy));
+
+			if (enemyAngle < smallestAngle)
+			{
+				smallestAngle = enemyAngle;
+				playerReference->debugPreviousFocus = enemies[i];
+			}
+		}
+	}
+}

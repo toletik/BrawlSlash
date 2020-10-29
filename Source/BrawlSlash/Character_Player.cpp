@@ -114,11 +114,23 @@ void ACharacter_Player::Tick(float DeltaTime)
 	if (currentInvincibleTime >= 0)
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
 
+	/////////////////////////////////////////////////////
 	//Debug
 	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
 		isFocusInShortRange = true;
 	else
 		isFocusInShortRange = false;
+
+	debugNextFocus = nullptr;
+	debugPreviousFocus = nullptr;
+	if (currentEnemyGroup)
+	{
+		currentEnemyGroup->SetDebugFocusToNextEnemy();
+		currentEnemyGroup->SetDebugFocusToPreviousEnemy();
+	}
+	GEngine->AddOnScreenDebugMessage(-97, 1.0f, FColor::Cyan, FString("next ").Append(GetDebugName(debugNextFocus)) );
+	GEngine->AddOnScreenDebugMessage(-98, 1.0f, FColor::Cyan, FString("previous ").Append(GetDebugName(debugPreviousFocus)) );
+	/////////////////////////////////////////////////////
 
 	//camera	
 	if (isInFight)
@@ -127,8 +139,6 @@ void ACharacter_Player::Tick(float DeltaTime)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
 	else
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds(), 2));
-
-		
 
 		
 	//Look at focus while idle

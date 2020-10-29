@@ -61,6 +61,10 @@ public:
 
 	void SetFocusToPreviousEnemy();
 
+	void SetDebugFocusToNextEnemy();
+
+	void SetDebugFocusToPreviousEnemy();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
 

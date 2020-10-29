@@ -237,4 +237,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	bool isFocusInShortRange{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	class ACharacter_EnemyBase* debugNextFocus = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
 };
