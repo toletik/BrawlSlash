@@ -95,6 +95,8 @@ protected:
 	void Bypass();
 	void DashHit();
 
+	void TurnAtRateFixed(float Rate);
+
 	void GetNextFocus();
 	void GetPreviousFocus();
 
@@ -104,6 +106,9 @@ protected:
 public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	bool isInSafeZone {false};
 
 	virtual void TakeHit(int damage, E_STATE attackerState) override;
 
@@ -172,7 +177,10 @@ public:
 	float verticalAngleMin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	FRotator initialRotation {0, 0, 0};
+	FRotator fixedRotation {0, 0, 0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
+	float rotationSpeedHorizontalFixed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float positionLerpLimitRange;
@@ -229,4 +237,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	bool isFocusInShortRange{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	class ACharacter_EnemyBase* debugNextFocus = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
 };

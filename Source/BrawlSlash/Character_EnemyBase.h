@@ -80,10 +80,16 @@ public:
 	bool needToAttackWeak{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	float attackCoolDownMin { 2 };
+	float attackCoolDownInnerMin { 2 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	float attackCoolDownMax{ 3 };
+	float attackCoolDownInnerMax{ 3 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float attackCoolDownBackMin{ 2 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float attackCoolDownBackMax{ 3 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float currentAttackCoolDown{ 0 };
@@ -120,7 +126,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	bool isShieldSwitchable {false};
 
-	bool isNextShieldToActivateFront {false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
+	bool isNextShieldToCycleFront {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float angleAcceptanceForDefense {45};

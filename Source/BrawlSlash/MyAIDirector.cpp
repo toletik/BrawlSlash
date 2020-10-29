@@ -52,6 +52,9 @@ void AMyAIDirector::Tick(float DeltaTime)
 
 void AMyAIDirector::UpdateIfNeedToStartFight()
 {
+	if (playerReference->isInSafeZone)
+		return;
+
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
 		if ((enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < radiusFromPlayerToStartFight)
@@ -77,6 +80,20 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 	}
 }
 
+void AMyAIDirector::SetEndToFight()
+{
+	isInFight = false;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+		enemies[i]->isInFight = false;
+
+	playerReference->isInFight = false;
+	playerReference->currentEnemyGroup = nullptr;
+	playerReference->focus = nullptr;
+	playerReference->SetCameraStatsNav();
+	playerReference->SetFocusToClosestFocus();
+}
+
 void AMyAIDirector::UpdateDead()
 {
 	for (int i = enemies.Num() - 1; i >= 0; --i)
@@ -97,12 +114,7 @@ void AMyAIDirector::UpdateDead()
 	}
 
 	if (enemies.Num() == 0)
-	{
-		playerReference->isInFight = false;
-		playerReference->currentEnemyGroup = nullptr;
-		playerReference->SetCameraStatsNav();
-		playerReference->SetFocusToClosestFocus();
-	}
+		SetEndToFight();
 }
 
 
@@ -267,6 +279,50 @@ void AMyAIDirector::SetFocusToPreviousEnemy()
 			{
 				smallestAngle = enemyAngle;
 				playerReference->focus = enemies[i];
+			}
+		}
+	}
+}
+
+void AMyAIDirector::SetDebugFocusToNextEnemy()
+{
+	FVector playerPos = playerReference->GetActorLocation();
+	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		if (enemies[i] != playerReference->focus)
+		{
+			FVector playerToEnemy = enemies[i]->GetActorLocation() - playerPos;
+			float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(playerToEnemy));
+
+			if (enemyAngle < smallestAngle)
+			{
+				smallestAngle = enemyAngle;
+				playerReference->debugNextFocus = enemies[i];
+			}
+		}
+	}
+}
+
+void AMyAIDirector::SetDebugFocusToPreviousEnemy()
+{
+	FVector playerPos = playerReference->GetActorLocation();
+	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
+	float smallestAngle = 360;
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		if (enemies[i] != playerReference->focus)
+		{
+			FVector playerToEnemy = enemies[i]->GetActorLocation() - playerPos;
+			float enemyAngle = (FVector::CrossProduct(vectorReference, playerToEnemy).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(playerToEnemy));
+
+			if (enemyAngle < smallestAngle)
+			{
+				smallestAngle = enemyAngle;
+				playerReference->debugPreviousFocus = enemies[i];
 			}
 		}
 	}
