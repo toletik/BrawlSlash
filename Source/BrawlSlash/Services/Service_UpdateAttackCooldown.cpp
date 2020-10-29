@@ -14,12 +14,18 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 	if (enemy->initialWaitAttack > 0)
 		enemy->initialWaitAttack -= GetWorld()->GetDeltaSeconds();
 	else
+	{
 		enemy->currentAttackCoolDown -= GetWorld()->GetDeltaSeconds();
 
-
-	if (enemy->currentAttackCoolDown < 0)
-	{
-		enemy->SetAttackState();
-		enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownMin, enemy->attackCoolDownMax);
+		if (enemy->currentAttackCoolDown < 0)
+		{
+			enemy->SetAttackState();
+			if (enemy->isInInnerCircle)
+				enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownInnerMin, enemy->attackCoolDownInnerMax);
+			else
+				enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownBackMin, enemy->attackCoolDownBackMax);
+		}
 	}
+
+
 }

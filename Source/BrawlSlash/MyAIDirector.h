@@ -54,9 +54,16 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 public:
 	void UpdateIfIsInInner();
 
+	UFUNCTION(BlueprintCallable)
+	void SetEndToFight();
+
 	void SetFocusToNextEnemy();
 
 	void SetFocusToPreviousEnemy();
+
+	void SetDebugFocusToNextEnemy();
+
+	void SetDebugFocusToPreviousEnemy();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };

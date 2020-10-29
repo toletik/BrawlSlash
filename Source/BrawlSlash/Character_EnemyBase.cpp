@@ -33,7 +33,6 @@ void ACharacter_EnemyBase::BeginPlay()
 	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
 	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	currentAttackCoolDown = FMath::RandRange(attackCoolDownMin, attackCoolDownMax);
 
 	if (isShieldInFront)
 		shieldFront->SetVisibility(true);
@@ -93,6 +92,8 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
 	Super::TakeHit(damage, attackerState);
+
+	LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
 
 	if (state == E_STATE::IDLE)
 		state = E_STATE::HITTED_WEAK;
@@ -171,31 +172,30 @@ bool ACharacter_EnemyBase::ShieldCheckProtection(FVector attackerPos)
 
 void ACharacter_EnemyBase::ShieldActivate()
 {
-	if (isNextShieldToActivateFront)
+	if (isNextShieldToCycleFront)
 	{
 		isShieldInFront = true;
 		shieldFront->SetVisibility(true);
+		isNextShieldToCycleFront = false;
 	}
 	else
 	{
 		isShieldInBack = true;
 		shieldBack->SetVisibility(true);
+		isNextShieldToCycleFront = true;
 	}
 }
 void ACharacter_EnemyBase::ShieldDeActivate()
 {
-	if (isShieldInFront)
+	if (isNextShieldToCycleFront)
 	{
 		isShieldInFront = false;
 		shieldFront->SetVisibility(false);
-		isNextShieldToActivateFront = false;
 	}
-
-	if (isShieldInBack)
+	else
 	{
 		isShieldInBack = false;
 		shieldBack->SetVisibility(false);
-		isNextShieldToActivateFront = true;
 	}
 }
 
