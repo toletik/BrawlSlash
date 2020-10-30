@@ -127,6 +127,13 @@ void ACharacter_Player::Tick(float DeltaTime)
 	{
 		currentEnemyGroup->SetDebugFocusToNextEnemy();
 		currentEnemyGroup->SetDebugFocusToPreviousEnemy();
+
+		if (!currentEnemyGroup->IsAllEnemiesInCameraSight(GetWorld()->GetFirstPlayerController()) )
+			cameraBoom->TargetArmLength = FMath::Min(maxdistance, cameraBoom->TargetArmLength + zoomDezoomSpeed * GetWorld()->GetDeltaSeconds() );
+		else
+			cameraBoom->TargetArmLength = FMath::Max(mindistance, cameraBoom->TargetArmLength - zoomDezoomSpeed * GetWorld()->GetDeltaSeconds() );
+
+
 	}
 	GEngine->AddOnScreenDebugMessage(-97, 1.0f, FColor::Cyan, FString("next ").Append(GetDebugName(debugNextFocus)) );
 	GEngine->AddOnScreenDebugMessage(-98, 1.0f, FColor::Cyan, FString("previous ").Append(GetDebugName(debugPreviousFocus)) );
