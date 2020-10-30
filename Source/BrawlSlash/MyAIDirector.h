@@ -30,6 +30,8 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	bool isInFight{ false };
 	bool hasAStrongEnemyInInner{ false };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float radiusFromPlayerToStartFight{ 0 };
 
 

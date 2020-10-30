@@ -87,7 +87,7 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 		playerCast->TakeHit(toDoDamage, state);
 		toDoDamage = 0;
 
-		if ((isInInnerCircle && attackCircleProject) || attackStrongProject)
+		if ((attackCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) || (attackBoxStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
 			playerCast->state = E_STATE::PROJECTED;
 	}
 }
