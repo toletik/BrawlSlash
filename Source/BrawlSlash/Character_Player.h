@@ -126,6 +126,8 @@ public:
 
 	bool canCombo = false;
 
+	bool canCancelCombo = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float comboTime = 1.0f;
 

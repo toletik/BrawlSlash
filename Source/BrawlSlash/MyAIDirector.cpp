@@ -6,6 +6,7 @@
 #include "MyAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
