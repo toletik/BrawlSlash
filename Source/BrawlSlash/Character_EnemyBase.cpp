@@ -86,6 +86,9 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 	{
 		playerCast->TakeHit(toDoDamage, state);
 		toDoDamage = 0;
+
+		if ((attackCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) || (attackBoxStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
+			playerCast->state = E_STATE::PROJECTED;
 	}
 }
 
@@ -93,7 +96,8 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
 	Super::TakeHit(damage, attackerState);
 
-	LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
+	if (health > 0)
+		LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
 
 	if (state == E_STATE::IDLE)
 		state = E_STATE::HITTED_WEAK;

@@ -126,6 +126,8 @@ public:
 
 	bool canCombo = false;
 
+	bool canCancelCombo = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float comboTime = 1.0f;
 
@@ -219,6 +221,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float fovFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float zoomDezoomSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float mindistance{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float maxdistance{2000};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	FRotator rotationForFight {0, 0, 0};

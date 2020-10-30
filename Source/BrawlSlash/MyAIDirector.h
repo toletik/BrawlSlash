@@ -30,6 +30,8 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	bool isInFight{ false };
 	bool hasAStrongEnemyInInner{ false };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float radiusFromPlayerToStartFight{ 0 };
 
 
@@ -51,11 +53,14 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	//void UpdateAttack(float DeltaTime);
 
+
 public:
 	void UpdateIfIsInInner();
 
 	UFUNCTION(BlueprintCallable)
 	void SetEndToFight();
+
+	bool IsAllEnemiesInCameraSight(APlayerController* controller);
 
 	void SetFocusToNextEnemy();
 

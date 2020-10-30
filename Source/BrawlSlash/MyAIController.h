@@ -32,8 +32,8 @@ class BRAWLSLASH_API AMyAIController : public AAIController
 public:
 	UBlackboardComponent* GetBlackboard() { return Blackboard; };
 
-	UPROPERTY(EditAnywhere, category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
 	float radiusInnerCircle;
-	UPROPERTY(EditAnywhere, category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
 	float radiusBackCircle;
 };

@@ -108,6 +108,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float pushForceAfterBeingHit = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	bool attackStrongProject = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	bool attackCircleProject = true;
 	///////////////////////////////////////////////////////////////////////////
 
 
