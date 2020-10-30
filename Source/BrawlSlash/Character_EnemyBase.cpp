@@ -82,7 +82,7 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 {
 	ACharacter_Player* playerCast = Cast<ACharacter_Player>(OtherActor);
 
-	if (playerCast)
+	if (playerCast && OtherComp == Cast<UPrimitiveComponent>(playerCast->GetCapsuleComponent()))
 	{
 		playerCast->TakeHit(toDoDamage, state);
 		toDoDamage = 0;
