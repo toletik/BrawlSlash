@@ -53,11 +53,14 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	//void UpdateAttack(float DeltaTime);
 
+
 public:
 	void UpdateIfIsInInner();
 
 	UFUNCTION(BlueprintCallable)
 	void SetEndToFight();
+
+	bool IsAllEnemiesInCameraSight(APlayerController* controller);
 
 	void SetFocusToNextEnemy();
 

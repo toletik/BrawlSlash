@@ -222,6 +222,33 @@ void AMyAIDirector::UpdateAttack(float DeltaTime)
 	}
 }
 */
+
+
+
+bool AMyAIDirector::IsAllEnemiesInCameraSight(APlayerController* controller)
+{
+
+	FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+
+	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	{
+		FVector2D enemyPosOnScreen;
+		UGameplayStatics::ProjectWorldToScreen(controller, enemies[i]->GetActorLocation(), enemyPosOnScreen);
+
+		if (0 < enemyPosOnScreen.X && enemyPosOnScreen.X < ViewportSize.X &&
+			0 < enemyPosOnScreen.Y && enemyPosOnScreen.Y < ViewportSize.Y)
+		{
+			//do Something
+		}
+		else
+			return false;
+	}
+
+
+
+	return true;
+}
+
 void AMyAIDirector::SetFocusToClosestEnemy()
 {
 	AActor* previousFocus = playerReference->focus;

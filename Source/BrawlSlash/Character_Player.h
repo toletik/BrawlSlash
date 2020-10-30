@@ -223,6 +223,15 @@ public:
 	float fovFight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float zoomDezoomSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float mindistance{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float maxdistance{2000};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	FRotator rotationForFight {0, 0, 0};
 
 	void SetCameraStatsFight(FRotator rotationToAdopt);
