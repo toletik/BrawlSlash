@@ -165,11 +165,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 		}
 
 		else
-		{
-			FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
-			temp.Pitch = 0;
-			SetActorRotation(temp);
-		}
+			LookAtFocus();
 	}
 
 	if (isGoingToStickPoint && focus)
@@ -204,9 +200,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 	{
 		if (focus && (focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
 		{
-			FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
-			temp.Pitch = 0;
-			SetActorRotation(temp);
+			LookAtFocus();
 			GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 			SetActorEnableCollision(true);
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
@@ -360,6 +354,7 @@ void ACharacter_Player::Attack()
 	{
 		if (state == E_STATE::DASHING)
 		{
+			LookAtFocus();
 			StopCombo();
 			toDoDamage = dashHitDamage;
 			state = E_STATE::ATTACKING;
@@ -370,6 +365,8 @@ void ACharacter_Player::Attack()
 
 		else
 		{
+			LookAtFocus();
+
 			state = E_STATE::ATTACKING;
 
 			if (focus)
@@ -642,5 +639,15 @@ void ACharacter_Player::SetFocusToPreviousFocus()
 				SetFocusNav(focusedActors[i]);
 			}
 		}
+	}
+}
+
+void ACharacter_Player::LookAtFocus()
+{
+	if (focus)
+	{
+		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
+		temp.Pitch = 0;
+		SetActorRotation(temp);
 	}
 }
