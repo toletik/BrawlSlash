@@ -229,14 +229,17 @@ bool AMyAIDirector::IsAllEnemiesInCameraSight(APlayerController* controller)
 {
 
 	FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+	float percentageX {ViewportSize.X / 100};
+	float percentageY {ViewportSize.Y / 100};
+
 
 	for (int i = 0; i <= enemies.Num() - 1; ++i)
 	{
 		FVector2D enemyPosOnScreen;
 		UGameplayStatics::ProjectWorldToScreen(controller, enemies[i]->GetActorLocation(), enemyPosOnScreen);
 
-		if (0 < enemyPosOnScreen.X && enemyPosOnScreen.X < ViewportSize.X &&
-			0 < enemyPosOnScreen.Y && enemyPosOnScreen.Y < ViewportSize.Y)
+		if (offsetFromLeft * percentageX < enemyPosOnScreen.X && enemyPosOnScreen.X < ViewportSize.X - offsetFromRight * percentageX  &&
+			offsetFromBottom * percentageY < enemyPosOnScreen.Y && enemyPosOnScreen.Y < ViewportSize.Y - offsetFromTop * percentageY)
 		{
 			//do Something
 		}
