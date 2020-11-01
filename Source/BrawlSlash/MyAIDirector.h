@@ -75,4 +75,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
 	float angularDisToRespect{ 90 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float offsetFromLeft{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float offsetFromRight{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float offsetFromBottom{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	float offsetFromTop{0};
 };

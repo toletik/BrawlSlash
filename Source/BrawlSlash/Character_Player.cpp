@@ -114,6 +114,8 @@ void ACharacter_Player::Tick(float DeltaTime)
 	if (currentInvincibleTime >= 0)
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
 
+	currentTimeForComeBack += GetWorld()->GetDeltaSeconds();
+
 	/////////////////////////////////////////////////////
 	//Debug
 	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
@@ -144,8 +146,14 @@ void ACharacter_Player::Tick(float DeltaTime)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), rotationForFight, GetWorld()->GetDeltaSeconds(), 2));
 	else if (focus)
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+	else if (currentTimeForComeBack > timeForComeBack)
+	{
+		fixedRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(behindAngle, GetActorRightVector())).Rotator();
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds() * scaleRotationSpeedToBehind, 2));
+	}
 	else
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds(), 2));
+
 
 		
 	//Look at focus while idle
@@ -331,16 +339,23 @@ void ACharacter_Player::MoveRight(float Value)
 //RightJoystick
 void ACharacter_Player::TurnAtRate(float Rate)
 {
+	if (Rate != 0)
+		currentTimeForComeBack = 0;
 	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f));
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
+	if (Rate != 0)
+		currentTimeForComeBack = 0;
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f));
 }
 void ACharacter_Player::TurnAtRateFixed(float Rate)
 {
+	if (Rate != 0)
+		currentTimeForComeBack = 0;
+
 	if (!isInFight && !focus)
 		fixedRotation.Yaw += Rate * rotationSpeedHorizontalFixed * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
 }
@@ -562,7 +577,7 @@ void ACharacter_Player::SetCameraStatsNav()
 	cameraBoom->CameraLagSpeed = LerpSpeedNav;
 	followCamera->SetFieldOfView(fovNav);
 
-	followCamera->SetRelativeLocation({0, 0, 0});
+	cameraBoom->SetRelativeLocation({0, 0, cameraHeightNav });
 }
 void ACharacter_Player::SetCameraStatsLookAt()
 {
@@ -570,7 +585,7 @@ void ACharacter_Player::SetCameraStatsLookAt()
 	cameraBoom->CameraLagSpeed = LerpSpeedLookAt;
 	followCamera->SetFieldOfView(fovLookAt);
 
-	followCamera->SetRelativeLocation({0, 0, 300});
+	cameraBoom->SetRelativeLocation({0, 0, cameraHeightLookAt});
 }
 void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 {
@@ -578,7 +593,7 @@ void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 	cameraBoom->CameraLagSpeed = LerpSpeedFight;
 	followCamera->SetFieldOfView(fovFight);
 
-	followCamera->SetRelativeLocation({ 0, 0, 0 });
+	cameraBoom->SetRelativeLocation({ 0, 0, cameraHeightFight});
 	rotationForFight = rotationToAdopt;
 }
 

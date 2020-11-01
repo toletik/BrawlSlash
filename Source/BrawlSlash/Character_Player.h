@@ -198,7 +198,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float fovNav;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float cameraHeightNav{ 0 };
+
 	void SetCameraStatsNav();
+
+	//Cam Nav Behind
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
+	float behindAngle {45};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
+	float scaleRotationSpeedToBehind {1};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
+	float timeForComeBack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
+	float currentTimeForComeBack;
 
 	//Cam LookAt
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
@@ -209,6 +225,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float fovLookAt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float cameraHeightLookAt{ 0 };
 
 	void SetCameraStatsLookAt();
 
@@ -221,6 +240,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float fovFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float cameraHeightFight{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float zoomDezoomSpeed;
