@@ -4,7 +4,7 @@
 #include "Service_SetStateToAttackingWeak.h"
 
 #include "AIController.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 
 void UService_SetStateToAttackingWeak::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {

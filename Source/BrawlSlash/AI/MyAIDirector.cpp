@@ -27,6 +27,9 @@ void AMyAIDirector::BeginPlay()
 	playerReference = Cast<ACharacter_Player>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
 	radiusFromPlayerToStartFight = Cast<AMyAIController>(enemies[0]->GetController())->radiusBackCircle;
+
+	for (int i = 0; i < enemies.Num(); i++)
+		enemies[i]->currentEnemyGroup = this;
 }
 
 // Called every frame
@@ -41,8 +44,6 @@ void AMyAIDirector::Tick(float DeltaTime)
 		UpdateIfNeedToStartFight();
 	else
 	{
-		UpdateDead();
-
 		UpdateIfIsRespectingAngularDist();
 
 		//Backup of Enemy Attack System V1
@@ -51,26 +52,22 @@ void AMyAIDirector::Tick(float DeltaTime)
 }
 
 
+
 void AMyAIDirector::UpdateIfNeedToStartFight()
 {
 	if (playerReference->isInSafeZone)
 		return;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if ((enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < radiusFromPlayerToStartFight)
 		{
 			isInFight = true;
 
-			for (int j = 0; j <= enemies.Num() - 1; ++j)
-				enemies[j]->isInFight = true;
-
 			UpdateIfIsInInner();
-
 
 			AMyAIController* tempController = Cast<AMyAIController>(enemies[i]->GetController());
 
-			playerReference->isInFight = true;
 			playerReference->currentEnemyGroup = this;
 			playerReference->focus = enemies[i];
 			playerReference->SetCameraStatsFight(rotationForTheFight);
@@ -85,56 +82,44 @@ void AMyAIDirector::SetEndToFight()
 {
 	isInFight = false;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
-		enemies[i]->isInFight = false;
-
-	playerReference->isInFight = false;
 	playerReference->currentEnemyGroup = nullptr;
 	playerReference->focus = nullptr;
 	playerReference->SetCameraStatsNav();
 	playerReference->SetFocusToClosestFocus();
 }
 
-void AMyAIDirector::UpdateDead()
+void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 {
-	for (int i = enemies.Num() - 1; i >= 0; --i)
-	{
-		if (enemies[i]->state == E_STATE::DEAD)
-		{
-			if (playerReference->focus == enemies[i])
-				SetFocusToClosestEnemy();
+	if (playerReference->focus == enemyToRemove)
+		SetFocusToClosestEnemy();
 
-			if (enemies.Num() == 1)
-				enemies[i]->LastEnemyInGroup();
+	if (enemies.Num() == 1)
+		enemyToRemove->LastEnemyInGroup();
 
-			enemies.RemoveAt(i);
+	enemies.Remove(enemyToRemove);
 
-			UpdateIfIsInInner();
-
-		}
-	}
+	UpdateIfIsInInner();
 
 	if (enemies.Num() == 0)
 		SetEndToFight();
 }
-
 
 void AMyAIDirector::UpdateIfIsInInner()
 {
 	FVector playerPos = playerReference->GetActorLocation();
 
 	//Free Previous Array
-	for (int i = 0; i <= enemiesInInner.Num() - 1; ++i)
+	for (int i = 0; i < enemiesInInner.Num(); ++i)
 		enemiesInInner[i]->isInInnerCircle = false;
 	enemiesInInner.Empty();
 	hasAStrongEnemyInInner = false;
 
 	//Fill new Array
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i]->isAStrongEnemy && hasAStrongEnemyInInner == true)
 			continue;
-		else if (enemiesInInner.Num() < numberOfEnemiesInInner)
+		else if (enemiesInInner.Num() < numberOfEnemiesToHaveInInner)
 		{
 			enemies[i]->isInInnerCircle = true;
 			enemiesInInner.Add(enemies[i]);
@@ -147,11 +132,12 @@ void AMyAIDirector::UpdateIfIsInInner()
 			float fartestEnemyDist{ 0 };
 			ACharacter_EnemyBase* enemyToRemove{ nullptr };
 
-			for (int j = 0; j <= enemiesInInner.Num() - 1; ++j)
+			for (int j = 0; j < enemiesInInner.Num(); ++j)
 			{
-				if ((enemiesInInner[j]->GetActorLocation() - playerPos).Size() > fartestEnemyDist)
+				float distanceFromPlayer = (enemiesInInner[j]->GetActorLocation() - playerPos).Size();
+				if (distanceFromPlayer > fartestEnemyDist)
 				{
-					fartestEnemyDist = (enemiesInInner[j]->GetActorLocation() - playerPos).Size();
+					fartestEnemyDist = distanceFromPlayer;
 					enemyToRemove = enemiesInInner[j];
 				}
 			}
@@ -173,21 +159,19 @@ void AMyAIDirector::UpdateIfIsInInner()
 			}
 		}
 	}
-
-
 }
 
 void AMyAIDirector::UpdateIfIsRespectingAngularDist()
 {
 	FVector playerPos = playerReference->GetActorLocation();
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		FVector vectorReference = enemies[i]->GetActorLocation() - playerPos;
 		vectorReference.Normalize();
 		enemies[i]->isRespectingAngularDist = true;
 
-		for (int j = 0; j <= enemies.Num() - 1; ++j)
+		for (int j = 0; j < enemies.Num(); ++j)
 		{
 			if (enemies[i] != enemies[j])
 			{
@@ -202,9 +186,6 @@ void AMyAIDirector::UpdateIfIsRespectingAngularDist()
 			}
 		}
 	}
-
-
-	 
 }
 
 /*
@@ -232,8 +213,7 @@ bool AMyAIDirector::IsAllEnemiesInCameraSight(APlayerController* controller)
 	float percentageX {ViewportSize.X / 100};
 	float percentageY {ViewportSize.Y / 100};
 
-
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		FVector2D enemyPosOnScreen;
 		UGameplayStatics::ProjectWorldToScreen(controller, enemies[i]->GetActorLocation(), enemyPosOnScreen);
@@ -246,8 +226,6 @@ bool AMyAIDirector::IsAllEnemiesInCameraSight(APlayerController* controller)
 		else
 			return false;
 	}
-
-
 
 	return true;
 }
@@ -262,7 +240,7 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 	float distanceFromPlayer{ INFINITY };
 
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i] != previousFocus && (enemies[i]->GetActorLocation() - playerPos).Size() < distanceFromPlayer)
 		{
@@ -277,7 +255,7 @@ void AMyAIDirector::SetFocusToNextEnemy()
 	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
 	float smallestAngle = 360;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i] != playerReference->focus)
 		{
@@ -299,7 +277,7 @@ void AMyAIDirector::SetFocusToPreviousEnemy()
 	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
 	float smallestAngle = 360;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i] != playerReference->focus)
 		{
@@ -321,7 +299,7 @@ void AMyAIDirector::SetDebugFocusToNextEnemy()
 	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
 	float smallestAngle = 360;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i] != playerReference->focus)
 		{
@@ -343,7 +321,7 @@ void AMyAIDirector::SetDebugFocusToPreviousEnemy()
 	FVector vectorReference = playerReference->focus->GetActorLocation() - playerPos;
 	float smallestAngle = 360;
 
-	for (int i = 0; i <= enemies.Num() - 1; ++i)
+	for (int i = 0; i < enemies.Num(); ++i)
 	{
 		if (enemies[i] != playerReference->focus)
 		{

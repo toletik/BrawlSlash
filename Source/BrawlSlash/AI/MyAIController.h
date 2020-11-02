@@ -16,11 +16,6 @@ class BRAWLSLASH_API AMyAIController : public AAIController
 
 	UPROPERTY(EditAnywhere, category = AI)
 	UBehaviorTree* behaviorT;
-	UPROPERTY(EditAnywhere, category = AI)
-	float radiusCloseToPlayer;
-
-
-
 	ACharacter* player;
 
 	// Called when the game starts or when spawned
@@ -28,10 +23,11 @@ class BRAWLSLASH_API AMyAIController : public AAIController
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
 public:
 	UBlackboardComponent* GetBlackboard() { return Blackboard; };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	float radiusCloseToPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
 	float radiusInnerCircle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)

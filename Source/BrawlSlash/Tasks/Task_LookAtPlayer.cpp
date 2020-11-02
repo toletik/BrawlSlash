@@ -4,7 +4,7 @@
 #include "Task_LookAtPlayer.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 #include "AIController.h"
 
 EBTNodeResult::Type UTask_LookAtPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -19,12 +19,12 @@ EBTNodeResult::Type UTask_LookAtPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 		lookAt.Pitch = 0;
 		selfToPlayer.Normalize();
 
-		if (enemy->rotateBypassed)
+		if (enemy->rotateDashedBack)
 		{
 			if (FVector::DotProduct(enemy->GetActorForwardVector(), selfToPlayer) > 0.99f)
-				enemy->rotateBypassed = false;
+				enemy->rotateDashedBack = false;
 
-			enemy->SetActorRotation(FMath::Lerp(enemy->GetActorRotation(), lookAt, enemy->rotateSpeedWhenBeingBypassed));
+			enemy->SetActorRotation(FMath::Lerp(enemy->GetActorRotation(), lookAt, enemy->rotateSpeedWhenBeingDashedBack));
 		}
 
 		else

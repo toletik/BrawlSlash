@@ -2,10 +2,12 @@
 
 
 #include "Character_EnemyBase.h"
+#include "Character_Player.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
-#include "Character_Player.h"
+#include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "../AI/MyAIDirector.h"
 
 // Sets default values for this character's properties
 ACharacter_EnemyBase::ACharacter_EnemyBase()
@@ -47,7 +49,7 @@ void ACharacter_EnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	/////////////////////////////////////////////////////////////////
-	//Debug
+	//Debug (will be removed)
 	if (isShieldInFront)
 	{
 		FVector selfPos = GetActorLocation();
@@ -65,16 +67,6 @@ void ACharacter_EnemyBase::Tick(float DeltaTime)
 		DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
 		DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(-angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
 	}
-
-	//should be done cleanly
-	if (state == E_STATE::DEAD)
-	{
-		isShieldInFront = false;
-		isShieldInBack = false;
-		shieldFront->SetVisibility(false);
-		shieldBack->SetVisibility(false);
-	}
-	/////////////////////////////////////////////////////////////////
 }
 
 
@@ -85,7 +77,6 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 	if (playerCast && OtherComp == Cast<UPrimitiveComponent>(playerCast->GetCapsuleComponent()))
 	{
 		playerCast->TakeHit(toDoDamage, state);
-		toDoDamage = 0;
 
 		if ((attackCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) || (attackBoxStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
 			playerCast->state = E_STATE::PROJECTED;
@@ -99,13 +90,21 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 	if (health > 0)
 		LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
 
+	else
+	{
+		currentEnemyGroup->RemoveEnemy(this);
+		shieldFront->SetVisibility(false);
+		shieldBack->SetVisibility(false);
+	}
+
 	if (state == E_STATE::IDLE)
 		state = E_STATE::HITTED_WEAK;
-	else
+
+	else if (state != E_STATE::DEAD)
 		HitOther();
 }
 
-void ACharacter_EnemyBase::SetAttackState()
+void ACharacter_EnemyBase::SetAttackState() //Will be changed
 {
 	float ratio = FMath::RandRange(0, 100);
 
@@ -162,7 +161,7 @@ bool ACharacter_EnemyBase::ShieldCheckProtection(FVector attackerPos)
 		angle = acos(FVector::DotProduct(selfToAttacker, -GetActorForwardVector()) ) * 180 / PI;
 
 	if (angle > 180)
-		angle = abs(angle - 360);
+		angle = 360 - angle;
 
 	if (angle <= angleAcceptanceForDefense)
 	{
@@ -171,7 +170,6 @@ bool ACharacter_EnemyBase::ShieldCheckProtection(FVector attackerPos)
 	}
 	
 	return false;
-
 }
 
 void ACharacter_EnemyBase::ShieldActivate()
@@ -206,5 +204,5 @@ void ACharacter_EnemyBase::ShieldDeActivate()
 void ACharacter_EnemyBase::LookAtPlayer()
 {
 	notLookAtPlayer = false;
-	rotateBypassed = true;
+	rotateDashedBack = true;
 }
