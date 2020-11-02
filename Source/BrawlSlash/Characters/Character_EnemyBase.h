@@ -185,6 +185,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float timeBeforeRotateWhenBeingDashedBack{ 2.0f };
+
+
+	//Event
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartNeedAttackWeak();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartAttackWeak();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartAttackStrong();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartFight();
 };
 
 

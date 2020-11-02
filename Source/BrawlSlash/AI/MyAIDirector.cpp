@@ -64,6 +64,9 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 		{
 			isInFight = true;
 
+			for (int j = 0; j < enemies.Num(); ++j)
+				enemies[j]->EnemyStartFight();
+
 			UpdateIfIsInInner();
 
 			AMyAIController* tempController = Cast<AMyAIController>(enemies[i]->GetController());
@@ -73,6 +76,7 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 			playerReference->SetCameraStatsFight(rotationForTheFight);
 			playerReference->debugInnerCircleRadius = tempController->radiusInnerCircle;
 			playerReference->debugBackCircleRadius = tempController->radiusBackCircle;
+			playerReference->PlayerStartFight();
 			return;
 		}
 	}
@@ -86,6 +90,7 @@ void AMyAIDirector::SetEndToFight()
 	playerReference->focus = nullptr;
 	playerReference->SetCameraStatsNav();
 	playerReference->SetFocusToClosestFocus();
+	playerReference->PlayerEndFight();
 }
 
 void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)

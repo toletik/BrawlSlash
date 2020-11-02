@@ -142,6 +142,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float jumpForceAfterNavDashHit = 1000.0f;
 
+
+
 	UFUNCTION()
 	void StopCombo();
 
@@ -266,6 +268,28 @@ public:
 
 	void SetCameraStatsFight(FRotator rotationToAdopt);
 
+	//Events
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartFight();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndFight();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartIsProjected();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndIsProjected();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartInvincibleTime();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndInvincibleTime();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartHitted();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
@@ -282,4 +306,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
+
+	FVector testForDashBack{ 0, 0, 0 };
 };

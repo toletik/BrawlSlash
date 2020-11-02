@@ -11,4 +11,5 @@ void UService_SetStateToAttackingWeak::TickNode(UBehaviorTreeComponent& OwnerCom
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
 	enemy->state = E_STATE::ATTACKING_WEAK;
+	enemy->EnemyStartAttackWeak();
 }

@@ -79,7 +79,11 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 		playerCast->TakeHit(toDoDamage, state);
 
 		if ((attackCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) || (attackBoxStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
+		{
 			playerCast->state = E_STATE::PROJECTED;
+			playerCast->PlayerStartIsProjected();
+		}
+
 	}
 }
 
@@ -113,6 +117,7 @@ void ACharacter_EnemyBase::SetAttackState() //Will be changed
 		if (isInInnerCircle)
 		{
 			needToAttackWeak = true;
+			EnemyStartNeedAttackWeak();
 			toDoDamage = weakDamage;
 		}
 	}
@@ -120,6 +125,7 @@ void ACharacter_EnemyBase::SetAttackState() //Will be changed
 	else if (ratio <= ratioAttackWeak + ratioAttackStrong)
 	{
 		state = E_STATE::ATTACKING_STRONG;
+		EnemyStartAttackStrong();
 		toDoDamage = strongDamage;
 	}
 }

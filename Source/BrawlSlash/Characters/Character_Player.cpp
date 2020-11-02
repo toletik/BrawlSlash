@@ -131,7 +131,12 @@ void ACharacter_Player::Tick(float DeltaTime)
 void ACharacter_Player::UpdateTimers()
 {
 	if (currentInvincibleTime >= 0)
+	{
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
+
+		if (currentInvincibleTime < 0)
+			PlayerEndInvincibleTime();
+	}
 
 	currentTimeForComeBack += GetWorld()->GetDeltaSeconds();
 }
@@ -204,9 +209,15 @@ void ACharacter_Player::UpdateDashingHit()
 }
 void ACharacter_Player::UpdateDashingBack()
 {
-	if (state == E_STATE::DASHING_BACK
-	&& (focus->GetActorLocation() + GetActorForwardVector() * stickPoint - GetActorLocation()).Size() < stickPoint)
+	if (focus)
+		GEngine->AddOnScreenDebugMessage(-96, 0.4f, FColor::Cyan, FString::FromInt(FVector::DotProduct(testForDashBack, focus->GetActorLocation() - GetActorLocation()) ) );
+	
+	if (state == E_STATE::DASHING_BACK &&
+		FVector::DotProduct(testForDashBack, focus->GetActorLocation() - GetActorLocation() ) < 0 &&
+		(focus->GetActorLocation() - GetActorLocation()).Size() > stickPoint)
 	{
+		
+		SetActorLocation(focus->GetActorLocation() + GetActorForwardVector() * stickPoint);
 		LookAtFocus(false);
 		GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 		SetActorEnableCollision(true);
@@ -275,6 +286,8 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 		state = E_STATE::HITTED_STRONG;
 
 	currentInvincibleTime = invincibleTime;
+	PlayerStartInvincibleTime();
+	PlayerStartHitted();
 }
 
 //Left Joystick
@@ -424,9 +437,9 @@ void ACharacter_Player::StartDash(E_STATE teleportState)
 
 void ACharacter_Player::DashHit()
 {
+	state = E_STATE::DASHING_HIT;
 	GetWorldTimerManager().ClearTimer(timerHandler);
 
-	state = E_STATE::DASHING_HIT;
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 	FVector direction = focus->GetActorLocation() - GetActorLocation();
 	direction.Normalize();
@@ -445,9 +458,9 @@ void ACharacter_Player::DashHit()
 
 void ACharacter_Player::DashBack()
 {
+	state = E_STATE::DASHING_BACK;
 	GetWorldTimerManager().ClearTimer(timerHandler);
 
-	state = E_STATE::DASHING_BACK;
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 	FVector direction = focus->GetActorLocation() - GetActorLocation();
 	direction.Normalize();
@@ -457,6 +470,8 @@ void ACharacter_Player::DashBack()
 		direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
 	LaunchCharacter(direction, true, true);
 	SetActorEnableCollision(false);
+
+	testForDashBack = direction;
 }
 
 void ACharacter_Player::StopCombo()
