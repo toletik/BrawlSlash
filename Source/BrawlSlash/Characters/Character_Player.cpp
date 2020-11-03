@@ -71,8 +71,6 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("TurnRate", this, &ACharacter_Player::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
-	PlayerInputComponent->BindAxis("TurnRateFixed", this, &ACharacter_Player::TurnAtRateFixed);
-
 	//Buttons
 	PlayerInputComponent->BindAction("DashBack", IE_Pressed, this, &ACharacter_Player::StartDashBack);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
@@ -91,14 +89,17 @@ void ACharacter_Player::BeginPlay()
 	
 	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 
-	Controller->SetControlRotation(fixedRotation);
-	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
+	//init values of camera
 	SetCameraStatsNav();
+	cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(behindAngle, GetActorRightVector())).Rotator(),
+	Controller->SetControlRotation(cameraRotation);
+	cameraBoom->SetRelativeLocation(cameraPosition);
+	cameraBoom->TargetArmLength = cameraLength;
+	cameraBoom->CameraLagMaxDistance = positionLerpLimitRange;
+	followCamera->SetFieldOfView(cameraFOV);
+	cameraBoom->bEnableCameraLag = true;
+	currentTimeForComeBack = timeForComeBack;
 
-	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
-	camManager->ViewPitchMin = -verticalAngleMax;
-	camManager->ViewPitchMax = -verticalAngleMin;
-	
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
 
 	//Focus Detector
@@ -160,23 +161,45 @@ void ACharacter_Player::UpdateDebug()
 }
 void ACharacter_Player::UpdateCamera()
 {
+	//clean by factoring by RInterpTo
+
+	//Camera Fight
 	if (currentEnemyGroup)
 	{
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), rotationForFight, GetWorld()->GetDeltaSeconds(), 2));
+		if (currentTimeForComeBack > timeForComeBack)
+			cameraRotation = rotationForFight;
+
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), 2));
+
+		// Zoom / deZoom
 		if (!currentEnemyGroup->IsAllEnemiesInCameraSight(GetWorld()->GetFirstPlayerController()))
-			cameraBoom->TargetArmLength = FMath::Min(maxdistance, cameraBoom->TargetArmLength + zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
+			cameraLength = FMath::Min(maxdistance, cameraLength + zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
 		else
-			cameraBoom->TargetArmLength = FMath::Max(mindistance, cameraBoom->TargetArmLength - zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
+			cameraLength = FMath::Max(mindistance, cameraLength - zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
 	}
+	//Camera LookAt
 	else if (focus)
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator(), GetWorld()->GetDeltaSeconds(), 2));
+	{
+		cameraRotation = FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator();
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), 2));
+	
+	}
+	//Camera Behind
 	else if (currentTimeForComeBack > timeForComeBack)
 	{
-		fixedRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(behindAngle, GetActorRightVector())).Rotator();
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds() * scaleRotationSpeedToBehind, 2));
+		cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(behindAngle, GetActorRightVector())).Rotator();
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds() * scaleRotationSpeedToBehind, 2));
 	}
+	//Camera Nav
 	else
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), fixedRotation, GetWorld()->GetDeltaSeconds(), 2));
+		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), 2));
+
+
+
+	cameraBoom->SetRelativeLocation( FMath::Lerp(cameraBoom->GetRelativeLocation(), cameraPosition, GetWorld()->GetDeltaSeconds()) );
+	cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, cameraLength, GetWorld()->GetDeltaSeconds());
+	followCamera->SetFieldOfView(FMath::Lerp(followCamera->FieldOfView, cameraFOV, GetWorld()->GetDeltaSeconds()) );
+
 }
 void ACharacter_Player::UpdatePosToStickPoint()
 {
@@ -251,6 +274,7 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 		focusedActors.Remove(OtherActor);
 		if (!currentEnemyGroup && focus == OtherActor)
 			SetFocusToClosestFocus();
+		currentTimeForComeBack = 0.0f;
 	}
 }
 
@@ -343,24 +367,20 @@ void ACharacter_Player::MoveRight(float Value)
 void ACharacter_Player::TurnAtRate(float Rate)
 {
 	if (Rate != 0.0f)
+	{
 		currentTimeForComeBack = 0.0f;
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f));
+		// calculate delta for this frame from the rate information	
+		cameraRotation.Yaw += Rate * rotationSpeedHorizontal * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
+	}
 }
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 	if (Rate != 0.0f)
+	{
 		currentTimeForComeBack = 0.0f;
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f));
-}
-void ACharacter_Player::TurnAtRateFixed(float Rate)
-{
-	if (Rate != 0.0f)
-		currentTimeForComeBack = 0.0f;
-
-	if (!currentEnemyGroup && !focus)
-		fixedRotation.Yaw += Rate * rotationSpeedHorizontalFixed * GetWorld()->GetDeltaSeconds() * (gameInstance->isXRevert ? -1.0f : 1.0f);
+		// calculate delta for this frame from the rate information
+		cameraRotation.Pitch += Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f);
+	}
 }
 
 void ACharacter_Player::DashAttack()
@@ -549,28 +569,37 @@ void ACharacter_Player::GetPreviousFocus()
 
 void ACharacter_Player::SetCameraStatsNav()
 {
-	cameraBoom->TargetArmLength = distanceNav;
+	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camManager->ViewPitchMin = -verticalAngleMaxNav;
+	camManager->ViewPitchMax = -verticalAngleMinNav;
 	cameraBoom->CameraLagSpeed = LerpSpeedNav;
-	followCamera->SetFieldOfView(fovNav);
 
-	cameraBoom->SetRelativeLocation({0, 0, cameraHeightNav });
+	cameraPosition = { 0, 0, cameraHeightNav };
+	cameraLength = distanceNav;
+	cameraFOV = fovNav;
 }
 void ACharacter_Player::SetCameraStatsLookAt()
 {
-	cameraBoom->TargetArmLength = distanceLookAt;
+	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camManager->ViewPitchMin = -verticalAngleMaxLookAt;
+	camManager->ViewPitchMax = -verticalAngleMinLookAt;
 	cameraBoom->CameraLagSpeed = LerpSpeedLookAt;
-	followCamera->SetFieldOfView(fovLookAt);
 
-	cameraBoom->SetRelativeLocation({0, 0, cameraHeightLookAt});
+	cameraPosition = { 0, 0, cameraHeightLookAt };
+	cameraLength = distanceLookAt;
+	cameraFOV = fovLookAt;
 }
 void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 {
-	cameraBoom->TargetArmLength = distanceFight;
+	APlayerCameraManager* const camManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camManager->ViewPitchMin = -verticalAngleMaxFight;
+	camManager->ViewPitchMax = -verticalAngleMinFight;
 	cameraBoom->CameraLagSpeed = LerpSpeedFight;
-	followCamera->SetFieldOfView(fovFight);
 
-	cameraBoom->SetRelativeLocation({ 0, 0, cameraHeightFight});
 	rotationForFight = rotationToAdopt;
+	cameraPosition = { 0, 0, cameraHeightFight };
+	cameraLength = distanceFight;
+	cameraFOV = fovFight;
 }
 
 void ACharacter_Player::SetFocusToClosestFocus()
