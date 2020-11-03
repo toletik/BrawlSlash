@@ -14,7 +14,7 @@ void UAnimNotify_StartCanCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	if (character)
 	{
 		character->canCombo = true;
-		character->GetWorldTimerManager().ClearTimer(character->timerHandler);
-		character->GetWorldTimerManager().SetTimer(character->timerHandler, character, &ACharacter_Player::StopCombo, character->comboTime, false);
+		character->GetWorldTimerManager().ClearTimer(character->comboTimer);
+		character->GetWorldTimerManager().SetTimer(character->comboTimer, character, &ACharacter_Player::StopCombo, character->comboTime, false);
 	}
 }

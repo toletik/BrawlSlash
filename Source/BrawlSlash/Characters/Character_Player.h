@@ -52,12 +52,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float maxDistanceToDash = 10000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickRange = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickPoint = 60.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float preparingDashDuration = 0.3f;
 
@@ -67,6 +61,12 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	bool isGoingToStickPoint = false;
 	
 	UMyGameInstance* gameInstance;
+
+	FTimerHandle dashBackCooldownTimer;
+
+	bool isDashBackInCooldown = false;
+
+	void StopDashBackRecovery();
 
 	void LookAtFocus(bool lerp);
 
@@ -129,6 +129,10 @@ public:
 
 	bool needToAttack = false;
 
+	FTimerHandle comboTimer;
+
+	FTimerHandle dashTimer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* focus = nullptr;
 
@@ -142,7 +146,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float jumpForceAfterNavDashHit = 1000.0f;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	FVector jumpVectorAfterNavDashHit = FVector::UpVector;
 
 	UFUNCTION()
 	void StopCombo();

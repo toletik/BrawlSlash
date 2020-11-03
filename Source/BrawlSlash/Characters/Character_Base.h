@@ -60,8 +60,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	class AMyAIDirector* currentEnemyGroup = nullptr;
 
-	FTimerHandle timerHandler;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
 	float walkSpeed{ 600 };
 
