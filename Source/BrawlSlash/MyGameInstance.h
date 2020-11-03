@@ -25,5 +25,8 @@ public:
 	FVector lastCheckPointPos {0, 0, 0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator lastCheckPointRot {0, 0, 0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool hasTakenACheckpoint {false};
 };

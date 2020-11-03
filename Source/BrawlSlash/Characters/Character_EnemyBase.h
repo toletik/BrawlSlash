@@ -39,8 +39,10 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
-	virtual void TakeHit(int damage, E_STATE attackerState) override;
+	void TakeHit(int damage, E_STATE attackerState) override;
 
+	//////////////////////////////////////////////////////////////
+	//Custom event
 	UFUNCTION(BlueprintImplementableEvent)
 	void HitOther();
 
@@ -49,6 +51,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void LastEnemyInGroup();
+	//////////////////////////////////////////////////////////////
 
 	UFUNCTION(BlueprintCallable)
 	void BeginAttackCircle();
@@ -64,7 +67,13 @@ public:
 
 	void SetAttackState();
 
-	float remainingTimeRecovery{ 0.f };
+	FTimerHandle timerHandler;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float stickRange = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float stickPoint = 60.0f;
 
 	bool isRespectingAngularDist{ false };
 
@@ -76,6 +85,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 	//Attack
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float initialWaitAttack{ 0.1f };
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool needToAttackWeak{ false };
 
@@ -93,12 +105,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float currentAttackCoolDown{ 0 };
-
+	
+	/////////////////////////////////////////////////////////////////
+	//Will be removed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float ratioAttackWeak{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float ratioAttackStrong{ 0 };
+	/////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	int weakDamage{ 1 };
@@ -122,6 +137,9 @@ public:
 	bool ShieldCheckProtection(FVector attackerPos);
 	void ShieldActivate();
 	void ShieldDeActivate();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
+	float initialWaitShield{ 0.1f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	bool isShieldInFront {false};
@@ -163,26 +181,32 @@ public:
 	float currentShieldTimeToActivate{ 0 };
 	///////////////////////////////////////////////////////////////////////////
 
-	//Initial Wait
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
-	float initialWaitAttack{ 0.1f };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
-	float initialWaitShield{ 0.1f };
 	UFUNCTION()
 	void LookAtPlayer();
 
-	FTimerHandle timerHandler;
-
 	bool notLookAtPlayer = false;
 
-	bool rotateBypassed = false;
+	bool rotateDashedBack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
-	float rotateSpeedWhenBeingBypassed{ 0.1f };
+	float rotateSpeedWhenBeingDashedBack{ 0.1f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
-	float timeBeforeRotateWhenBeingBypassed{ 2.0f };
+	float timeBeforeRotateWhenBeingDashedBack{ 2.0f };
+
+
+	//Event
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartNeedAttackWeak();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartAttackWeak();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartAttackStrong();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyStartFight();
 };
 
 

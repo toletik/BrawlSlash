@@ -35,13 +35,6 @@ void ACharacter_Base::BeginPlay()
 void ACharacter_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//need to be put in takeDamage
-	if (health <= 0)
-	{
-		SetActorEnableCollision(false);
-		state = E_STATE::DEAD;
-	}
 }
 
 void ACharacter_Base::BeginAttack()
@@ -57,4 +50,10 @@ void ACharacter_Base::EndAttack()
 void ACharacter_Base::TakeHit(int damage, E_STATE attackerState)
 {
 	health -= damage;
+
+	if (health <= 0)
+	{
+		SetActorEnableCollision(false);
+		state = E_STATE::DEAD;
+	}
 }

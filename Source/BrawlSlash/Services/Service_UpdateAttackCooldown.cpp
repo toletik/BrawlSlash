@@ -4,7 +4,7 @@
 #include "Service_UpdateAttackCooldown.h"
 
 #include "AIController.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 #include "Engine/World.h"
 
 void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -26,6 +26,4 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 				enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownBackMin, enemy->attackCoolDownBackMax);
 		}
 	}
-
-
 }

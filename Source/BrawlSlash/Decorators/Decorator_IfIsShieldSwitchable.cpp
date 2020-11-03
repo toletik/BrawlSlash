@@ -4,7 +4,7 @@
 #include "Decorator_IfIsShieldSwitchable.h"
 
 #include "AIController.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 
 bool UDecorator_IfIsShieldSwitchable::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
