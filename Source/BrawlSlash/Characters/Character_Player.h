@@ -188,25 +188,31 @@ public:
 	float rotationSpeedVertical;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float verticalAngleMax;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float verticalAngleMin;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	FRotator fixedRotation {0, 0, 0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float rotationSpeedHorizontalFixed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float positionLerpLimitRange;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	FRotator cameraRotation {0, 0, 0};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	FVector cameraPosition {0, 0, 0};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	float cameraLength{ 0 };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	float cameraFOV{ 0 };
 
 
 	//Cam Nav
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float distanceNav;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float verticalAngleMinNav {10};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
+	float verticalAngleMaxNav {80};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float LerpSpeedNav;
 
@@ -236,6 +242,12 @@ public:
 	float distanceLookAt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float verticalAngleMinLookAt {10};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float verticalAngleMaxLookAt {80};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float LerpSpeedLookAt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
@@ -249,6 +261,12 @@ public:
 	//Cam Fight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float distanceFight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float verticalAngleMinFight {10};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	float verticalAngleMaxFight {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float LerpSpeedFight;
