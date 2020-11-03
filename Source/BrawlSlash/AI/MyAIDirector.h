@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Character_Player.h"
-#include "Character_EnemyBase.h"
+#include "../Characters/Character_Player.h"
+#include "../Characters/Character_EnemyBase.h"
 #include "MyAIDirector.generated.h"
 
 UCLASS()
@@ -21,19 +21,17 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	TArray<ACharacter_EnemyBase*> enemiesInInner;
 
 	UPROPERTY(EditAnywhere, category = AI)
-	float numberOfEnemiesInInner;
+	float numberOfEnemiesToHaveInInner { 0 };
 
 	//UPROPERTY(EditAnywhere, category = AI)
 	//float timeBetweenAttacks;
 
-	float remainingTimeForNextAttack;
+	//float remainingTimeForNextAttack;
 
-	bool isInFight{ false };
 	bool hasAStrongEnemyInInner{ false };
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float radiusFromPlayerToStartFight{ 0 };
-
 
 	// Sets default values for this actor's properties
 	AMyAIDirector();
@@ -45,8 +43,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	
 	void UpdateIfNeedToStartFight();
 
-	void UpdateDead();
-
 	void UpdateIfIsRespectingAngularDist();
 
 	void SetFocusToClosestEnemy();
@@ -55,6 +51,8 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 
 public:
+	void RemoveEnemy(ACharacter_EnemyBase* enemyToRemove);
+
 	void UpdateIfIsInInner();
 
 	UFUNCTION(BlueprintCallable)
@@ -69,6 +67,8 @@ public:
 	void SetDebugFocusToNextEnemy();
 
 	void SetDebugFocusToPreviousEnemy();
+
+	bool isInFight{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };

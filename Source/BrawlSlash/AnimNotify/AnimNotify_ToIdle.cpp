@@ -2,8 +2,8 @@
 
 
 #include "AnimNotify_ToIdle.h"
-#include "../Character_Base.h"
-#include "../Character_Player.h"
+#include "../Characters/Character_Base.h"
+#include "../Characters/Character_Player.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequenceBase.h"
 

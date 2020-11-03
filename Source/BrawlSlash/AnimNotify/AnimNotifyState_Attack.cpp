@@ -2,7 +2,7 @@
 
 
 #include "AnimNotifyState_Attack.h"
-#include "../Character_Base.h"
+#include "../Characters/Character_Base.h"
 #include "Components/SkeletalMeshComponent.h"
 
 void UAnimNotifyState_Attack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)

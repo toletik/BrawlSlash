@@ -4,7 +4,7 @@
 #include "Decorator_IfIsNotDead.h"
 
 #include "AIController.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 
 bool UDecorator_IfIsNotDead::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {

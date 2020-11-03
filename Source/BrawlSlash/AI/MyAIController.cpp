@@ -21,7 +21,6 @@ void AMyAIController::BeginPlay()
 	Blackboard->SetValueAsFloat("radiusCloseToPlayer", radiusCloseToPlayer);
 	Blackboard->SetValueAsFloat("radiusInnerCircle", radiusInnerCircle);
 	Blackboard->SetValueAsFloat("radiusBackCircle", radiusBackCircle);
-	
 }
 
 // Called every frame
