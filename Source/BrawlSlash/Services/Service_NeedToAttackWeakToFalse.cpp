@@ -4,7 +4,7 @@
 #include "Service_NeedToAttackWeakToFalse.h"
 
 #include "AIController.h"
-#include "../Character_EnemyBase.h"
+#include "../Characters/Character_EnemyBase.h"
 
 void UService_NeedToAttackWeakToFalse::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {

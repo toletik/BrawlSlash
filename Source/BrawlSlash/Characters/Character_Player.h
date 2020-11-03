@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
-#include "MyGameInstance.h"
+#include "../MyGameInstance.h"
 #include "Character_Player.generated.h"
 
 
@@ -65,12 +65,25 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	float dashBackRecoveryDuration = 1.0f;
 
 	bool isGoingToStickPoint = false;
-
-	bool hasChangedFocus = false;
 	
 	UMyGameInstance* gameInstance;
 
-	void LookAtFocus();
+	void LookAtFocus(bool lerp);
+
+	void DashAttack();
+
+	void UpdateTimers();
+
+	void UpdateDebug();
+
+	void UpdateCamera();
+
+	void UpdatePosToStickPoint();
+
+	void UpdateDashingHit();
+
+	void UpdateDashingBack();
+
 protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -81,7 +94,6 @@ protected:
 	
 	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
-
 	//Left Joystick
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -91,9 +103,9 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
-	void StartTeleport(E_STATE teleportState);
-	void StartBypass();
-	void Bypass();
+	void StartDash(E_STATE dashState);
+	void StartDashBack();
+	void DashBack();
 	void DashHit();
 
 	void TurnAtRateFixed(float Rate);
@@ -111,19 +123,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	bool isInSafeZone {false};
 
-	virtual void TakeHit(int damage, E_STATE attackerState) override;
+	void TakeHit(int damage, E_STATE attackerState) override;
 
 	void Attack();
 
 	bool needToAttack = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	class AMyAIDirector* currentEnemyGroup = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* focus = nullptr;
-
-	FTimerHandle timerHandler;
 
 	bool canCombo = false;
 
@@ -134,6 +141,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float jumpForceAfterNavDashHit = 1000.0f;
+
+
 
 	UFUNCTION()
 	void StopCombo();
@@ -259,7 +268,27 @@ public:
 
 	void SetCameraStatsFight(FRotator rotationToAdopt);
 
+	//Events
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartFight();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndFight();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartIsProjected();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndIsProjected();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartInvincibleTime();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerEndInvincibleTime();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartHitted();
 
 	//////////////////////////////////////////////////////////////
 	//DEBUG
@@ -277,4 +306,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
+
+	FVector testForDashBack{ 0, 0, 0 };
 };

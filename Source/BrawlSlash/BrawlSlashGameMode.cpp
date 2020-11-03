@@ -1,7 +1,6 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "BrawlSlashGameMode.h"
-#include "BrawlSlashCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 ABrawlSlashGameMode::ABrawlSlashGameMode()

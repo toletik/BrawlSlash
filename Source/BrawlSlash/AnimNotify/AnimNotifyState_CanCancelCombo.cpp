@@ -2,7 +2,7 @@
 
 
 #include "AnimNotifyState_CanCancelCombo.h"
-#include "../Character_Player.h"
+#include "../Characters/Character_Player.h"
 #include "Components/SkeletalMeshComponent.h"
 
 void UAnimNotifyState_CanCancelCombo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)

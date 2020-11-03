@@ -11,11 +11,7 @@ bool UDecorator_IfIsCloseToPlayer::CalculateRawConditionValue(UBehaviorTreeCompo
 {
 	FVector enemyPos = OwnerComp.GetAIOwner()->GetPawn()->GetActorLocation();
 	FVector playerPos = OwnerComp.GetBlackboardComponent()->GetValueAsVector("playerPos");
-	FVector playerToSelf = enemyPos - playerPos;
 
-	//get distance
-	float distanceFromPlayer = playerToSelf.Size();
-
-	return (distanceFromPlayer < OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusCloseToPlayer"));
+	return ((enemyPos - playerPos).Size() < OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusCloseToPlayer"));
 
 }
