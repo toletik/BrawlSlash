@@ -3,20 +3,19 @@
 
 #include "Character_EnemyBase.h"
 #include "Character_Player.h"
-#include "Components/SphereComponent.h"
-#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
 #include "../AI/MyAIDirector.h"
 
 // Sets default values for this character's properties
 ACharacter_EnemyBase::ACharacter_EnemyBase()
 {
-	attackCircle = CreateDefaultSubobject<USphereComponent>(TEXT("AttackCircle"));
-	attackCircle->SetupAttachment(RootComponent);
-	attackBoxStrong = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBoxStrong"));
-	attackBoxStrong->SetupAttachment(RootComponent);
-
+	attackMeshCircle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AttackMeshCircle"));
+	attackMeshCircle->SetupAttachment(RootComponent);
+	attackMeshStrong = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AttackMeshStrong"));
+	attackMeshStrong->SetupAttachment(RootComponent);
 
 	shieldFront = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldFront"));
 	shieldFront->SetupAttachment(RootComponent);
@@ -30,10 +29,10 @@ void ACharacter_EnemyBase::BeginPlay()
 	Super::BeginPlay();
 
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
-	attackCircle->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
-	attackCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	attackBoxStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	attackMeshCircle->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
+	attackMeshCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	attackMeshStrong->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_EnemyBase::AttackOverlap);
+	attackMeshStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 
 	if (isShieldInFront)
@@ -69,7 +68,6 @@ void ACharacter_EnemyBase::Tick(float DeltaTime)
 	}
 }
 
-
 void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ACharacter_Player* playerCast = Cast<ACharacter_Player>(OtherActor);
@@ -78,7 +76,8 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 	{
 		playerCast->TakeHit(toDoDamage, state);
 
-		if ((attackCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) || (attackBoxStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
+		if ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) 
+		|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
 		{
 			playerCast->state = E_STATE::PROJECTED;
 			playerCast->PlayerStartIsProjected();
@@ -132,22 +131,22 @@ void ACharacter_EnemyBase::SetAttackState() //Will be changed
 
 void ACharacter_EnemyBase::BeginAttackCircle()
 {
-	attackCircle->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	attackMeshCircle->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void ACharacter_EnemyBase::EndAttackCircle()
 {
-	attackCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	attackMeshCircle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACharacter_EnemyBase::BeginAttackStrong()
 {
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	attackMeshStrong->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void ACharacter_EnemyBase::EndAttackStrong()
 {
-	attackBoxStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	attackMeshStrong->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 

@@ -11,11 +11,11 @@ void UAnimNotify_ToIdle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 {
 	ACharacter_Base* character = Cast<ACharacter_Base>(MeshComp->GetOwner());
 
-	if (character)
-		character->state = E_STATE::IDLE;
-
 	ACharacter_Player* player = Cast<ACharacter_Player>(character);
 
 	if (player && player->needToAttack)
 		player->Attack();
+
+	if (character)
+		character->state = E_STATE::IDLE;
 }
