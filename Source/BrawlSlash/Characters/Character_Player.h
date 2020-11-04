@@ -47,10 +47,10 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int dashHitDamage = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float minDistanceToDash = 200.0f;
+	float minDistanceToDashNav = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float maxDistanceToDash = 10000.0f;
+	float maxDistanceToDashNav = 10000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float preparingDashDuration = 0.3f;
