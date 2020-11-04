@@ -166,7 +166,7 @@ void ACharacter_Player::UpdateCamera()
 	//Camera Fight
 	if (currentEnemyGroup)
 	{
-		if (currentTimeForComeBack > timeForComeBack)
+		if (currentTimeForComeBack >= timeForComeBack)
 			cameraRotation = rotationForFight;
 
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), 2));
@@ -185,7 +185,7 @@ void ACharacter_Player::UpdateCamera()
 	
 	}
 	//Camera Behind
-	else if (currentTimeForComeBack > timeForComeBack)
+	else if (currentTimeForComeBack >= timeForComeBack)
 	{
 		cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(behindAngle, GetActorRightVector())).Rotator();
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds() * scaleRotationSpeedToBehind, 2));
@@ -277,7 +277,8 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 		focusedActors.Remove(OtherActor);
 		if (!currentEnemyGroup && focus == OtherActor)
 			SetFocusToClosestFocus();
-		currentTimeForComeBack = 0.0f;
+		if(!focus)
+			currentTimeForComeBack = timeForComeBack;
 	}
 }
 
@@ -382,7 +383,7 @@ void ACharacter_Player::LookUpAtRate(float Rate)
 	{
 		currentTimeForComeBack = 0.0f;
 		// calculate delta for this frame from the rate information
-		cameraRotation.Pitch += Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? -1.0f : 1.0f);
+		cameraRotation.Pitch += Rate * rotationSpeedVertical * GetWorld()->GetDeltaSeconds() * (gameInstance->isYRevert ? 1.0f : -1.0f);
 	}
 }
 
@@ -615,6 +616,8 @@ void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
 	cameraPosition = { 0, 0, cameraHeightFight };
 	cameraLength = distanceFight;
 	cameraFOV = fovFight;
+
+	currentTimeForComeBack = timeForComeBack;
 }
 
 void ACharacter_Player::SetFocusToClosestFocus()
