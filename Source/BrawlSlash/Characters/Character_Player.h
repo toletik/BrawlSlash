@@ -60,6 +60,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	bool isGoingToStickPoint = false;
 	
+	bool needToRefreshCameraBehind {true};
+
 	UMyGameInstance* gameInstance;
 
 	FTimerHandle dashBackCooldownTimer;
@@ -188,7 +190,13 @@ public:
 	float rotationSpeedVertical;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float positionLerpLimitRange;
+	float LagSpeedCameraToPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
+	float LagPositionCameraToPlayerLimitRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
+	float rotationLerpFactorJoystick{2};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
 	FRotator cameraRotation {0, 0, 0};
@@ -202,6 +210,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
 	float cameraFOV{ 0 };
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	float cameraVerticalAngleMin{ 0 };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraOverAll)
+	float cameraVerticalAngleMax{ 0 };
 
 	//Cam Nav
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
@@ -214,9 +227,6 @@ public:
 	float verticalAngleMaxNav {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
-	float LerpSpeedNav;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float fovNav;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
@@ -224,12 +234,12 @@ public:
 
 	void SetCameraStatsNav();
 
-	//Cam Nav Behind
+	//Cam fixedRotation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
-	float behindAngle {45};
+	float fixedRotationAngle {45};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
-	float scaleRotationSpeedToBehind {1};
+	float rotationLerpFactorFixedRotation{ 2 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
 	float timeForComeBack;
@@ -239,6 +249,9 @@ public:
 
 	//Cam LookAt
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
+	float rotationLerpFactorToLookAt{ 2 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float distanceLookAt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
@@ -246,9 +259,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float verticalAngleMaxLookAt {80};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
-	float LerpSpeedLookAt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float fovLookAt;
@@ -269,9 +279,6 @@ public:
 	float verticalAngleMaxFight {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float LerpSpeedFight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float fovFight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
@@ -286,7 +293,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float maxdistance{2000};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CameraFight)
 	FRotator rotationForFight {0, 0, 0};
 
 	void SetCameraStatsFight(FRotator rotationToAdopt);
