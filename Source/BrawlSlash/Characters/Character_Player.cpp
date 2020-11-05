@@ -53,8 +53,8 @@ ACharacter_Player::ACharacter_Player()
 	followCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	
-	focusDetector = CreateDefaultSubobject<USphereComponent>(TEXT("focusDetector"));
-	focusDetector->SetupAttachment(RootComponent);
+	detectorOfFocus = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FocusDetector"));
+	detectorOfFocus->SetupAttachment(RootComponent);
 }
 
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -104,8 +104,8 @@ void ACharacter_Player::BeginPlay()
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
 
 	//Focus Detector
-	focusDetector->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
-	focusDetector->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
+	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
+	detectorOfFocus->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
 }
 
 // Called every frame
@@ -193,6 +193,7 @@ void ACharacter_Player::UpdateCamera()
 	else if (focus)
 	{
 		cameraRotation = FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator();
+		cameraRotation.Pitch = FMath::Clamp(cameraRotation.Pitch, cameraVerticalAngleMax, cameraVerticalAngleMin);
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorToLookAt));
 	
 	}
@@ -301,14 +302,16 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	if (enemyCast)
 	{
 		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
+		{
 			enemyCast->TakeHit(toDoDamage, state);
+			EndAttack();
+		}
 		else
 		{
 			enemyCast->ShieldHitted();
 			state = E_STATE::PUSHED_BACK;
 			LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);
 		}
-		toDoDamage = 0;
 	}
 }
 
@@ -341,7 +344,6 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 void ACharacter_Player::MoveForward(float Value)
 {
 	needToRefreshCameraBehind = true;
-	GEngine->AddOnScreenDebugMessage(-67, 1.0f, FColor::Red, FString::FromInt(Value));
 
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
