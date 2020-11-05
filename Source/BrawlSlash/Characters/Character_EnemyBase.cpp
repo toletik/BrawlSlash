@@ -76,21 +76,18 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 	{
 		playerCast->TakeHit(toDoDamage, state);
 
-		if ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) 
-		|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject))
+		if (playerCast->state != E_STATE::DEAD
+		&& ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) 
+		|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject)))
 		{
 			playerCast->state = E_STATE::PROJECTED;
 			playerCast->PlayerStartIsProjected();
 		}
-
 	}
 }
 
 void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
-	if (currentInvincibleTime > 0)
-		return;
-
 	Super::TakeHit(damage, attackerState);
 
 	if (health > 0)
@@ -104,8 +101,6 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 			state = E_STATE::HITTED_WEAK;
 		else 
 			HitOther();
-
-		currentInvincibleTime = invincibleTime;
 	}
 	else
 	{
