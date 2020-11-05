@@ -23,6 +23,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -512,16 +513,36 @@ void ACharacter_Player::DashHit()
 	GetWorldTimerManager().ClearTimer(dashTimer);
 
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-	FVector direction = focus->GetActorLocation() - GetActorLocation();
+
+	FVector focusPos = focus->GetActorLocation();
+	FVector direction = focusPos - GetActorLocation();
 
 	if (currentEnemyGroup)
 	{
-		float stickPoint = Cast<ACharacter_EnemyBase>(focus)->stickPoint;
-		SetActorEnableCollision(false);
-		if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
-			direction -= focus->GetActorForwardVector() * stickPoint;
+		FHitResult hit;
+		FCollisionQueryParams raycastParams;
+		raycastParams.AddIgnoredActor(this);
+
+		ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
+
+		FVector toEnemy = focusPos - GetActorLocation();
+		toEnemy.Normalize();
+
+		if (FVector::DotProduct(-toEnemy, focus->GetActorForwardVector()) < 0)
+			direction -= enemy->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius() / 2) + stickPointFight);
 		else
-			direction += focus->GetActorForwardVector() * stickPoint;
+			direction += enemy->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius() / 2) + stickPointFight);
+		
+		SetActorEnableCollision(false);
+	}
+
+	else if (!focus->ActorHasTag("TargetInWorld"))
+	{
+		FHitResult hit;
+		FCollisionQueryParams raycastParams;
+		raycastParams.AddIgnoredActor(this);
+		FVector direction = focus->GetActorLocation() - GetActorLocation();
+		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() + direction, ECC_WorldDynamic, raycastParams);
 	}
 
 	direction.Normalize();
