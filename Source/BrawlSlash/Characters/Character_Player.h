@@ -175,13 +175,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float knockbackForceAfterAttackBlocked = 1000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float invincibleTime{ 0 };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float currentInvincibleTime{0};
-
-
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationSpeedHorizontal;

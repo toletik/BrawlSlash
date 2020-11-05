@@ -88,11 +88,25 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 
 void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 {
+	if (currentInvincibleTime > 0)
+		return;
+
 	Super::TakeHit(damage, attackerState);
 
 	if (health > 0)
-		LaunchCharacter(-GetActorForwardVector() * pushForceAfterBeingHit, true, true);
+	{
+		//can use a : UGameplayStatics::GetPlayerCharacter(GetWorld(), 0); but access a ptr cost less
+		FVector direction = GetActorLocation() - currentEnemyGroup->playerReference->GetActorLocation();
+		direction.Normalize();
+		LaunchCharacter(direction * pushForceAfterBeingHit, true, true);
 
+		if (state == E_STATE::IDLE)
+			state = E_STATE::HITTED_WEAK;
+		else 
+			HitOther();
+
+		currentInvincibleTime = invincibleTime;
+	}
 	else
 	{
 		currentEnemyGroup->RemoveEnemy(this);
@@ -100,12 +114,8 @@ void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
 		shieldBack->SetVisibility(false);
 	}
 
-	if (state == E_STATE::IDLE)
-		state = E_STATE::HITTED_WEAK;
-
-	else if (state != E_STATE::DEAD)
-		HitOther();
 }
+
 
 void ACharacter_EnemyBase::SetAttackState() //Will be changed
 {

@@ -57,13 +57,20 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 	class AMyAIDirector* currentEnemyGroup = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float walkSpeed{ 600 };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float invincibleTime{ 1 };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float currentInvincibleTime{ 0 };
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
 	int toDoDamage{ 0 };
 
 	UFUNCTION(BlueprintCallable)
