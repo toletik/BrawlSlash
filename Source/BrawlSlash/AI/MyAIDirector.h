@@ -13,8 +13,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 {
 	GENERATED_BODY()
 
-	ACharacter_Player* playerReference {nullptr};
-
 	UPROPERTY(EditAnywhere, category = AI)
 	TArray<ACharacter_EnemyBase*> enemies;	
 	
@@ -67,6 +65,8 @@ public:
 	void SetDebugFocusToNextEnemy();
 
 	void SetDebugFocusToPreviousEnemy();
+
+	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
 

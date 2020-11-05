@@ -132,11 +132,11 @@ void ACharacter_Player::Tick(float DeltaTime)
 
 void ACharacter_Player::UpdateTimers()
 {
-	if (currentInvincibleTime >= 0)
+	if (currentInvincibleTime > 0)
 	{
 		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
 
-		if (currentInvincibleTime < 0)
+		if (currentInvincibleTime <= 0)
 			PlayerEndInvincibleTime();
 	}
 
@@ -314,20 +314,27 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 {
-	if (currentInvincibleTime >= 0)
+	if (currentInvincibleTime > 0)
 		return;
 
 	Super::TakeHit(damage, attackerState);
 
-	if (attackerState == E_STATE::ATTACKING_WEAK)
-		state = E_STATE::HITTED_WEAK;
+	if (health > 0)
+	{
+		if (attackerState == E_STATE::ATTACKING_WEAK)
+			state = E_STATE::HITTED_WEAK;
 
-	else if (attackerState == E_STATE::ATTACKING_STRONG)
-		state = E_STATE::HITTED_STRONG;
+		else if (attackerState == E_STATE::ATTACKING_STRONG)
+			state = E_STATE::HITTED_STRONG;
 
-	currentInvincibleTime = invincibleTime;
-	PlayerStartInvincibleTime();
-	PlayerStartHitted();
+		currentInvincibleTime = invincibleTime;
+		PlayerStartInvincibleTime();
+		PlayerStartHitted();
+	}
+	else
+		DisableInput(GetWorld()->GetFirstPlayerController());
+
+
 }
 
 //Left Joystick
