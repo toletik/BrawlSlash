@@ -16,10 +16,10 @@ class BRAWLSLASH_API ACharacter_EnemyBase : public ACharacter_Base
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* attackCircle;
+	class UStaticMeshComponent* attackMeshCircle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* attackBoxStrong;
+	class UStaticMeshComponent* attackMeshStrong;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* shieldFront;
@@ -74,6 +74,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float stickPoint = 60.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float minDistanceToPlayerDash = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	float maxDistanceToPlayerDash = 10000.0f;
 
 	bool isRespectingAngularDist{ false };
 

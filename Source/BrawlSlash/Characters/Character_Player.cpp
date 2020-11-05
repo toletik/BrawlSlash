@@ -144,7 +144,15 @@ void ACharacter_Player::UpdateTimers()
 }
 void ACharacter_Player::UpdateDebug()
 {
-	if (focus && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDash && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
+	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
+
+	if (enemy 
+	&& (focus->GetActorLocation() - GetActorLocation()).Size() > enemy->minDistanceToPlayerDash 
+	&& (focus->GetActorLocation() - GetActorLocation()).Size() < enemy->maxDistanceToPlayerDash)
+		isFocusInShortRange = true;
+	else if (focus 
+		 && (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDashNav 
+		 && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDashNav)
 		isFocusInShortRange = true;
 	else
 		isFocusInShortRange = false;
@@ -333,7 +341,6 @@ void ACharacter_Player::MoveForward(float Value)
 		if (state == E_STATE::ATTACKING && actualCombo == 3 && canCancelCombo)
 		{
 			state = E_STATE::IDLE;
-			actualCombo = 0;
 			canCancelCombo = false;
 		}
 
@@ -359,7 +366,6 @@ void ACharacter_Player::MoveRight(float Value)
 		if (state == E_STATE::ATTACKING && actualCombo == 3 && canCancelCombo)
 		{
 			state = E_STATE::IDLE;
-			actualCombo = 0;
 			canCancelCombo = false;
 		}
 
@@ -417,11 +423,21 @@ void ACharacter_Player::Attack()
 	||  state == E_STATE::PROJECTED)
 		return;
 
-	if (state == E_STATE::ATTACKING && canCombo)
-		needToAttack = true;
+	if (state == E_STATE::ATTACKING)
+	{
+		if (canCombo && actualCombo != 3)
+			needToAttack = true;
+	}
 	else
 	{
-		if (focus && minDistanceToDash < (focus->GetActorLocation() - GetActorLocation()).Size() && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDash)
+		ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
+		if (enemy
+		&&  enemy->minDistanceToPlayerDash < (focus->GetActorLocation() - GetActorLocation()).Size()
+		&& (focus->GetActorLocation() - GetActorLocation()).Size() < enemy->maxDistanceToPlayerDash)
+			StartDash(E_STATE::DASHING_HIT);
+		else if (focus && !enemy
+			 && minDistanceToDashNav < (focus->GetActorLocation() - GetActorLocation()).Size()
+			 && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDashNav)
 			StartDash(E_STATE::DASHING_HIT);
 		else
 		{
@@ -489,8 +505,6 @@ void ACharacter_Player::DashHit()
 
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 	FVector direction = focus->GetActorLocation() - GetActorLocation();
-	direction.Normalize();
-	direction *= 10000.0f;
 
 	if (currentEnemyGroup)
 	{
@@ -501,6 +515,9 @@ void ACharacter_Player::DashHit()
 		else
 			direction += focus->GetActorForwardVector() * stickPoint;
 	}
+
+	direction.Normalize();
+	direction *= 10000.0f;
 	LaunchCharacter(direction, true, true);
 }
 
@@ -511,12 +528,14 @@ void ACharacter_Player::DashBack()
 
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 	FVector direction = focus->GetActorLocation() - GetActorLocation();
-	direction.Normalize();
 	float stickPoint = Cast<ACharacter_EnemyBase>(focus)->stickPoint;
 	if (FVector::DotProduct(-direction, focus->GetActorForwardVector()) < 0)
-		direction = direction * 10000.0f + focus->GetActorForwardVector() * stickPoint;
+		direction += focus->GetActorForwardVector() * stickPoint;
 	else
-		direction = direction * 10000.0f - focus->GetActorForwardVector() * stickPoint;
+		direction -= focus->GetActorForwardVector() * stickPoint;
+	direction.Normalize();
+	direction *= 10000.0f;
+
 	LaunchCharacter(direction, true, true);
 	SetActorEnableCollision(false);
 
