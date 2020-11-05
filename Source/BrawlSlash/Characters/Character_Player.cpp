@@ -193,6 +193,7 @@ void ACharacter_Player::UpdateCamera()
 	else if (focus)
 	{
 		cameraRotation = FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator();
+		cameraRotation.Pitch = FMath::Clamp(cameraRotation.Pitch, cameraVerticalAngleMax, cameraVerticalAngleMin);
 		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorToLookAt));
 	
 	}
