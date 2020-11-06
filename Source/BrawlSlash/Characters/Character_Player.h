@@ -16,9 +16,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* cameraBoom;
 
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* followCamera;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Focus, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* focusDetector;
@@ -122,8 +120,19 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Player();
 
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* followCamera;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	bool isInSafeZone {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float shieldPointMax{3};
+
+	//will be VisibleAnywhere after playTest
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float currentShieldPoint{0};
 
 	void TakeHit(int damage, E_STATE attackerState) override;
 
