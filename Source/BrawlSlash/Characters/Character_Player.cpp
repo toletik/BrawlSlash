@@ -320,6 +320,12 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 	if (currentInvincibleTime > 0)
 		return;
 
+	if (currentShieldPoint > 0)
+	{
+		currentShieldPoint--;
+		return;
+	}
+
 	Super::TakeHit(damage, attackerState);
 
 	if (health > 0)

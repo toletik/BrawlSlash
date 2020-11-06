@@ -66,9 +66,16 @@ public:
 
 	void SetDebugFocusToPreviousEnemy();
 
+	UPROPERTY(EditAnywhere, category = AI)
+	TArray<ACharacter_EnemyBase*> vipEnemies;
+
+	UPROPERTY(EditAnywhere, category = AI)
+	AActor* actorInWhichCallCustomEventOnVipEnemiesDeath {nullptr};
+
 	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
