@@ -19,7 +19,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Focus, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* focusDetector;
+	class UStaticMeshComponent* detectorOfFocus;
 
 	TArray<AActor*> focusedActors;
 		
@@ -159,6 +159,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	FVector jumpVectorAfterNavDashHit = FVector::UpVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float invincibleTime{ 1 };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float currentInvincibleTime{ 0 };
 
 	UFUNCTION()
 	void StopCombo();
