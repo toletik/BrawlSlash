@@ -47,13 +47,13 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	int dashHitDamage = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickPointFight = 100.0f;
+	float stickPointFight = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickPointNav = 150.0f;
+	float stickPointNav = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickRangeFight = 300.0f;
+	float stickRangeFight = 350.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float stickRangeNav = 350.0f;
@@ -64,7 +64,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	float maxDistanceToDashNav = 10000.0f;
 
-	FVector dashHitPointOnFocus = FVector::ZeroVector;
+	FVector dashHitImpactPoint = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
 	float preparingDashDuration = 0.3f;
@@ -144,6 +144,8 @@ public:
 	void Attack();
 
 	bool needToAttack = false;
+
+	bool isAtEndOfAttackAnim = false;
 
 	FTimerHandle comboTimer;
 
