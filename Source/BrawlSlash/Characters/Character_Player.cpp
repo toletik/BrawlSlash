@@ -218,18 +218,52 @@ void ACharacter_Player::UpdateCamera()
 void ACharacter_Player::UpdatePosToStickPoint()
 {
 	//if player is in fight and he is too far to hit his focus
-	if (currentEnemyGroup && state == E_STATE::ATTACKING)
-		AddMovementInput(focus->GetActorLocation() - GetActorLocation(), 1.0f);
+	if (focus && state == E_STATE::ATTACKING)
+	{
+		if (currentEnemyGroup && state == E_STATE::ATTACKING)
+		{
+			FVector direction = focus->GetActorLocation() - GetActorLocation();
+			direction.Z = 0;
+			AddMovementInput(direction, 1.0f);
+		}
+		//FVector focusPos = focus->GetActorLocation();
+		//FVector focusToPlayer = (GetActorLocation() - focusPos);
+		//focusToPlayer.Normalize();
+		//FVector finalDirection = FVector::ZeroVector;
+
+		//if (currentEnemyGroup)
+		//	finalDirection = focusPos + focusToPlayer * ((Cast<ACharacter_EnemyBase>(focus)->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight) - GetActorLocation();
+		//else if (focus->ActorHasTag("Door"))
+		//{
+		//	FVector focusBounds;
+		//	
+		//	focus->GetActorBounds(true, focusPos, focusBounds);
+
+		//	finalDirection = focusPos + focusToPlayer * (focusBounds.X + stickPointNav) - GetActorLocation();
+		//}
+		//else if (focus->ActorHasTag("Chest"))
+		//{
+		//	FHitResult hit;
+		//	FCollisionQueryParams raycastParams;
+		//	raycastParams.AddIgnoredActor(this);
+		//	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_Pawn, raycastParams);
+
+		//	if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Chest"))
+		//		finalDirection = hit.Location + focusToPlayer * stickPointNav - GetActorLocation();
+		//}
+		
+		//AddMovementInput(finalDirection, 1.0f);
+	}
 }
 void ACharacter_Player::UpdateDashingHit()
 {
-	if (state == E_STATE::DASHING_HIT && FVector::DotProduct(focus->GetActorLocation() - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()) , dashDirection) < 0)
+	if (state == E_STATE::DASHING_HIT && FVector::DotProduct(dashPosToReach - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()) , dashDirection) < 0)
 		StopDashHit();
 
 }
 void ACharacter_Player::UpdateDashingBack()
 {
-	if (state == E_STATE::DASHING_BACK && FVector::DotProduct(focus->GetActorLocation() - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()), dashDirection) < 0)
+	if (state == E_STATE::DASHING_BACK && FVector::DotProduct(dashPosToReach - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()), dashDirection) < 0)
 		StopDashBack();
 }
 
@@ -237,9 +271,10 @@ void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* Overlappe
 {
 	if (OtherActor->ActorHasTag("Focusable"))
 	{
-		if (!currentEnemyGroup)
-			SetFocusNav(OtherActor);
 		focusedActors.Add(OtherActor);
+
+		if (!currentEnemyGroup && state != E_STATE::DASHING_HIT)
+			SetFocusNav(OtherActor);
 	}
 }
 
@@ -248,8 +283,10 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 	if (OtherActor->ActorHasTag("Focusable"))
 	{
 		focusedActors.Remove(OtherActor);
+
 		if (!currentEnemyGroup && focus == OtherActor)
 			SetFocusToClosestFocus();
+
 		if(!focus)
 			currentTimeForComeBack = timeForComeBack;
 	}
@@ -482,6 +519,8 @@ void ACharacter_Player::StartDash(E_STATE teleportState)
 
 void ACharacter_Player::DashHit()
 {
+	if (!focus)
+		return;
 	state = E_STATE::DASHING_HIT;
 	GetWorldTimerManager().ClearTimer(dashTimer);
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
@@ -509,9 +548,9 @@ void ACharacter_Player::DashHit()
 		focus->GetActorBounds(true, focusPos, focusBounds);
 
 		if (FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
-			dashPosToReach = focus->GetActorLocation() + focus->GetActorForwardVector() * (focusBounds.X + stickPointFight);
+			dashPosToReach = focus->GetActorLocation() + focus->GetActorForwardVector() * (focusBounds.X + stickPointNav);
 		else
-			dashPosToReach = focus->GetActorLocation() - focus->GetActorForwardVector() * (focusBounds.X + stickPointFight);
+			dashPosToReach = focus->GetActorLocation() - focus->GetActorForwardVector() * (focusBounds.X + stickPointNav);
 	}
 	//if focus is a Chest
 	else if (focus->ActorHasTag("Chest"))
@@ -542,6 +581,8 @@ void ACharacter_Player::DashHit()
 
 void ACharacter_Player::DashBack()
 {
+	if (!focus)
+		return;
 	state = E_STATE::DASHING_BACK;
 	GetWorldTimerManager().ClearTimer(dashTimer);
 
@@ -580,7 +621,9 @@ void ACharacter_Player::StopDashHit()
 	GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
-	if (currentEnemyGroup)
+	if (!focus)
+		state = E_STATE::IDLE;
+	else if (currentEnemyGroup)
 	{
 		SetActorEnableCollision(true);
 		currentEnemyGroup->UpdateIfIsInInner();
