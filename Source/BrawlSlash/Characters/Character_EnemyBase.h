@@ -69,18 +69,6 @@ public:
 
 	FTimerHandle timerHandler;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickRange = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float stickPoint = 60.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float minDistanceToPlayerDash = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float maxDistanceToPlayerDash = 10000.0f;
-
 	bool isRespectingAngularDist{ false };
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "State")
