@@ -4,6 +4,7 @@
 #include "AnimNotify_AttackIfNeedTo.h"
 #include "../Characters/Character_Player.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "TimerManager.h"
 
 void UAnimNotify_AttackIfNeedTo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
@@ -11,7 +12,7 @@ void UAnimNotify_AttackIfNeedTo::Notify(USkeletalMeshComponent* MeshComp, UAnimS
 
 	if (player && player->needToAttack)
 	{
-		player->isAtEndOfAttackAnim = true;
-		player->Attack();
+		player->needToAttack = false;
+		player->SetNextAttackCombo();
 	}
 }
