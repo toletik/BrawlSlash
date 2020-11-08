@@ -15,9 +15,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* cameraBoom;
-
-
-
+	   
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Focus, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* detectorOfFocus;
 
@@ -28,45 +26,12 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	
 	UFUNCTION()
 	void FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	int actualCombo = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	int firstComboDamage = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	int secondComboDamage = 2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	int thirdComboDamage = 3;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	int dashHitDamage = 4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float minDistanceToDashNav = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	float maxDistanceToDashNav = 10000.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	float preparingDashDuration = 0.3f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mobility Points", meta = (AllowPrivateAccess = "true"))
-	float dashBackRecoveryDuration = 1.0f;
-
-	bool isGoingToStickPoint = false;
 	
 	bool needToRefreshCameraBehind {true};
 
 	UMyGameInstance* gameInstance;
 
 	FTimerHandle dashBackCooldownTimer;
-
-	bool isDashBackInCooldown = false;
-
-	void StopDashBackRecovery();
 
 	void LookAtFocus(bool lerp);
 
@@ -82,7 +47,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	void UpdateDashingHit();
 
-	void UpdateDashingBack();
+	void UpdateDashingBack();	
+	
+	void StopDashBackRecovery();
 
 protected:
 	// Called to bind functionality to input
@@ -136,23 +103,8 @@ public:
 
 	void TakeHit(int damage, E_STATE attackerState) override;
 
-	void Attack();
-
-	bool needToAttack = false;
-
-	FTimerHandle comboTimer;
-
-	FTimerHandle dashTimer;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* focus = nullptr;
-
-	bool canCombo = false;
-
-	bool canCancelCombo = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	float comboTime = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float jumpForceAfterNavDashHit = 1000.0f;
@@ -172,6 +124,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopDashHit();
 
+	UFUNCTION(BlueprintCallable)
+	void StopDashBack();
+
 	UFUNCTION()
 	void SetFocusNav(AActor* newFocus);
 	
@@ -189,6 +144,72 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float knockbackForceAfterAttackBlocked = 1000.0f;
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Attack
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attack)
+		int actualCombo = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		int firstComboDamage = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		int secondComboDamage = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		int thirdComboDamage = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		int dashHitDamage = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		float stickPointFight = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		float stickPointNav = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		float minToDashFight = 350.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+		float minToDashNav = 350.0f;
+
+	FVector dashPosToReach = FVector::ZeroVector;
+
+	FVector dashDirection { 0, 0, 0 };
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
+		float preparingDashDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
+		float dashBackRecoveryDuration = 1.0f;
+
+	bool isDashBackInCooldown = false;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
+	//	float dashHitRecoveryDuration = 1.0f;
+
+	void Attack();
+
+	bool needToAttack = false;
+	
+	FTimerHandle comboTimer;
+
+	FTimerHandle dashTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+	bool canCombo = false;
+
+	bool canCancelCombo = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+		float comboTime = 1.0f;
+
+	void SetNextAttackCombo();
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
@@ -345,5 +366,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
 
-	FVector testForDashBack{ 0, 0, 0 };
 };
