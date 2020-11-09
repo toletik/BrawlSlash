@@ -103,6 +103,7 @@ void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 	if (enemies.Num() == 1)
 	{
 		enemyToRemove->LastEnemyInGroup();
+		AIDirectorAllEnemiesDead();
 		SetEndToFight();
 	}
 
@@ -116,7 +117,6 @@ void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 	vipEnemies.Remove(enemyToRemove);
 
 	UpdateIfIsInInner();
-
 }
 
 void AMyAIDirector::UpdateIfIsInInner()

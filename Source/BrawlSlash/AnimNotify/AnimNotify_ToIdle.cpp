@@ -10,11 +10,6 @@ void UAnimNotify_ToIdle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 {
 	ACharacter_Base* character = Cast<ACharacter_Base>(MeshComp->GetOwner());
 
-	if (character)
+	if (character && character->state != E_STATE::DEAD)
 		character->state = E_STATE::IDLE;
-
-	if (Cast<ACharacter_Player>(MeshComp->GetOwner()))
-	{
-		GEngine->AddOnScreenDebugMessage(-21, 1.0f, FColor::Red, "TOIDLE");
-	}
 }

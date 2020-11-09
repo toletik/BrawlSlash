@@ -13,7 +13,7 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI, meta = (AllowPrivateAccess = "true"))
 	TArray<ACharacter_EnemyBase*> enemies;	
 	
 	TArray<ACharacter_EnemyBase*> enemiesInInner;
@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetEndToFight();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void AIDirectorAllEnemiesDead();
+
 	bool IsAllEnemiesInCameraSight(APlayerController* controller);
 
 	void SetFocusToNextEnemy();
@@ -75,7 +78,6 @@ public:
 	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };

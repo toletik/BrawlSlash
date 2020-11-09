@@ -10,7 +10,7 @@
 EBTNodeResult::Type UTask_LookAtPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
-	if (!enemy->notLookAtPlayer)
+	if (!enemy->beingDashedBack)
 	{
 		FVector selfToPlayer = OwnerComp.GetBlackboardComponent()->GetValueAsVector("playerPos") - enemy->GetActorLocation();
 

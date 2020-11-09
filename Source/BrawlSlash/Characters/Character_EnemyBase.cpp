@@ -213,6 +213,6 @@ void ACharacter_EnemyBase::ShieldDeActivate()
 
 void ACharacter_EnemyBase::LookAtPlayer()
 {
-	notLookAtPlayer = false;
+	beingDashedBack = false;
 	rotateDashedBack = true;
 }
