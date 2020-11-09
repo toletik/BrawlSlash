@@ -13,6 +13,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 {
 	GENERATED_BODY()
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* cameraBoom;
 	   
