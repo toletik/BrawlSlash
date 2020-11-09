@@ -12,10 +12,10 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
 	if (enemy->initialWaitAttack > 0)
-		enemy->initialWaitAttack -= GetWorld()->GetDeltaSeconds();
+		enemy->initialWaitAttack -= DeltaSeconds;
 	else
 	{
-		enemy->currentAttackCoolDown -= GetWorld()->GetDeltaSeconds();
+		enemy->currentAttackCoolDown -= DeltaSeconds;
 
 		if (enemy->currentAttackCoolDown < 0)
 		{

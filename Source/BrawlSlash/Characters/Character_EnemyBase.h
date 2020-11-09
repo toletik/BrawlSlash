@@ -178,16 +178,20 @@ public:
 	UFUNCTION()
 	void LookAtPlayer();
 
-	bool notLookAtPlayer = false;
+	bool beingDashedBack = false;
 
 	bool rotateDashedBack = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float rotateSpeedWhenBeingDashedBack{ 0.1f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float timeBeforeRotateWhenBeingDashedBack{ 2.0f };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
+	bool canRotateDuringStartupCone = false;
+
+	bool isInStartupCone = false;
 
 	//Event
 	UFUNCTION(BlueprintImplementableEvent)

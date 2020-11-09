@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character_Base.h"
-#include "../MyGameInstance.h"
 #include "Character_Player.generated.h"
 
 
@@ -29,7 +28,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	
 	bool needToRefreshCameraBehind {true};
 
-	UMyGameInstance* gameInstance;
+	class UMyGameInstance* gameInstance;
 
 	FTimerHandle dashBackCooldownTimer;
 
@@ -117,6 +116,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float currentInvincibleTime{ 0 };
+
+	bool isInReco = false;
 
 	UFUNCTION()
 	void StopCombo();

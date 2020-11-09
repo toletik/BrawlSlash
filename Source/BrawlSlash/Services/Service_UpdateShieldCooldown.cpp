@@ -1,15 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Task_UpdateShieldCoolDowns.h"
-
+#include "Service_UpdateShieldCooldown.h"
 #include "AIController.h"
 #include "../Characters/Character_EnemyBase.h"
-#include "Engine/World.h"
 
-void UTask_UpdateShieldCoolDowns::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UService_UpdateShieldCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
+
+	if (!enemy->isShieldSwitchable)
+		return;
 
 	if (enemy->initialWaitShield > 0)
 		enemy->initialWaitShield -= DeltaSeconds;
