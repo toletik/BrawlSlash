@@ -149,31 +149,31 @@ public:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Attack
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attack)
-		int actualCombo = 0;
+	int actualCombo = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		int firstComboDamage = 1;
+	int firstComboDamage = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		int secondComboDamage = 2;
+	int secondComboDamage = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		int thirdComboDamage = 3;
+	int thirdComboDamage = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		int dashHitDamage = 4;
+	int dashHitDamage = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		float stickPointFight = 200.0f;
+	float stickPointFight = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		float stickPointNav = 200.0f;
+	float stickPointNav = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		float minToDashFight = 350.0f;
+	float minToDashFight = 350.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-		float minToDashNav = 350.0f;
+	float minToDashNav = 350.0f;
 
 	FVector dashPosToReach = FVector::ZeroVector;
 
@@ -349,6 +349,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartHitted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerLostShieldPoint();
 
 	//////////////////////////////////////////////////////////////
 	//DEBUG

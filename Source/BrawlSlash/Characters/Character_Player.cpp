@@ -291,6 +291,7 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 	if (currentShieldPoint > 0)
 	{
 		currentShieldPoint--;
+		PlayerLostShieldPoint();
 		return;
 	}
 
