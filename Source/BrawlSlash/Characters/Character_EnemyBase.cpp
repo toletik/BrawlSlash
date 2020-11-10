@@ -49,22 +49,25 @@ void ACharacter_EnemyBase::Tick(float DeltaTime)
 
 	/////////////////////////////////////////////////////////////////
 	//Debug (will be removed)
-	if (isShieldInFront)
+	if (currentEnemyGroup->playerReference->isTracingEnemyAngularAcceptance)
 	{
-		FVector selfPos = GetActorLocation();
-		FVector forward = GetActorForwardVector();
+		if (isShieldInFront)
+		{
+			FVector selfPos = GetActorLocation();
+			FVector forward = GetActorForwardVector();
 
-		DrawDebugLine(GetWorld(), selfPos, selfPos + forward.RotateAngleAxis(angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
-		DrawDebugLine(GetWorld(), selfPos, selfPos + forward.RotateAngleAxis(-angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
-	}
+			DrawDebugLine(GetWorld(), selfPos, selfPos + forward.RotateAngleAxis(angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
+			DrawDebugLine(GetWorld(), selfPos, selfPos + forward.RotateAngleAxis(-angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
+		}
 
-	if (isShieldInBack)
-	{
-		FVector selfPos = GetActorLocation();
-		FVector backward = -GetActorForwardVector();
+		if (isShieldInBack)
+		{
+			FVector selfPos = GetActorLocation();
+			FVector backward = -GetActorForwardVector();
 
-		DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
-		DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(-angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
+			DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
+			DrawDebugLine(GetWorld(), selfPos, selfPos + backward.RotateAngleAxis(-angleAcceptanceForDefense, FVector::UpVector) * 200, FColor::Blue, false, 0.05, 0, 5);
+		}
 	}
 }
 

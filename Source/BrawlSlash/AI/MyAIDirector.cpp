@@ -75,7 +75,7 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 
 			playerReference->currentEnemyGroup = this;
 			playerReference->focus = enemies[i];
-			playerReference->SetCameraStatsFight(rotationForTheFight);
+			playerReference->SetCameraStatsFight(rotationForTheFight, minDistanceToAdoptForCamera, maxDistanceToAdoptForCamera);
 			playerReference->debugInnerCircleRadius = tempController->radiusInnerCircle;
 			playerReference->debugBackCircleRadius = tempController->radiusBackCircle;
 			playerReference->PlayerStartFight();

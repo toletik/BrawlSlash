@@ -82,18 +82,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float minDistanceToAdoptForCamera{ 800.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float maxDistanceToAdoptForCamera{ 1600.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float angularDisToRespect{ 90 };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float offsetFromLeft{0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float offsetFromRight{0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float offsetFromBottom{0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Angle)
-	float offsetFromTop{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float offsetFromTop{ 0 };
 };
