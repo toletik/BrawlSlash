@@ -28,5 +28,8 @@ public:
 	FRotator lastCheckPointRot {0, 0, 0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int numberOfPlayerShieldPoints{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool hasTakenACheckpoint {false};
 };

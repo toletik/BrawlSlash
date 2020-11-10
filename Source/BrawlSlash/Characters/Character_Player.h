@@ -95,11 +95,11 @@ public:
 	bool isInSafeZone {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float shieldPointMax{3};
+	int shieldPointMax{3};
 
 	//will be VisibleAnywhere after playTest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float currentShieldPoint{0};
+	int currentShieldPoint{0};
 
 	void TakeHit(int damage, E_STATE attackerState) override;
 
@@ -182,10 +182,10 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
-		float preparingDashDuration = 0.3f;
+	float preparingDashDuration = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
-		float dashBackRecoveryDuration = 1.0f;
+	float dashBackRecoveryDuration = 1.0f;
 
 	bool isDashBackInCooldown = false;
 
@@ -206,7 +206,7 @@ public:
 	bool canCancelCombo = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-		float comboTime = 1.0f;
+	float comboTime = 1.0f;
 
 	void SetNextAttackCombo();
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -318,16 +318,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float zoomDezoomSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float mindistance{0};
+	float minDistanceCameraFight{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float maxdistance{2000};
+	float maxDistanceCameraFight{0.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = CameraFight)
 	FRotator rotationForFight {0, 0, 0};
 
-	void SetCameraStatsFight(FRotator rotationToAdopt);
+	void SetCameraStatsFight(FRotator rotationToAdopt, float minDistanceToAdopt, float maxDistanceToAdopt);
 
 	//Events
 	UFUNCTION(BlueprintImplementableEvent)
@@ -366,9 +364,11 @@ public:
 	bool isFocusInShortRange{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	bool isTracingEnemyAngularAcceptance{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class ACharacter_EnemyBase* debugNextFocus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
-
 };

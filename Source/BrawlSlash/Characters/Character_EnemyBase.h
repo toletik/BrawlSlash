@@ -34,7 +34,6 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
-
 public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
@@ -123,6 +122,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool attackCircleProject = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float attackCircleAngle = 0.0f;
 	///////////////////////////////////////////////////////////////////////////
 
 

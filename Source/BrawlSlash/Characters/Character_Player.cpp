@@ -187,9 +187,9 @@ void ACharacter_Player::UpdateCamera()
 	
 		// Zoom / deZoom
 		if (!currentEnemyGroup->IsAllEnemiesInCameraSight(GetWorld()->GetFirstPlayerController()))
-			cameraLength = FMath::Min(maxdistance, cameraLength + zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
+			cameraLength = FMath::Min(maxDistanceCameraFight, cameraLength + zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
 		else
-			cameraLength = FMath::Max(mindistance, cameraLength - zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
+			cameraLength = FMath::Max(minDistanceCameraFight, cameraLength - zoomDezoomSpeed * GetWorld()->GetDeltaSeconds());
 	}
 	//Camera LookAt
 	else if (focus)
@@ -722,8 +722,10 @@ void ACharacter_Player::SetCameraStatsLookAt()
 	cameraLength = distanceLookAt;
 	cameraFOV = fovLookAt;
 }
-void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt)
+void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt, float minDistanceToAdopt, float maxDistanceToAdopt)
 {
+	minDistanceCameraFight = minDistanceToAdopt;
+	maxDistanceCameraFight = maxDistanceToAdopt;
 	cameraVerticalAngleMin = -verticalAngleMinFight;
 	cameraVerticalAngleMax = -verticalAngleMaxFight;
 	rotationForFight = rotationToAdopt;

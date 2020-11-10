@@ -5,9 +5,12 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "../MyGameInstance.h"
 
 void UAnimNotify_OnPlayerDeath::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	
+	UMyGameInstance* gameInstance = Cast<UMyGameInstance>(MeshComp->GetOwner()->GetGameInstance());
+	gameInstance->numberOfPlayerShieldPoints = 0;
+
 	UGameplayStatics::OpenLevel(MeshComp->GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(MeshComp->GetWorld())));
 }
