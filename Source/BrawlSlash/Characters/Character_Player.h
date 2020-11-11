@@ -31,7 +31,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	class UMyGameInstance* gameInstance;
 
-	FTimerHandle dashBackCooldownTimer;
 
 	void LookAtFocus(bool lerp);
 
@@ -49,7 +48,6 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	void UpdateDashingBack();	
 	
-	void StopDashBackRecovery();
 
 protected:
 	// Called to bind functionality to input
@@ -70,6 +68,7 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	//Buttons
+	bool CheckIfCanDash();
 	void StartDash(E_STATE dashState);
 	void StartDashBack();
 	void DashBack();
@@ -107,12 +106,6 @@ public:
 	AActor* focus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	float jumpForceAfterNavDashHit = 1000.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
-	FVector jumpVectorAfterNavDashHit = FVector::UpVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float invincibleTime{ 1 };
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
@@ -147,6 +140,48 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float knockbackForceAfterAttackBlocked = 1000.0f;
 
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Dash
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+	float stickPointFight = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+	float stickPointNav = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+	float minToDashFight = 350.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
+	float minToDashNav = 350.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dash)
+	float preparingDashDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dash)
+	float dashBackRecoveryDuration = 1.0f;
+
+	bool isDashBackInCooldown = false;
+	FTimerHandle dashBackCooldownTimer;
+	void StopDashBackRecovery();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Dash)
+	float dashHitRecoveryDuration = 1.0f;
+
+	bool isDashHitInCooldown = false;
+	FTimerHandle dashHitCooldownTimer;
+	void StopDashHitRecovery();
+
+	FVector dashPosToReach = FVector::ZeroVector;
+
+	FVector dashDirection { 0, 0, 0 };
+
+	FVector	GetStickPoint();
+
+	bool CheckIfFreeSpaceForDash();
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Attack
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attack)
@@ -163,34 +198,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 	int dashHitDamage = 4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-	float stickPointFight = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-	float stickPointNav = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-	float minToDashFight = 350.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
-	float minToDashNav = 350.0f;
-
-	FVector dashPosToReach = FVector::ZeroVector;
-
-	FVector dashDirection { 0, 0, 0 };
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
-	float preparingDashDuration = 0.3f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
-	float dashBackRecoveryDuration = 1.0f;
-
-	bool isDashBackInCooldown = false;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mobility_Points)
-	//	float dashHitRecoveryDuration = 1.0f;
 
 	void Attack();
 
@@ -209,10 +216,8 @@ public:
 	float comboTime = 1.0f;
 
 	void SetNextAttackCombo();
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 	//Camera OverAll
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationSpeedHorizontal;

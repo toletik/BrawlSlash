@@ -45,12 +45,9 @@ void AMyAIDirector::Tick(float DeltaTime)
 	if (!isInFight)
 		UpdateIfNeedToStartFight();
 	else
-	{
 		UpdateIfIsRespectingAngularDist();
 
-		//Backup of Enemy Attack System V1
-		//UpdateAttack(DeltaTime);
-	}
+
 }
 
 
@@ -202,22 +199,6 @@ void AMyAIDirector::UpdateIfIsRespectingAngularDist()
 		}
 	}
 }
-
-/*
-void AMyAIDirector::UpdateAttack(float DeltaTime)
-{
-	remainingTimeForNextAttack -= DeltaTime;
-
-	if (remainingTimeForNextAttack <= 0)
-	{
-		remainingTimeForNextAttack = timeBetweenAttacks;
-
-		ACharacter_EnemyBase* randomEnemy = enemiesInInner[FMath::RandRange(0, enemiesInInner.Num() - 1)];
-		
-		randomEnemy->SetAttackState();
-	}
-}
-*/
 
 
 

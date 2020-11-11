@@ -4,6 +4,7 @@
 #include "AnimNotify_SpawnDashPointFight.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "../Characters/Character_EnemyBase.h"
+#include "../AI/MyAIDirector.h"
 
 void UAnimNotify_SpawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
