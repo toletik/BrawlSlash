@@ -352,6 +352,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerLostShieldPoint();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerLostAllShieldPoints();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
