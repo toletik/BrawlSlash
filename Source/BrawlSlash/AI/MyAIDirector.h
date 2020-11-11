@@ -21,11 +21,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	UPROPERTY(EditAnywhere, category = AI)
 	float numberOfEnemiesToHaveInInner { 0 };
 
-	//UPROPERTY(EditAnywhere, category = AI)
-	//float timeBetweenAttacks;
-
-	//float remainingTimeForNextAttack;
-
 	bool hasAStrongEnemyInInner{ false };
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -44,8 +39,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	void UpdateIfIsRespectingAngularDist();
 
 	void SetFocusToClosestEnemy();
-
-	//void UpdateAttack(float DeltaTime);
 
 
 public:
@@ -75,12 +68,17 @@ public:
 	UPROPERTY(EditAnywhere, category = AI)
 	AActor* actorInWhichCallCustomEventOnVipEnemiesDeath {nullptr};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	FRotator rotationForTheFight { 0, 0, 0 };
+
 	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	FRotator rotationForTheFight { 0, 0, 0 };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> dashPointInFightClassType;
+
+	AActor* dashPointInFight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float minDistanceToAdoptForCamera{ 800.0f };

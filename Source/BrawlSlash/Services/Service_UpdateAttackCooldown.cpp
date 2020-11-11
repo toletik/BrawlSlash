@@ -11,6 +11,9 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
+	if (enemy->state == E_STATE::ATTACKING_WEAK || enemy->state == E_STATE::ATTACKING_STRONG || enemy->needToAttackWeak)
+		return;
+
 	if (enemy->initialWaitAttack > 0)
 		enemy->initialWaitAttack -= DeltaSeconds;
 	else
