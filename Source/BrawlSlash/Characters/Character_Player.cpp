@@ -649,8 +649,9 @@ void ACharacter_Player::StopDashHit()
 	GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
-	if (!focus || (focus && focus->ActorHasTag("DashPoint")) )
+	if (!focus || (focus && focus->ActorHasTag("DashPoint")))
 		state = E_STATE::IDLE;
+
 	else
 	{
 		if (currentEnemyGroup)
@@ -663,8 +664,6 @@ void ACharacter_Player::StopDashHit()
 		isDashHitInCooldown = true;
 		GetWorldTimerManager().SetTimer(dashHitCooldownTimer, this, &ACharacter_Player::StopDashHitRecovery, dashHitRecoveryDuration, false);
 	}
-	
-
 }
 
 void ACharacter_Player::StopDashBack()
