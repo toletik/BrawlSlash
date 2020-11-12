@@ -12,5 +12,10 @@ void UAnimNotify_SpawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp, U
 
 	if (enemy)
 	{
+		FActorSpawnParameters spawnParams;
+		FVector spawnPosition = enemy->GetActorLocation() + enemy->GetActorForwardVector().RotateAngleAxis(enemy->attackCircleAngle, FVector::UpVector) * enemy->currentEnemyGroup->distanceFromSelfToDashPoint;
+		spawnPosition.Z = enemy->currentEnemyGroup->playerReference->GetActorLocation().Z;
+
+		enemy->currentEnemyGroup->dashPointInFight = enemy->GetWorld()->SpawnActor<AActor>(enemy->currentEnemyGroup->dashPointInFightClassType, spawnPosition, FRotator::ZeroRotator, spawnParams);
 	}
 }

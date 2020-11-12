@@ -3,7 +3,6 @@
 
 #include "AnimNotify_ToIdle.h"
 #include "../Characters/Character_Base.h"
-#include "../Characters/Character_Player.h"
 #include "Components/SkeletalMeshComponent.h"
 
 void UAnimNotify_ToIdle::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)

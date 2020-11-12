@@ -360,6 +360,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerLostAllShieldPoints();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStopDashHitDashPoint();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
@@ -375,8 +378,8 @@ public:
 	bool isTracingEnemyAngularAcceptance{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	class ACharacter_EnemyBase* debugNextFocus = nullptr;
+	class AActor* debugNextFocus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	class ACharacter_EnemyBase* debugPreviousFocus = nullptr;
+	class AActor* debugPreviousFocus = nullptr;
 };
