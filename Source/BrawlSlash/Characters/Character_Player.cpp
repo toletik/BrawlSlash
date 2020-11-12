@@ -656,10 +656,9 @@ void ACharacter_Player::StopDashHit()
 		if (currentEnemyGroup)
 		{
 			focus->Destroy();
-			focus = nullptr;
 			SetActorEnableCollision(true);
-			currentEnemyGroup->UpdateIfIsInInner();
 			currentEnemyGroup->SetFocusToClosestEnemy();
+			currentEnemyGroup->UpdateIfIsInInner();
 		}
 	}
 
@@ -822,7 +821,6 @@ void ACharacter_Player::SetFocusToNextFocus()
 		}
 	}
 }
-
 void ACharacter_Player::SetFocusToPreviousFocus()
 {
 	FVector playerPos = GetActorLocation();
@@ -862,7 +860,6 @@ void ACharacter_Player::StopDashBackRecovery()
 {
 	isDashBackInCooldown = false;
 }
-
 void ACharacter_Player::StopDashHitRecovery()
 {
 	isDashHitInCooldown = false;

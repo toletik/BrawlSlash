@@ -241,6 +241,7 @@ void AMyAIDirector::SetFocusToClosestEnemy()
 		}
 	}
 }
+
 void AMyAIDirector::SetFocusToNextEnemy()
 {
 	FVector cameraPos = playerReference->followCamera->GetComponentLocation();
@@ -271,7 +272,6 @@ void AMyAIDirector::SetFocusToNextEnemy()
 		}
 	}
 }
-
 void AMyAIDirector::SetFocusToPreviousEnemy()
 {
 	FVector cameraPos = playerReference->followCamera->GetComponentLocation();
@@ -315,7 +315,7 @@ void AMyAIDirector::SetDebugFocusToNextEnemy()
 
 		float enemyAngle = (FVector::CrossProduct(vectorReference, cameraToDashPoint).Z > 0) ? acos(vectorReference.CosineAngle2D(cameraToDashPoint)) : 360 - acos(vectorReference.CosineAngle2D(cameraToDashPoint));
 		smallestAngle = enemyAngle;
-		playerReference->focus = dashPointInFight;
+		playerReference->debugNextFocus = dashPointInFight;
 	}
 
 	for (int i = 0; i < enemies.Num(); ++i)
@@ -333,7 +333,6 @@ void AMyAIDirector::SetDebugFocusToNextEnemy()
 		}
 	}
 }
-
 void AMyAIDirector::SetDebugFocusToPreviousEnemy()
 {
 	FVector cameraPos = playerReference->followCamera->GetComponentLocation();
@@ -346,7 +345,7 @@ void AMyAIDirector::SetDebugFocusToPreviousEnemy()
 
 		float enemyAngle = (FVector::CrossProduct(vectorReference, cameraToDashPoint).Z < 0) ? acos(vectorReference.CosineAngle2D(cameraToDashPoint)) : 360 - acos(vectorReference.CosineAngle2D(cameraToDashPoint));
 		smallestAngle = enemyAngle;
-		playerReference->focus = dashPointInFight;
+		playerReference->debugPreviousFocus = dashPointInFight;
 	}
 
 	for (int i = 0; i < enemies.Num(); ++i)
