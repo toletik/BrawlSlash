@@ -8,9 +8,15 @@
 
 void UAnimNotify_SpawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	//ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
 
-	if (enemy)
-	{
-	}
+	//if (enemy)
+	//{
+	//	FActorSpawnParameters spawnParams;
+	//	FVector spawnPosition = enemy->GetActorLocation() + 
+	//		enemy->GetActorForwardVector().RotateAngleAxis(enemy->attackCircleAngle, FVector::UpVector) * enemy->currentEnemyGroup->distanceFromSelfToDashPoint;
+	//	spawnPosition.Z = enemy->currentEnemyGroup->playerReference->GetActorLocation().Z;
+
+	//	enemy->currentEnemyGroup->dashPointInFight = enemy->GetWorld()->SpawnActor<AActor>(enemy->currentEnemyGroup->dashPointInFightClassType, spawnPosition, FRotator::ZeroRotator, spawnParams);
+	//}
 }

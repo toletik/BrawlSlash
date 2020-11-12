@@ -247,8 +247,10 @@ void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* Overlappe
 	{
 		focusedActors.Add(OtherActor);
 
-		if (!currentEnemyGroup && state != E_STATE::DASHING_HIT)
-			SetFocusNav(OtherActor);
+		if (!currentEnemyGroup && state == E_STATE::IDLE)
+			//SetFocusNav(OtherActor);
+			SetFocusToClosestFocus();
+
 	}
 }
 
@@ -407,7 +409,6 @@ void ACharacter_Player::DashAttack()
 {
 	//called after stop dashhit
 	LookAtFocus(false);
-	StopCombo();
 	toDoDamage = dashHitDamage;
 	state = E_STATE::DASH_ATTACK;
 }
@@ -451,9 +452,7 @@ void ACharacter_Player::Attack()
 
 void ACharacter_Player::SetNextAttackCombo()
 {
-	GetWorldTimerManager().ClearTimer(comboTimer);
-	canCombo = false;
-
+	StopCombo();
 	actualCombo++;
 
 	if (actualCombo == 2)
@@ -467,6 +466,8 @@ bool ACharacter_Player::CheckIfCanDash()
 {
 	if (!focus)
 		return false;
+	if (focus->ActorHasTag("DashPoint"))
+		return true;
 
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
@@ -477,7 +478,7 @@ bool ACharacter_Player::CheckIfCanDash()
 
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
 	//if focus is target in world or focus is an enemy or not and player is at the good distance to dash, then dash
-	if (focus->ActorHasTag("DashPoint") || (enemy && minToDashFight < distanceToFocus) || (!enemy && minToDashNav < distanceToFocus))
+	if ((enemy && minToDashFight < distanceToFocus) || (!enemy && minToDashNav < distanceToFocus))
 		return true;
 	
 	return false;
@@ -486,7 +487,7 @@ bool ACharacter_Player::CheckIfCanDash()
 void ACharacter_Player::StartDashBack()
 {
 	//called with "A" input
-	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING) )
+	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING) && Cast<ACharacter_EnemyBase>(focus))
 		StartDash(E_STATE::DASHING_BACK);
 }
 
@@ -530,8 +531,7 @@ void ACharacter_Player::DashHit()
 	FVector direction = dashPosToReach - GetActorLocation();
 	direction.Normalize();
 	dashDirection = direction;
-	direction *= 10000.0f;
-	LaunchCharacter(direction, true, true);
+	LaunchCharacter(direction * 10000.0f, true, true);
 }
 
 void ACharacter_Player::DashBack()
@@ -565,19 +565,17 @@ void ACharacter_Player::DashBack()
 	FVector direction = dashPosToReach - GetActorLocation();
 	direction.Normalize();
 	dashDirection = direction;
-	direction *= 10000.0f;
-	LaunchCharacter(direction, true, true);
+	LaunchCharacter(direction * 10000.0f, true, true);
 }
 
 FVector	ACharacter_Player::GetStickPoint()
 {
 	FVector vectorToReturn = FVector::ZeroVector;
 
+	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
 	//if player is in fight
-	if (currentEnemyGroup)
+	if (enemy)
 	{
-		ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
-
 		if (FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
 			vectorToReturn = focus->GetActorLocation() + focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
 		else
@@ -610,11 +608,10 @@ FVector	ACharacter_Player::GetStickPoint()
 
 		if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Chest"))
 		{
-			GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Red, "RAYCAST");
 			FVector focusToHit = (hit.Location - focus->GetActorLocation());
 			focusToHit.Normalize();
 			vectorToReturn = hit.Location + focusToHit * stickPointNav;
-			vectorToReturn.Z = GetActorLocation().Z;
+			vectorToReturn.Z = focus->GetActorLocation().Z;
 		}
 	}
 	//if focus is a DashPoint
@@ -635,11 +632,10 @@ bool ACharacter_Player::CheckIfFreeSpaceForDash()
 	GetWorld()->LineTraceSingleByChannel(hit, focusPos, dashPosToReach, ECC_WorldStatic, raycastParams);
 
 	if (hit.GetActor())
-		SetActorEnableCollision(true);
+		return false;
 
 	return true;
 }
-
 
 void ACharacter_Player::StopDashHit()
 {
@@ -649,8 +645,23 @@ void ACharacter_Player::StopDashHit()
 	GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
-	if (!focus || (focus && focus->ActorHasTag("DashPoint")))
+	if (!focus)
 		state = E_STATE::IDLE;
+
+	else if (focus && focus->ActorHasTag("DashPoint"))
+	{
+		state = IDLE;
+		PlayerStopDashHitDashPoint();
+
+		if (currentEnemyGroup)
+		{
+			focus->Destroy();
+			focus = nullptr;
+			SetActorEnableCollision(true);
+			currentEnemyGroup->UpdateIfIsInInner();
+			currentEnemyGroup->SetFocusToClosestEnemy();
+		}
+	}
 
 	else
 	{
@@ -660,9 +671,9 @@ void ACharacter_Player::StopDashHit()
 			currentEnemyGroup->UpdateIfIsInInner();
 		}
 
-		DashAttack();
 		isDashHitInCooldown = true;
 		GetWorldTimerManager().SetTimer(dashHitCooldownTimer, this, &ACharacter_Player::StopDashHitRecovery, dashHitRecoveryDuration, false);
+		DashAttack();
 	}
 }
 

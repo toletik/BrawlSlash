@@ -28,8 +28,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
 	float radiusCloseToPlayer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
-	float radiusInnerCircle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
-	float radiusBackCircle;
 };

@@ -360,6 +360,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerLostAllShieldPoints();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStopDashHitDashPoint();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)

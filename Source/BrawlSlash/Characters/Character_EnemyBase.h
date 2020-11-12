@@ -76,8 +76,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	bool isAStrongEnemy{ false };
 
-
-
 	///////////////////////////////////////////////////////////////////////////
 	//Attack
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
@@ -108,6 +106,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float ratioAttackStrong{ 0 };
+
 	/////////////////////////////////////////////////////////////////
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")

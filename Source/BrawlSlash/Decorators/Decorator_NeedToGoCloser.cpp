@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "../Characters/Character_EnemyBase.h"
+#include "../AI/MyAIDirector.h"
 
 bool UDecorator_NeedToGoCloser::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
@@ -16,8 +17,8 @@ bool UDecorator_NeedToGoCloser::CalculateRawConditionValue(UBehaviorTreeComponen
 	//get distance
 	float distanceFromPlayer = (enemyPos - playerPos).Size();
 
-	if ((enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusInnerCircle")) ||
-		(!enemy->isInInnerCircle && distanceFromPlayer > OwnerComp.GetBlackboardComponent()->GetValueAsFloat("radiusBackCircle")))
+	if ((enemy->isInInnerCircle && distanceFromPlayer > enemy->currentEnemyGroup->radiusInnerCircle) ||
+		(!enemy->isInInnerCircle && distanceFromPlayer > enemy->currentEnemyGroup->radiusBackCircle))
 		return true;
 
 	return false;

@@ -13,6 +13,7 @@ void UAnimNotify_StartCanCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	ACharacter_Player* character = Cast<ACharacter_Player>(MeshComp->GetOwner());
 	if (character)
 	{
+		character->needToAttack = false;
 		character->canCombo = true;
 		character->GetWorldTimerManager().ClearTimer(character->comboTimer);
 		character->GetWorldTimerManager().SetTimer(character->comboTimer, character, &ACharacter_Player::StopCombo, character->comboTime, false);

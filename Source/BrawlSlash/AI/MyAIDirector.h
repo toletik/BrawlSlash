@@ -23,9 +23,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	bool hasAStrongEnemyInInner{ false };
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float radiusFromPlayerToStartFight{ 0 };
-
 	// Sets default values for this actor's properties
 	AMyAIDirector();
 	// Called when the game starts or when spawned
@@ -38,10 +35,9 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 
 	void UpdateIfIsRespectingAngularDist();
 
+public:
 	void SetFocusToClosestEnemy();
 
-
-public:
 	void RemoveEnemy(ACharacter_EnemyBase* enemyToRemove);
 
 	void UpdateIfIsInInner();
@@ -71,6 +67,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	float radiusInnerCircle = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	float radiusBackCircle = 700.0f;
+
 	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
@@ -78,7 +80,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> dashPointInFightClassType;
 
-	AActor* dashPointInFight;
+	AActor* dashPointInFight = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float distanceFromSelfToDashPoint = 700.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float minDistanceToAdoptForCamera{ 800.0f };
