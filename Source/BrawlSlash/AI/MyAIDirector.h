@@ -105,4 +105,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float offsetFromTop{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Save)
+	int uniqueIndex{ 0 };
 };
