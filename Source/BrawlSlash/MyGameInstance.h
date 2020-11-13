@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "AI/MyAIDirector.h"
 #include "MyGameInstance.generated.h"
 
 /**
@@ -32,4 +33,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool hasTakenACheckpoint {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<int, bool> allDirectors;
+
 };
