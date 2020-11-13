@@ -587,16 +587,21 @@ FVector	ACharacter_Player::GetStickPoint()
 	//if focus is a Door
 	else if (focus->ActorHasTag("Door"))
 	{
-		FVector focusPos;
-		FVector focusBounds;
+		FHitResult hit;
+		FCollisionQueryParams raycastParams;
+		raycastParams.AddIgnoredActor(this);
+		FVector focusPos = focus->GetActorLocation();
+		focusPos.Z = GetActorLocation().Z;
+		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focusPos, ECC_WorldDynamic, raycastParams);
 
-		focus->GetActorBounds(true, focusPos, focusBounds);
-
-		if (FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
-			vectorToReturn = focus->GetActorLocation() + focus->GetActorForwardVector() * (focusBounds.X + stickPointNav);
-		else
-			vectorToReturn = focus->GetActorLocation() - focus->GetActorForwardVector() * (focusBounds.X + stickPointNav);
-		vectorToReturn.Z = GetActorLocation().Z;
+		if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Door"))
+		{
+			FVector hitLocation = hit.Location;
+			hitLocation.Z = GetActorLocation().Z;
+			FVector focusToHit = (hitLocation - focusPos);
+			focusToHit.Normalize();
+			vectorToReturn = hitLocation + focusToHit * stickPointNav;
+		}
 	}
 	//if focus is a Chest
 	else if (focus->ActorHasTag("Chest"))
@@ -604,7 +609,7 @@ FVector	ACharacter_Player::GetStickPoint()
 		FHitResult hit;
 		FCollisionQueryParams raycastParams;
 		raycastParams.AddIgnoredActor(this);
-		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_Pawn, raycastParams);
+		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_WorldDynamic, raycastParams);
 
 		if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Chest"))
 		{
