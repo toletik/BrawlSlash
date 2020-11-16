@@ -282,6 +282,7 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		else
 		{
 			enemyCast->ShieldHitted();
+			PlayerHitShield();
 			state = E_STATE::PUSHED_BACK;
 			StopCombo();
 			LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);

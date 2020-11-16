@@ -363,6 +363,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStopDashHitDashPoint();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerHitShield();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
