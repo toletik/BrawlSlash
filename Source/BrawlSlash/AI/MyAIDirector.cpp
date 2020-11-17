@@ -11,7 +11,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "Camera/CameraComponent.h"
-#include "../Interfaces/Interface_CustomEventCallable.h"
+
+#include "LevelSequenceActor.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
 
 // Sets default values
 AMyAIDirector::AMyAIDirector()
@@ -102,10 +105,12 @@ void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 
 	enemies.Remove(enemyToRemove);
 	
-	if (vipEnemies.Num() == 1 && vipEnemies.Contains(enemyToRemove) && actorInWhichCallCustomEventOnVipEnemiesDeath &&
-		actorInWhichCallCustomEventOnVipEnemiesDeath->Implements<UInterface_CustomEventCallable>())
-			IInterface_CustomEventCallable::Execute_AllVipEnemiesDead(actorInWhichCallCustomEventOnVipEnemiesDeath);
-
+	if (vipEnemies.Num() == 1 && vipEnemies.Contains(enemyToRemove) && sequenceToPlay)
+	{
+		ALevelSequenceActor* temp;
+		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlay, FMovieSceneSequencePlaybackSettings(), temp);
+		SequencePlayer->Play();
+	}
 
 	vipEnemies.Remove(enemyToRemove);
 

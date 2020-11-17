@@ -97,13 +97,15 @@ public:
 	int shieldPointMax{3};
 
 	//will be VisibleAnywhere after playTest
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
 	int currentShieldPoint{0};
 
-	void TakeHit(int damage, E_STATE attackerState) override;
+	void TakeHit(int damage) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	AActor* focus = nullptr;
+
+	AActor* initialFocus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float invincibleTime{ 1 };

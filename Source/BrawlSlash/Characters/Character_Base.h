@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-
+#include "../Interfaces/Interface_Damageable.h"
 #include "Character_Base.generated.h"
 
 UENUM(BlueprintType)
@@ -28,7 +28,7 @@ enum E_STATE
 };
 
 UCLASS()
-class BRAWLSLASH_API ACharacter_Base : public ACharacter
+class BRAWLSLASH_API ACharacter_Base : public ACharacter, public IInterface_Damageable
 {
 	GENERATED_BODY() 
 
@@ -43,18 +43,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* attackBox;
+	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
-	float health = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
-	float maxHealth = 5.0f;
 
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
-	virtual void TakeHit(int damage, E_STATE attackerState);
+	virtual void TakeHit(int damage) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 5.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
+	float health = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};
