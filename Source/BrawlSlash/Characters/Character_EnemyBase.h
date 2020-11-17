@@ -38,7 +38,7 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_EnemyBase();
 
-	void TakeHit(int damage, E_STATE attackerState) override;
+	void TakeHit(int damage) override;
 
 	//////////////////////////////////////////////////////////////
 	//Custom event
@@ -46,7 +46,10 @@ public:
 	void HitOther();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShieldHitted();
+	void ShieldFrontHitted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShieldBackHitted();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void LastEnemyInGroup();

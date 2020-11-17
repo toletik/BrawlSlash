@@ -61,8 +61,8 @@ public:
 	UPROPERTY(EditAnywhere, category = AI)
 	TArray<ACharacter_EnemyBase*> vipEnemies;
 
-	UPROPERTY(EditAnywhere, category = AI)
-	AActor* actorInWhichCallCustomEventOnVipEnemiesDeath {nullptr};
+	UPROPERTY(EditAnywhere, Category = AI, meta = (AllowPrivateAccess = "true"))
+	class ULevelSequence* sequenceToPlay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };

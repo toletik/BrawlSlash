@@ -25,6 +25,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "../MyGameInstance.h"
+#include "../interfaces/Interface_Damageable.h"
+#include "../LDBricks/LDBrick_DashPoint.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -270,29 +272,34 @@ void ACharacter_Player::FocusDetectorEndOverlap(UPrimitiveComponent* OverlappedC
 
 void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ACharacter_EnemyBase* enemyCast = Cast<ACharacter_EnemyBase>(OtherActor);
+	if (OtherActor == this)
+		return;
 
-	if (enemyCast)
+	IInterface_Damageable* damageableActor = Cast<IInterface_Damageable>(OtherActor);
+
+	if (damageableActor)
 	{
-		if (!enemyCast->ShieldCheckProtection(GetActorLocation()))
+		ACharacter_EnemyBase* enemyCast = Cast<ACharacter_EnemyBase>(OtherActor);
+
+		if (enemyCast && enemyCast->ShieldCheckProtection(GetActorLocation()))
 		{
-			enemyCast->TakeHit(toDoDamage, state);
-			EndAttack();
-		}
-		else
-		{
-			enemyCast->ShieldHitted();
 			state = E_STATE::PUSHED_BACK;
 			StopCombo();
 			LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);
 
 			if (actualCombo == 3)
 				isInReco = false;
+
+			return;
 		}
+
+		damageableActor->TakeHit(toDoDamage);
+		EndAttack();
 	}
+
 }
 
-void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
+void ACharacter_Player::TakeHit(int damage)
 {
 	if (currentInvincibleTime > 0)
 		return;
@@ -307,19 +314,10 @@ void ACharacter_Player::TakeHit(int damage, E_STATE attackerState)
 		return;
 	}
 
-	Super::TakeHit(damage, attackerState);
+	Super::TakeHit(damage);
 
 	if (health > 0)
 	{
-		if (state == E_STATE::IDLE)
-		{
-			if (attackerState == E_STATE::ATTACKING_WEAK)
-				state = E_STATE::HITTED_WEAK;
-
-			else if (attackerState == E_STATE::ATTACKING_STRONG)
-				state = E_STATE::HITTED_STRONG;
-		}
-
 		currentInvincibleTime = invincibleTime;
 		PlayerStartInvincibleTime();
 		PlayerStartHitted();
@@ -532,6 +530,8 @@ void ACharacter_Player::DashHit()
 	direction.Normalize();
 	dashDirection = direction;
 	LaunchCharacter(direction * 10000.0f, true, true);
+
+	initialFocus = focus;
 }
 
 void ACharacter_Player::DashBack()
@@ -571,8 +571,9 @@ void ACharacter_Player::DashBack()
 FVector	ACharacter_Player::GetStickPoint()
 {
 	FVector vectorToReturn = FVector::ZeroVector;
-
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
+
+
 	//if player is in fight
 	if (enemy)
 	{
@@ -635,9 +636,14 @@ bool ACharacter_Player::CheckIfFreeSpaceForDash()
 	FVector focusPos = focus->GetActorLocation();
 	focusPos.Z = GetActorLocation().Z;
 	GetWorld()->LineTraceSingleByChannel(hit, focusPos, dashPosToReach, ECC_WorldStatic, raycastParams);
+	DrawDebugLine(GetWorld(), focusPos, dashPosToReach, FColor::Blue, false, 1, 0, 5);
 
 	if (hit.GetActor())
+	{
+		GEngine->AddOnScreenDebugMessage(-44, 0.2f, FColor::Red, GetDebugName(hit.GetActor()));
 		return false;
+	}
+
 
 	return true;
 }
@@ -650,23 +656,22 @@ void ACharacter_Player::StopDashHit()
 	GetCharacterMovement()->BrakingFrictionFactor = 2.0f;
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
-	if (!focus)
-		state = E_STATE::IDLE;
-
-	else if (focus && focus->ActorHasTag("DashPoint"))
+	if (initialFocus->ActorHasTag("DashPoint"))
 	{
 		state = IDLE;
 		PlayerStopDashHitDashPoint();
 
+		ALDBrick_DashPoint* dashPoint = Cast<ALDBrick_DashPoint>(initialFocus);
+		dashPoint->OnPlayerEndDash();
+
 		if (currentEnemyGroup)
 		{
-			focus->Destroy();
+			initialFocus->Destroy();
 			SetActorEnableCollision(true);
 			currentEnemyGroup->SetFocusToClosestEnemy();
 			currentEnemyGroup->UpdateIfIsInInner();
 		}
 	}
-
 	else
 	{
 		if (currentEnemyGroup)

@@ -47,7 +47,7 @@ void ACharacter_Base::EndAttack()
 	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ACharacter_Base::TakeHit(int damage, E_STATE attackerState)
+void ACharacter_Base::TakeHit(int damage)
 {
 	health -= damage;
 

@@ -77,21 +77,35 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 
 	if (playerCast && OtherComp == Cast<UPrimitiveComponent>(playerCast->GetCapsuleComponent()))
 	{
-		playerCast->TakeHit(toDoDamage, state);
+		float tempHealth = playerCast->health;
+		playerCast->TakeHit(toDoDamage);
 
-		if (playerCast->state != E_STATE::DEAD
-		&& ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) 
-		|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject)))
+		if (playerCast->health < tempHealth)
 		{
-			playerCast->state = E_STATE::PROJECTED;
-			playerCast->PlayerStartIsProjected();
+			if (playerCast->state == E_STATE::IDLE)
+			{
+				if (state == E_STATE::ATTACKING_WEAK)
+					playerCast->state = E_STATE::HITTED_WEAK;
+
+				else if (state == E_STATE::ATTACKING_STRONG)
+					playerCast->state = E_STATE::HITTED_STRONG;
+			}
+
+			if (playerCast->state != E_STATE::DEAD
+			&& ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject) 
+			|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject)))
+			{
+				playerCast->state = E_STATE::PROJECTED;
+				playerCast->PlayerStartIsProjected();
+			}
 		}
+
 	}
 }
 
-void ACharacter_EnemyBase::TakeHit(int damage, E_STATE attackerState)
+void ACharacter_EnemyBase::TakeHit(int damage)
 {
-	Super::TakeHit(damage, attackerState);
+	Super::TakeHit(damage);
 
 	if (health > 0)
 	{
@@ -166,22 +180,37 @@ bool ACharacter_EnemyBase::ShieldCheckProtection(FVector attackerPos)
 	FVector selfToAttacker = attackerPos - GetActorLocation();
 	selfToAttacker.Normalize();
 
-	float angle = 0;
 
-	if(isShieldInFront)
-		angle = acos(FVector::DotProduct(selfToAttacker, GetActorForwardVector()) ) * 180 / PI;
-	else if (isShieldInBack)
-		angle = acos(FVector::DotProduct(selfToAttacker, -GetActorForwardVector()) ) * 180 / PI;
-
-	if (angle > 180)
-		angle = 360 - angle;
-
-	if (angle <= angleAcceptanceForDefense)
+	if (isShieldInFront)
 	{
-		GEngine->AddOnScreenDebugMessage(-49, 1.0f, FColor::Green, "!!!BLOCK!!!");
-		return true;
+		float angle = acos(FVector::DotProduct(selfToAttacker, GetActorForwardVector()) ) * 180 / PI;
+
+		if (angle > 180)
+				angle = 360 - angle;
+
+		if (angle <= angleAcceptanceForDefense)
+		{
+			GEngine->AddOnScreenDebugMessage(-49, 1.0f, FColor::Green, "!!!BLOCK!!!");
+			ShieldFrontHitted();
+			return true;
+		}
 	}
-	
+
+	if (isShieldInBack)
+	{
+		float angle = acos(FVector::DotProduct(selfToAttacker, -GetActorForwardVector())) * 180 / PI;
+
+		if (angle > 180)
+			angle = 360 - angle;
+
+		if (angle <= angleAcceptanceForDefense)
+		{
+			GEngine->AddOnScreenDebugMessage(-49, 1.0f, FColor::Green, "!!!BLOCK!!!");
+			ShieldBackHitted();
+			return true;
+		}
+	}
+
 	return false;
 }
 
