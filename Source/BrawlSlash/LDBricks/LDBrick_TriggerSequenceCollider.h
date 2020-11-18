@@ -23,6 +23,13 @@ class BRAWLSLASH_API ALDBrick_TriggerSequenceCollider : public AActor
 	UPROPERTY(EditAnywhere, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	class ULevelSequence* sequenceToPlay;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
+	bool stopPlayerMovementOnSequence = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
+	bool isSequenceSkippable = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* boxCollider;
 	class ACharacter_Player* playerReference{ nullptr };
 };

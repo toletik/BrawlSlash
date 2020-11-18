@@ -13,9 +13,6 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI, meta = (AllowPrivateAccess = "true"))
-	TArray<ACharacter_EnemyBase*> enemies;	
-	
 	TArray<ACharacter_EnemyBase*> enemiesInInner;
 
 	UPROPERTY(EditAnywhere, category = AI)
@@ -30,12 +27,16 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
 	void UpdateIfNeedToStartFight();
 
 	void UpdateIfIsRespectingAngularDist();
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	TArray<ACharacter_EnemyBase*> enemies;	
+	
+	void StartFight();
+
 	void SetFocusToClosestEnemy();
 
 	void RemoveEnemy(ACharacter_EnemyBase* enemyToRemove);
@@ -63,6 +64,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class ULevelSequence* sequenceToPlay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	bool stopPlayerMovementOnSequence = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	bool isSequenceSkippable = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	FRotator rotationForTheFight { 0, 0, 0 };
@@ -108,4 +115,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Save)
 	int uniqueIndex{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Save)
+	bool canClearIndex{ true };
 };

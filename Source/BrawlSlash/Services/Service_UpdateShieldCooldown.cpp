@@ -19,7 +19,10 @@ void UService_UpdateShieldCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "Active");
 		enemy->currentShieldTimeActive -= DeltaSeconds;
 		if (enemy->currentShieldTimeActive <= 0)
+		{
 			enemy->currentShieldTimeToDeActivate = enemy->shieldTimeToDeActivate;
+			enemy->ShieldToDeActivate();
+		}
 	}
 
 	if (enemy->currentShieldTimeToDeActivate > 0)
@@ -38,7 +41,10 @@ void UService_UpdateShieldCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "DeActive");
 		enemy->currentShieldTimeDeActivate -= DeltaSeconds;
 		if (enemy->currentShieldTimeDeActivate <= 0)
+		{
 			enemy->currentShieldTimeToActivate = enemy->shieldTimeToActivate;
+			enemy->ShieldToActivate();
+		}
 	}
 
 	if (enemy->currentShieldTimeToActivate > 0)

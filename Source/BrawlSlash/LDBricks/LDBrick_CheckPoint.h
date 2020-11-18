@@ -23,6 +23,7 @@ class BRAWLSLASH_API ALDBrick_CheckPoint : public AActor
 	UPROPERTY(EditAnywhere, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	FRotator rotationForRespawn{ 0, 0, 0 };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* boxCollider;
 	class ACharacter_Player* playerReference{ nullptr };
 	class UMyGameInstance* gameInstanceReference{ nullptr };

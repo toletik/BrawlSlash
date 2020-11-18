@@ -10,7 +10,5 @@
 void UAnimNotify_OnPlayerDeath::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	UMyGameInstance* gameInstance = Cast<UMyGameInstance>(MeshComp->GetOwner()->GetGameInstance());
-	gameInstance->numberOfPlayerShieldPoints = 0;
-
 	UGameplayStatics::OpenLevel(MeshComp->GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(MeshComp->GetWorld())));
 }

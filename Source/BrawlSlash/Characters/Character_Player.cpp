@@ -27,6 +27,9 @@
 #include "../MyGameInstance.h"
 #include "../interfaces/Interface_Damageable.h"
 #include "../LDBricks/LDBrick_DashPoint.h"
+#include "LevelSequenceActor.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -76,7 +79,8 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ACharacter_Player::LookUpAtRate);
 
 	//Buttons
-	PlayerInputComponent->BindAction("DashBack", IE_Pressed, this, &ACharacter_Player::StartDashBack);
+	PlayerInputComponent->BindAction("DashBack", IE_Pressed, this, &ACharacter_Player::OnAPressed);
+	PlayerInputComponent->BindAction("DashBack", IE_Released, this, &ACharacter_Player::OnAReleased);
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("FocusNextEnemy", IE_Pressed, this, &ACharacter_Player::GetNextFocus);
 	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
@@ -110,6 +114,13 @@ void ACharacter_Player::BeginPlay()
 	//Focus Detector
 	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
 	detectorOfFocus->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
+
+	if (gameInstance->hasRestartLevel && sequenceToPlayOnRestart)
+	{
+		ALevelSequenceActor* temp;
+		currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlayOnRestart, FMovieSceneSequencePlaybackSettings(), temp);
+		currentSequence->Play();
+	}
 }
 
 // Called every frame
@@ -117,7 +128,7 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateTimers();
+	UpdateTimers(DeltaTime);
 
 	UpdateDebug();
 
@@ -132,19 +143,44 @@ void ACharacter_Player::Tick(float DeltaTime)
 	UpdateDashingHit();
 
 	UpdateDashingBack();
+
+	CheckGround();
 }
 
-void ACharacter_Player::UpdateTimers()
+void ACharacter_Player::UpdateTimers(float deltaTime)
 {
 	if (currentInvincibleTime > 0)
 	{
-		currentInvincibleTime -= GetWorld()->GetDeltaSeconds();
+		currentInvincibleTime -= deltaTime;
 
 		if (currentInvincibleTime <= 0)
 			PlayerEndInvincibleTime();
 	}
 
-	currentTimeForComeBack += GetWorld()->GetDeltaSeconds();
+	currentTimeForComeBack += deltaTime;
+
+	if (currentSequence && !currentSequence->IsPlaying())
+	{
+		currentSequence = nullptr;
+		isHoldingInputToPassSequence = false;
+		currentTimeToPassSequence = 0.0f;
+		isSequenceSkippable = false;
+		state = IDLE;
+	}
+
+	if (isHoldingInputToPassSequence)
+	{
+		currentTimeToPassSequence += deltaTime;
+		if (currentTimeToPassSequence >= timeToPassSequence)
+		{
+			isHoldingInputToPassSequence = false;
+			isSequenceSkippable = false;
+			currentTimeToPassSequence = 0.0f;
+			currentSequence->GoToEndAndStop();
+			currentSequence = nullptr;
+			state = IDLE;
+		}
+	}
 }
 void ACharacter_Player::UpdateDebug()
 {
@@ -243,6 +279,22 @@ void ACharacter_Player::UpdateDashingBack()
 		StopDashBack();
 }
 
+void ACharacter_Player::CheckGround()
+{
+	if (state != IDLE || GetCharacterMovement()->IsFalling())
+		return;
+
+	FHitResult hit;
+	FCollisionQueryParams raycastParams;
+	raycastParams.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() - FVector::UpVector * 100.0f, ECC_WorldStatic, raycastParams);
+
+	if (hit.GetActor() && hit.GetActor()->ActorHasTag("Stone"))
+		isOnStone = true;
+	else
+		isOnStone = false;
+}
+
 void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor->ActorHasTag("Focusable"))
@@ -309,6 +361,7 @@ void ACharacter_Player::TakeHit(int damage)
 	{
 		currentShieldPoint--;
 		PlayerLostShieldPoint();
+		currentInvincibleTime = invincibleTime;
 		if (currentShieldPoint == 0)
 			PlayerLostAllShieldPoints();
 
@@ -321,10 +374,19 @@ void ACharacter_Player::TakeHit(int damage)
 	{
 		currentInvincibleTime = invincibleTime;
 		PlayerStartInvincibleTime();
-		PlayerStartHitted();
 	}
 	else
+	{
 		DisableInput(GetWorld()->GetFirstPlayerController());
+		gameInstance->numberOfPlayerShieldPoints = 0;
+		gameInstance->hasRestartLevel = true;
+		if (sequenceToPlayOnDeath)
+		{
+			ALevelSequenceActor* temp;
+			currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlayOnDeath, FMovieSceneSequencePlaybackSettings(), temp);
+			currentSequence->Play();
+		}
+	}
 }
 
 //Left Joystick
@@ -444,6 +506,7 @@ void ACharacter_Player::Attack()
 			{
 				actualCombo = 1;
 				toDoDamage = firstComboDamage;
+				PlayerCombo1();
 			}
 		}
 	}
@@ -455,10 +518,15 @@ void ACharacter_Player::SetNextAttackCombo()
 	actualCombo++;
 
 	if (actualCombo == 2)
+	{
 		toDoDamage = secondComboDamage;
-
+		PlayerCombo2();
+	}
 	else
+	{
 		toDoDamage = thirdComboDamage;
+		PlayerCombo3();
+	}
 }
 
 bool ACharacter_Player::CheckIfCanDash()
@@ -471,6 +539,12 @@ bool ACharacter_Player::CheckIfCanDash()
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(this);
+
+	if (currentEnemyGroup)
+		for (int i = 0; i < currentEnemyGroup->enemies.Num(); ++i)
+			if (currentEnemyGroup->enemies[i] != focus)
+				raycastParams.AddIgnoredActor(currentEnemyGroup->enemies[i]);
+
 	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_WorldStatic, raycastParams);
 
 	float distanceToFocus = (hit.Location - GetActorLocation()).Size();
@@ -483,11 +557,21 @@ bool ACharacter_Player::CheckIfCanDash()
 	return false;
 }
 
-void ACharacter_Player::StartDashBack()
+void ACharacter_Player::OnAPressed()
 {
-	//called with "A" input
+	if (isSequenceSkippable)
+		isHoldingInputToPassSequence = true;
 	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING) && Cast<ACharacter_EnemyBase>(focus))
 		StartDash(E_STATE::DASHING_BACK);
+}
+
+void ACharacter_Player::OnAReleased()
+{
+	if (isSequenceSkippable)
+	{
+		isHoldingInputToPassSequence = false;
+		currentTimeToPassSequence = 0.0f;
+	}
 }
 
 void ACharacter_Player::StartDash(E_STATE teleportState)

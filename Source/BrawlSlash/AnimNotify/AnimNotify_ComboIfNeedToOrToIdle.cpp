@@ -16,7 +16,7 @@ void UAnimNotify_ComboIfNeedToOrToIdle::Notify(USkeletalMeshComponent* MeshComp,
 			player->needToAttack = false;
 			player->SetNextAttackCombo();
 		}
-		else if (player->state != E_STATE::DEAD)
+		else if (player->state != E_STATE::DEAD && player->state != CINEMATIC)
 			player->state = E_STATE::IDLE;
 	}
 }

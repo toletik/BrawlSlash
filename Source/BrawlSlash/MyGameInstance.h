@@ -20,21 +20,26 @@ public:
 	bool isXRevert{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isYRevert{ false };
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float volumeMusic{ 50.0f };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float volumeSFX{ 50.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector lastCheckPointPos {0, 0, 0};
+	FVector lastPlayerPos {0, 0, 0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator lastCheckPointRot {0, 0, 0};
+	FRotator lastPlayerRot {0, 0, 0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int numberOfPlayerShieldPoints{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool hasTakenACheckpoint {false};
+	bool hasRestartLevel {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<int, bool> allDirectors;
 
+	UFUNCTION(BlueprintCallable)
+	void RestartLevelWithInitialValues();
 };

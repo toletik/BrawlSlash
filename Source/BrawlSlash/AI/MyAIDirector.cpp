@@ -51,8 +51,6 @@ void AMyAIDirector::Tick(float DeltaTime)
 
 }
 
-
-
 void AMyAIDirector::UpdateIfNeedToStartFight()
 {
 	if (playerReference->isInSafeZone)
@@ -62,22 +60,28 @@ void AMyAIDirector::UpdateIfNeedToStartFight()
 	{
 		if ((enemies[i]->GetActorLocation() - playerReference->GetActorLocation()).Size() < radiusBackCircle)
 		{
-			isInFight = true;
-
-			for (int j = 0; j < enemies.Num(); ++j)
-				enemies[j]->EnemyStartFight();
-
-			UpdateIfIsInInner();
-
-			playerReference->currentEnemyGroup = this;
-			playerReference->focus = enemies[i];
-			playerReference->SetCameraStatsFight(rotationForTheFight, minDistanceToAdoptForCamera, maxDistanceToAdoptForCamera);
-			playerReference->debugInnerCircleRadius = radiusInnerCircle;
-			playerReference->debugBackCircleRadius = radiusBackCircle;
-			playerReference->PlayerStartFight();
+			StartFight();
 			return;
 		}
 	}
+}
+
+void AMyAIDirector::StartFight()
+{
+	isInFight = true;
+
+	for (int j = 0; j < enemies.Num(); ++j)
+		enemies[j]->EnemyStartFight();
+
+	playerReference->currentEnemyGroup = this;
+
+	UpdateIfIsInInner();
+	SetFocusToClosestEnemy();
+
+	playerReference->SetCameraStatsFight(rotationForTheFight, minDistanceToAdoptForCamera, maxDistanceToAdoptForCamera);
+	playerReference->debugInnerCircleRadius = radiusInnerCircle;
+	playerReference->debugBackCircleRadius = radiusBackCircle;
+	playerReference->PlayerStartFight();
 }
 
 void AMyAIDirector::SetEndToFight()
@@ -108,8 +112,11 @@ void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 	if (vipEnemies.Num() == 1 && vipEnemies.Contains(enemyToRemove) && sequenceToPlay)
 	{
 		ALevelSequenceActor* temp;
-		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlay, FMovieSceneSequencePlaybackSettings(), temp);
-		SequencePlayer->Play();
+		playerReference->currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlay, FMovieSceneSequencePlaybackSettings(), temp);
+		playerReference->currentSequence->Play();
+		playerReference->isSequenceSkippable = isSequenceSkippable;
+		if (stopPlayerMovementOnSequence)
+			playerReference->state = CINEMATIC;
 	}
 
 	vipEnemies.Remove(enemyToRemove);

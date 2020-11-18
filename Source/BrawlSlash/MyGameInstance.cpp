@@ -3,3 +3,9 @@
 
 #include "MyGameInstance.h"
 
+void UMyGameInstance::RestartLevelWithInitialValues()
+{
+	allDirectors.Empty();
+	numberOfPlayerShieldPoints = 0;
+	hasRestartLevel = false;
+}

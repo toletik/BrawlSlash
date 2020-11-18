@@ -85,10 +85,16 @@ void ACharacter_EnemyBase::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 			if (playerCast->state == E_STATE::IDLE)
 			{
 				if (state == E_STATE::ATTACKING_WEAK)
+				{
 					playerCast->state = E_STATE::HITTED_WEAK;
+					playerCast->PlayerStartHittedWeak();
+				}
 
 				else if (state == E_STATE::ATTACKING_STRONG)
+				{
 					playerCast->state = E_STATE::HITTED_STRONG;
+					playerCast->PlayerStartHittedStrong();
+				}
 			}
 
 			if (playerCast->state != E_STATE::DEAD
@@ -220,14 +226,16 @@ void ACharacter_EnemyBase::ShieldActivate()
 	{
 		isShieldInFront = true;
 		shieldFront->SetVisibility(true);
-		isNextShieldToCycleFront = false;
+		EnemyShieldFrontStartActive();
 	}
 	else
 	{
 		isShieldInBack = true;
 		shieldBack->SetVisibility(true);
-		isNextShieldToCycleFront = true;
+		EnemyShieldBackStartActive();
 	}
+
+	isNextShieldToCycleFront = !isNextShieldToCycleFront;
 }
 void ACharacter_EnemyBase::ShieldDeActivate()
 {
@@ -235,12 +243,30 @@ void ACharacter_EnemyBase::ShieldDeActivate()
 	{
 		isShieldInFront = false;
 		shieldFront->SetVisibility(false);
+		EnemyShieldFrontStartDeactive();
 	}
 	else
 	{
 		isShieldInBack = false;
 		shieldBack->SetVisibility(false);
+		EnemyShieldBackStartDeactive();
 	}
+}
+
+void ACharacter_EnemyBase::ShieldToActivate()
+{
+	if (isNextShieldToCycleFront)
+		EnemyShieldFrontStartToActive();
+	else
+		EnemyShieldBackStartToActive();
+}
+
+void ACharacter_EnemyBase::ShieldToDeActivate()
+{
+	if (isNextShieldToCycleFront)
+		EnemyShieldFrontStartToDeactive();
+	else
+		EnemyShieldBackStartToDeactive();
 }
 
 void ACharacter_EnemyBase::LookAtPlayer()

@@ -23,6 +23,7 @@ class BRAWLSLASH_API ALDBrick_SafeZone : public AActor
 	UFUNCTION()
 	void BoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* boxCollider;
 	class ACharacter_Player* playerReference{ nullptr };
 };

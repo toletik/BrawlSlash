@@ -31,12 +31,11 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	class UMyGameInstance* gameInstance;
 
-
 	void LookAtFocus(bool lerp);
 
 	void DashAttack();
 
-	void UpdateTimers();
+	void UpdateTimers(float deltaTime);
 
 	void UpdateDebug();
 
@@ -47,7 +46,11 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	void UpdateDashingHit();
 
 	void UpdateDashingBack();	
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
+	bool isOnStone = false;
+
+	void CheckGround();
 
 protected:
 	// Called to bind functionality to input
@@ -70,7 +73,8 @@ protected:
 	//Buttons
 	bool CheckIfCanDash();
 	void StartDash(E_STATE dashState);
-	void StartDashBack();
+	void OnAPressed();
+	void OnAReleased();
 	void DashBack();
 	void DashHit();
 
@@ -142,8 +146,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float knockbackForceAfterAttackBlocked = 1000.0f;
 
-
-
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Dash
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
@@ -182,7 +184,6 @@ public:
 	FVector	GetStickPoint();
 
 	bool CheckIfFreeSpaceForDash();
-
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Attack
@@ -334,6 +335,27 @@ public:
 
 	void SetCameraStatsFight(FRotator rotationToAdopt, float minDistanceToAdopt, float maxDistanceToAdopt);
 
+	//Sequence
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sequence)
+	bool isHoldingInputToPassSequence = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sequence)
+	bool isSequenceSkippable = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sequence)
+	float currentTimeToPassSequence = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sequence)
+	float timeToPassSequence = 2.0f;
+
+	class ULevelSequencePlayer* currentSequence = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Sequence)
+	class ULevelSequence* sequenceToPlayOnRestart = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Sequence)
+	class ULevelSequence* sequenceToPlayOnDeath = nullptr;
+
 	//Events
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartFight();
@@ -354,7 +376,10 @@ public:
 	void PlayerEndInvincibleTime();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlayerStartHitted();
+	void PlayerStartHittedWeak();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartHittedStrong();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerLostShieldPoint();
@@ -367,6 +392,15 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerHitShield();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerCombo1();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerCombo2();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerCombo3();
 
 	//////////////////////////////////////////////////////////////
 	//DEBUG

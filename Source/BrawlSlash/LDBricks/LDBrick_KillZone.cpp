@@ -9,6 +9,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
 #include "../MyGameInstance.h"
+#include "LevelSequenceActor.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
 
 ALDBrick_KillZone::ALDBrick_KillZone()
 {
@@ -30,7 +33,14 @@ void ALDBrick_KillZone::BoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AAc
 {
 	if (OtherComp == playerReference->GetCapsuleComponent())
 	{
+		gameInstanceReference->hasRestartLevel = true;
 		gameInstanceReference->numberOfPlayerShieldPoints = playerReference->currentShieldPoint;
+		if (sequenceToPlayOnPlayerDeath)
+		{
+			ALevelSequenceActor* temp;
+			playerReference->currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlayOnPlayerDeath, FMovieSceneSequencePlaybackSettings(), temp);
+			playerReference->currentSequence->Play();
+		}
 		UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
 	}
 }

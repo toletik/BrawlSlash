@@ -32,8 +32,11 @@ void ALDBrick_TriggerSequenceCollider::BoxBeginOverlap(UPrimitiveComponent* Over
 	if (OtherComp == playerReference->GetCapsuleComponent())
 	{
 		ALevelSequenceActor* temp;
-		ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlay, FMovieSceneSequencePlaybackSettings(), temp);
-		SequencePlayer->Play();
+		playerReference->currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlay, FMovieSceneSequencePlaybackSettings(), temp);
+		playerReference->currentSequence->Play();
+		playerReference->isSequenceSkippable = isSequenceSkippable;
+		if (stopPlayerMovementOnSequence)
+			playerReference->state = CINEMATIC;
 		Destroy();
 	}
 }

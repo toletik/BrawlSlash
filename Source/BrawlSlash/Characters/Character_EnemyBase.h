@@ -40,20 +40,6 @@ public:
 
 	void TakeHit(int damage) override;
 
-	//////////////////////////////////////////////////////////////
-	//Custom event
-	UFUNCTION(BlueprintImplementableEvent)
-	void HitOther();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void ShieldFrontHitted();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void ShieldBackHitted();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void LastEnemyInGroup();
-	//////////////////////////////////////////////////////////////
 
 	UFUNCTION(BlueprintCallable)
 	void BeginAttackCircle();
@@ -137,6 +123,8 @@ public:
 	bool ShieldCheckProtection(FVector attackerPos);
 	void ShieldActivate();
 	void ShieldDeActivate();
+	void ShieldToActivate();
+	void ShieldToDeActivate();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float initialWaitShield{ 0.1f };
@@ -199,7 +187,20 @@ public:
 
 	bool isInStartupCone = false;
 
-	//Event
+	//////////////////////////////////////////////////////////////
+	//Custom event
+	UFUNCTION(BlueprintImplementableEvent)
+	void HitOther();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShieldFrontHitted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShieldBackHitted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void LastEnemyInGroup();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnemyStartNeedAttackWeak();
 
@@ -211,6 +212,31 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnemyStartFight();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldFrontStartActive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldFrontStartDeactive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldFrontStartToActive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldFrontStartToDeactive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldBackStartActive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldBackStartDeactive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldBackStartToActive();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EnemyShieldBackStartToDeactive();
+	//////////////////////////////////////////////////////////////
 };
 
 

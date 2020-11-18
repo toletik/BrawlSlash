@@ -30,5 +30,6 @@ void UAnimNotify_DespawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp,
 		}
 		
 		enemy->currentEnemyGroup->dashPointInFight->Destroy();
+		enemy->currentEnemyGroup->dashPointInFight = nullptr;
 	}
 }
