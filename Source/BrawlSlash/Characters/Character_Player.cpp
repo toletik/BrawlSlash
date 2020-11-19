@@ -30,6 +30,7 @@
 #include "LevelSequenceActor.h"
 #include "LevelSequence.h"
 #include "LevelSequencePlayer.h"
+#include "Component_EnemyShield.h"
 
 // Sets default values
 ACharacter_Player::ACharacter_Player()
@@ -62,6 +63,9 @@ ACharacter_Player::ACharacter_Player()
 	
 	detectorOfFocus = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FocusDetector"));
 	detectorOfFocus->SetupAttachment(RootComponent);
+
+	attackBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBox"));
+	attackBox->SetupAttachment(RootComponent);
 }
 
 void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -110,6 +114,7 @@ void ACharacter_Player::BeginPlay()
 	currentTimeForComeBack = timeForComeBack;
 
 	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
+	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	//Focus Detector
 	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
@@ -332,20 +337,23 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	if (damageableActor)
 	{
 		ACharacter_EnemyBase* enemyCast = Cast<ACharacter_EnemyBase>(OtherActor);
-
-		if (enemyCast && enemyCast->ShieldCheckProtection(GetActorLocation()))
+		if (enemyCast)
 		{
-			PlayerHitShield();
-			state = E_STATE::PUSHED_BACK;
-			StopCombo();
-			LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);
+			UComponent_EnemyShield* shield = enemyCast->FindComponentByClass<UComponent_EnemyShield>();
 
-			if (actualCombo == 3)
-				isInReco = false;
+			if (shield && shield->ShieldCheckProtection(GetActorLocation()))
+			{
+				PlayerHitShield();
+				state = E_STATE::PUSHED_BACK;
+				StopCombo();
+				LaunchCharacter(-GetActorForwardVector() * knockbackForceAfterAttackBlocked, true, true);
 
-			return;
+				if (actualCombo == 3)
+					isInReco = false;
+
+				return;
+			}
 		}
-
 		damageableActor->TakeHit(toDoDamage);
 		EndAttack();
 	}
@@ -958,4 +966,14 @@ void ACharacter_Player::StopDashBackRecovery()
 void ACharacter_Player::StopDashHitRecovery()
 {
 	isDashHitInCooldown = false;
+}
+
+void ACharacter_Player::BeginAttack()
+{
+	attackBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void ACharacter_Player::EndAttack()
+{
+	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

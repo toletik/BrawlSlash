@@ -5,21 +5,21 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "../Characters/Character_Player.h"
-#include "../Characters/Character_EnemyBase.h"
+#include "../Characters/Character_EnemyStrong.h"
 #include "../AI/MyAIDirector.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UAnimNotify_DespawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (enemy && enemy->currentEnemyGroup->dashPointInFight)
+	if (enemyStrong->currentEnemyGroup->dashPointInFight)
 	{
-		ACharacter_Player* player = enemy->currentEnemyGroup->playerReference;
+		ACharacter_Player* player = enemyStrong->currentEnemyGroup->playerReference;
 
-		if (player->focus == enemy->currentEnemyGroup->dashPointInFight)
+		if (player->focus == enemyStrong->currentEnemyGroup->dashPointInFight)
 		{
-			enemy->currentEnemyGroup->SetFocusToClosestEnemy();
+			enemyStrong->currentEnemyGroup->SetFocusToClosestEnemy();
 
 			if (player->state == DASHING_HIT)
 			{
@@ -29,7 +29,7 @@ void UAnimNotify_DespawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp,
 			}
 		}
 		
-		enemy->currentEnemyGroup->dashPointInFight->Destroy();
-		enemy->currentEnemyGroup->dashPointInFight = nullptr;
+		enemyStrong->currentEnemyGroup->dashPointInFight->Destroy();
+		enemyStrong->currentEnemyGroup->dashPointInFight = nullptr;
 	}
 }

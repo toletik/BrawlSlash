@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "AnimNotifyState_Attack.generated.h"
+#include "AnimNotifyState_EnemyWeakAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRAWLSLASH_API UAnimNotifyState_Attack : public UAnimNotifyState
+class BRAWLSLASH_API UAnimNotifyState_EnemyWeakAttack : public UAnimNotifyState
 {
 	GENERATED_BODY()
-	
+
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
-	
+
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 };

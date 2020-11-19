@@ -13,10 +13,6 @@ ACharacter_Base::ACharacter_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-
-	attackBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackBox"));
-	attackBox->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -27,8 +23,6 @@ void ACharacter_Base::BeginPlay()
 	health = maxHealth;
 
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
-
-	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame
@@ -37,15 +31,6 @@ void ACharacter_Base::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACharacter_Base::BeginAttack()
-{
-	attackBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-}
-
-void ACharacter_Base::EndAttack()
-{
-	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
 
 void ACharacter_Base::TakeHit(int damage)
 {

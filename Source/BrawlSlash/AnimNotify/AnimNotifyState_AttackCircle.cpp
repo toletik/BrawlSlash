@@ -2,21 +2,19 @@
 
 
 #include "AnimNotifyState_AttackCircle.h"
-#include "../Characters/Character_EnemyBase.h"
+#include "../Characters/Character_EnemyStrong.h"
 #include "Components/SkeletalMeshComponent.h"
 
 void UAnimNotifyState_AttackCircle::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
-	ACharacter_EnemyBase* character = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (character)
-		character->BeginAttackCircle();
+	enemyStrong->BeginAttackCircle();
 }
 
 void UAnimNotifyState_AttackCircle::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	ACharacter_EnemyBase* character = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (character)
-		character->EndAttackCircle();
+	enemyStrong->EndAttackCircle();
 }

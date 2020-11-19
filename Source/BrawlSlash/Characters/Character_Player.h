@@ -52,6 +52,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	void CheckGround();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* attackBox;
+
 protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -201,6 +204,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 	int dashHitDamage = 4;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attack)
+	int toDoDamage{ 0 };
+
+	void BeginAttack();
+
+	void EndAttack();
 
 	void Attack();
 

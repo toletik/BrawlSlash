@@ -4,11 +4,11 @@
 #include "Service_SetStateToAttackingWeak.h"
 
 #include "AIController.h"
-#include "../Characters/Character_EnemyBase.h"
+#include "../Characters/Character_EnemyWeak.h"
 
 void UService_SetStateToAttackingWeak::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
+	ACharacter_EnemyWeak* enemy = Cast<ACharacter_EnemyWeak>(OwnerComp.GetAIOwner()->GetPawn());
 
 	enemy->state = E_STATE::ATTACKING_WEAK;
 	enemy->EnemyStartAttackWeak();

@@ -4,57 +4,60 @@
 #include "Service_UpdateShieldCooldown.h"
 #include "AIController.h"
 #include "../Characters/Character_EnemyBase.h"
+#include "../Characters/Component_EnemyShield.h"
 
 void UService_UpdateShieldCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (!enemy->isShieldSwitchable)
+	UComponent_EnemyShield* shield = enemy->FindComponentByClass<UComponent_EnemyShield>();
+
+	if (!shield || !shield->isShieldSwitchable)
 		return;
 
-	if (enemy->initialWaitShield > 0)
-		enemy->initialWaitShield -= DeltaSeconds;
-	else if (enemy->currentShieldTimeActive > 0)
+	if (shield->initialWaitShield > 0)
+		shield->initialWaitShield -= DeltaSeconds;
+	else if (shield->currentShieldTimeActive > 0)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "Active");
-		enemy->currentShieldTimeActive -= DeltaSeconds;
-		if (enemy->currentShieldTimeActive <= 0)
+		shield->currentShieldTimeActive -= DeltaSeconds;
+		if (shield->currentShieldTimeActive <= 0)
 		{
-			enemy->currentShieldTimeToDeActivate = enemy->shieldTimeToDeActivate;
-			enemy->ShieldToDeActivate();
+			shield->currentShieldTimeToDeActivate = shield->shieldTimeToDeActivate;
+			shield->ShieldToDeActivate();
 		}
 	}
 
-	if (enemy->currentShieldTimeToDeActivate > 0)
+	if (shield->currentShieldTimeToDeActivate > 0)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "ToDeActive");
-		enemy->currentShieldTimeToDeActivate -= DeltaSeconds;
-		if (enemy->currentShieldTimeToDeActivate <= 0)
+		shield->currentShieldTimeToDeActivate -= DeltaSeconds;
+		if (shield->currentShieldTimeToDeActivate <= 0)
 		{
-			enemy->currentShieldTimeDeActivate = enemy->shieldTimeDeActivate;
-			enemy->ShieldDeActivate();
+			shield->currentShieldTimeDeActivate = shield->shieldTimeDeActivate;
+			shield->ShieldDeActivate();
 		}
 	}
 
-	if (enemy->currentShieldTimeDeActivate > 0)
+	if (shield->currentShieldTimeDeActivate > 0)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "DeActive");
-		enemy->currentShieldTimeDeActivate -= DeltaSeconds;
-		if (enemy->currentShieldTimeDeActivate <= 0)
+		shield->currentShieldTimeDeActivate -= DeltaSeconds;
+		if (shield->currentShieldTimeDeActivate <= 0)
 		{
-			enemy->currentShieldTimeToActivate = enemy->shieldTimeToActivate;
-			enemy->ShieldToActivate();
+			shield->currentShieldTimeToActivate = shield->shieldTimeToActivate;
+			shield->ShieldToActivate();
 		}
 	}
 
-	if (enemy->currentShieldTimeToActivate > 0)
+	if (shield->currentShieldTimeToActivate > 0)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Purple, "ToActive");
-		enemy->currentShieldTimeToActivate -= DeltaSeconds;
-		if (enemy->currentShieldTimeToActivate <= 0)
+		shield->currentShieldTimeToActivate -= DeltaSeconds;
+		if (shield->currentShieldTimeToActivate <= 0)
 		{
-			enemy->currentShieldTimeActive = enemy->shieldTimeActive;
-			enemy->ShieldActivate();
+			shield->currentShieldTimeActive = shield->shieldTimeActive;
+			shield->ShieldActivate();
 		}
 	}
 }

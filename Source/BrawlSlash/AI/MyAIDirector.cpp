@@ -11,6 +11,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "Camera/CameraComponent.h"
+#include "../Characters/Character_EnemyStrong.h"
 
 #include "LevelSequenceActor.h"
 #include "LevelSequence.h"
@@ -107,6 +108,9 @@ void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)
 		SetEndToFight();
 	}
 
+	else
+		enemyToRemove->EnemyDeath();
+
 	enemies.Remove(enemyToRemove);
 	
 	if (vipEnemies.Num() == 1 && vipEnemies.Contains(enemyToRemove) && sequenceToPlay)
@@ -137,14 +141,15 @@ void AMyAIDirector::UpdateIfIsInInner()
 	//Fill new Array
 	for (int i = 0; i < enemies.Num(); ++i)
 	{
-		if (enemies[i]->isAStrongEnemy && hasAStrongEnemyInInner == true)
+		ACharacter_EnemyStrong* strongEnemy = Cast<ACharacter_EnemyStrong>(enemies[i]);
+		if (strongEnemy && hasAStrongEnemyInInner == true)
 			continue;
 		else if (enemiesInInner.Num() < numberOfEnemiesToHaveInInner)
 		{
 			enemies[i]->isInInnerCircle = true;
 			enemiesInInner.Add(enemies[i]);
 
-			if (enemies[i]->isAStrongEnemy)
+			if (strongEnemy)
 				hasAStrongEnemyInInner = true;
 		}
 		else

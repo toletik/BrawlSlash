@@ -2,21 +2,19 @@
 
 
 #include "AnimNotifyState_IsInStartupCone.h"
-#include "../Characters/Character_EnemyBase.h"
+#include "../Characters/Character_EnemyStrong.h"
 #include "Components/SkeletalMeshComponent.h"
 
 void UAnimNotifyState_IsInStartupCone::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	ACharacter_EnemyStrong* enemy = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (enemy)
-		enemy->isInStartupCone = true;
+	enemy->isInStartupCone = true;
 }
 
 void UAnimNotifyState_IsInStartupCone::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(MeshComp->GetOwner());
+	ACharacter_EnemyStrong* enemy = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (enemy)
-		enemy->isInStartupCone = false;
+	enemy->isInStartupCone = false;
 }

@@ -40,12 +40,7 @@ protected:
 
 	UFUNCTION()
 	virtual void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {}
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* attackBox;
 	
-
-
 public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
@@ -66,13 +61,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float walkSpeed{ 600 };
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
-	int toDoDamage{ 0 };
-
-	UFUNCTION(BlueprintCallable)
-	void BeginAttack();
-
-	UFUNCTION(BlueprintCallable)
-	void EndAttack();
 };

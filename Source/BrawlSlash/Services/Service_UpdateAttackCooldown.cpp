@@ -11,7 +11,7 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 {
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (enemy->state == E_STATE::ATTACKING_WEAK || enemy->state == E_STATE::ATTACKING_STRONG || enemy->needToAttackWeak)
+	if (enemy->state == E_STATE::ATTACKING_WEAK || enemy->state == E_STATE::ATTACKING_STRONG)
 		return;
 
 	if (enemy->initialWaitAttack > 0)
@@ -21,12 +21,6 @@ void UService_UpdateAttackCooldown::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		enemy->currentAttackCoolDown -= DeltaSeconds;
 
 		if (enemy->currentAttackCoolDown < 0)
-		{
 			enemy->SetAttackState();
-			if (enemy->isInInnerCircle)
-				enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownInnerMin, enemy->attackCoolDownInnerMax);
-			else
-				enemy->currentAttackCoolDown = FMath::RandRange(enemy->attackCoolDownBackMin, enemy->attackCoolDownBackMax);
-		}
 	}
 }
