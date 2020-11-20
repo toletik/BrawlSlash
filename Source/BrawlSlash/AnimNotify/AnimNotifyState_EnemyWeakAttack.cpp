@@ -9,12 +9,14 @@ void UAnimNotifyState_EnemyWeakAttack::NotifyBegin(USkeletalMeshComponent* MeshC
 {
 	ACharacter_EnemyWeak* enemyWeak = Cast<ACharacter_EnemyWeak>(MeshComp->GetOwner());
 
-	enemyWeak->BeginAttack();
+	if (enemyWeak)
+		enemyWeak->BeginAttack();
 }
 
 void UAnimNotifyState_EnemyWeakAttack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	ACharacter_EnemyWeak* enemyWeak = Cast<ACharacter_EnemyWeak>(MeshComp->GetOwner());
 	
-	enemyWeak->EndAttack();
+	if (enemyWeak)
+		enemyWeak->EndAttack();
 }

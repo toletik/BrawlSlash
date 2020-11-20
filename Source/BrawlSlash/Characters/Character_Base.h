@@ -51,7 +51,7 @@ public:
 	float maxHealth = 5.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Characteristics", meta = (AllowPrivateAccess = "true"))
-	float health = 0.0f;
+	float health = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<E_STATE> state{E_STATE::IDLE};

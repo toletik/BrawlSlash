@@ -17,8 +17,15 @@ class BRAWLSLASH_API ACharacter_EnemyStrongWithShield : public ACharacter_EnemyS
 public:
 	ACharacter_EnemyStrongWithShield();
 
-	void TakeHit(int damage) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield")
+	class UStaticMeshComponent* meshShieldFront;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shield)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield")
+	class UStaticMeshComponent* meshShieldBack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield")
 	class UComponent_EnemyShield* shieldComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float attackCircleAngle = 0.0f;
 };

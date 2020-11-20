@@ -10,15 +10,6 @@ UComponent_EnemyShield::UComponent_EnemyShield()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	shieldFront = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldFront"));
-	shieldBack = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldBack"));
-}
-
-void UComponent_EnemyShield::AttachToOwner()
-{
-	shieldFront->SetupAttachment(GetOwner()->GetRootComponent());
-	shieldBack->SetupAttachment(GetOwner()->GetRootComponent());
 }
 
 // Called when the game starts
@@ -68,7 +59,7 @@ bool UComponent_EnemyShield::ShieldCheckProtection(FVector attackerPos)
 
 		if (angle <= angleAcceptanceForDefense)
 		{
-			ShieldFrontHitted();
+			ShieldFrontHitted.Broadcast();
 			return true;
 		}
 	}
@@ -82,7 +73,7 @@ bool UComponent_EnemyShield::ShieldCheckProtection(FVector attackerPos)
 
 		if (angle <= angleAcceptanceForDefense)
 		{
-			ShieldBackHitted();
+			ShieldBackHitted.Broadcast();
 			return true;
 		}
 	}
@@ -95,14 +86,12 @@ void UComponent_EnemyShield::ShieldActivate()
 	if (isNextShieldToCycleFront)
 	{
 		isShieldInFront = true;
-		shieldFront->SetVisibility(true);
-		EnemyShieldFrontStartActive();
+		EnemyShieldFrontStartActive.Broadcast();
 	}
 	else
 	{
 		isShieldInBack = true;
-		shieldBack->SetVisibility(true);
-		EnemyShieldBackStartActive();
+		EnemyShieldBackStartActive.Broadcast();
 	}
 
 	isNextShieldToCycleFront = !isNextShieldToCycleFront;
@@ -113,28 +102,34 @@ void UComponent_EnemyShield::ShieldDeActivate()
 	{
 		isShieldInFront = false;
 		shieldFront->SetVisibility(false);
-		EnemyShieldFrontStartDeactive();
+		EnemyShieldFrontStartDeactive.Broadcast();
 	}
 	else
 	{
 		isShieldInBack = false;
 		shieldBack->SetVisibility(false);
-		EnemyShieldBackStartDeactive();
+		EnemyShieldBackStartDeactive.Broadcast();
 	}
 }
 
 void UComponent_EnemyShield::ShieldToActivate()
 {
 	if (isNextShieldToCycleFront)
-		EnemyShieldFrontStartToActive();
+	{
+		EnemyShieldFrontStartToActive.Broadcast();
+		shieldFront->SetVisibility(true);
+	}
 	else
-		EnemyShieldBackStartToActive();
+	{
+		EnemyShieldBackStartToActive.Broadcast();
+		shieldBack->SetVisibility(true);
+	}
 }
 
 void UComponent_EnemyShield::ShieldToDeActivate()
 {
 	if (isNextShieldToCycleFront)
-		EnemyShieldFrontStartToDeactive();
+		EnemyShieldFrontStartToDeactive.Broadcast();
 	else
-		EnemyShieldBackStartToDeactive();
+		EnemyShieldBackStartToDeactive.Broadcast();
 }

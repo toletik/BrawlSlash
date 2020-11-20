@@ -9,12 +9,14 @@ void UAnimNotifyState_AttackCircle::NotifyBegin(USkeletalMeshComponent* MeshComp
 {
 	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	enemyStrong->BeginAttackCircle();
+	if (enemyStrong)
+		enemyStrong->BeginAttackCircle();
 }
 
 void UAnimNotifyState_AttackCircle::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	enemyStrong->EndAttackCircle();
+	if (enemyStrong)
+		enemyStrong->EndAttackCircle();
 }

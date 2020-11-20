@@ -6,23 +6,20 @@
 #include "Components/ActorComponent.h"
 #include "Component_EnemyShield.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCustomEventSignature);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BRAWLSLASH_API UComponent_EnemyShield : public UActorComponent
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* shieldFront;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* shieldBack;
 
 public:	
 	// Sets default values for this component's properties
 	UComponent_EnemyShield();
 
-	void AttachToOwner();
+	class UStaticMeshComponent* shieldFront;
+
+	class UStaticMeshComponent* shieldBack;
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -30,6 +27,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
 	void OnOwnerDeath();
 
 	bool ShieldCheckProtection(FVector attackerPos);
@@ -80,33 +78,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defense")
 	float currentShieldTimeToActivate{ 0 };
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void ShieldFrontHitted();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature ShieldFrontHitted;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void ShieldBackHitted();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature ShieldBackHitted;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldFrontStartActive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldFrontStartActive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldFrontStartDeactive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldFrontStartDeactive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldFrontStartToActive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldFrontStartToActive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldFrontStartToDeactive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldFrontStartToDeactive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldBackStartActive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldBackStartActive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldBackStartDeactive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldBackStartDeactive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldBackStartToActive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldBackStartToActive;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void EnemyShieldBackStartToDeactive();
+	UPROPERTY(BlueprintAssignable)
+	FCustomEventSignature EnemyShieldBackStartToDeactive;
 };

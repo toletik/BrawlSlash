@@ -3,18 +3,18 @@
 
 #include "Character_EnemyWeakWithShield.h"
 #include "Component_EnemyShield.h"
+#include "Components/StaticMeshComponent.h"
 
 ACharacter_EnemyWeakWithShield::ACharacter_EnemyWeakWithShield()
 {
 	shieldComponent = CreateDefaultSubobject<UComponent_EnemyShield>(TEXT("ShieldComponent"));
 	AddOwnedComponent(shieldComponent);
-	shieldComponent->AttachToOwner();
-}
 
-void ACharacter_EnemyWeakWithShield::TakeHit(int damage)
-{
-	Super::TakeHit(damage);
+	meshShieldFront = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldFront"));
+	meshShieldBack = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldBack"));
+	meshShieldFront->SetupAttachment(RootComponent);
+	meshShieldBack->SetupAttachment(RootComponent);
 
-	if (health < 0)
-		shieldComponent->OnOwnerDeath();
+	shieldComponent->shieldFront = meshShieldFront;
+	shieldComponent->shieldBack = meshShieldBack;
 }

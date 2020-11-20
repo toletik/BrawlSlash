@@ -13,7 +13,7 @@ void UAnimNotify_DespawnDashPointFight::Notify(USkeletalMeshComponent* MeshComp,
 {
 	ACharacter_EnemyStrong* enemyStrong = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	if (enemyStrong->currentEnemyGroup->dashPointInFight)
+	if (enemyStrong && enemyStrong->currentEnemyGroup->dashPointInFight)
 	{
 		ACharacter_Player* player = enemyStrong->currentEnemyGroup->playerReference;
 

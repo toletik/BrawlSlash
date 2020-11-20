@@ -9,6 +9,11 @@
 #include "DrawDebugHelpers.h"
 #include "../AI/MyAIDirector.h"
 
+void ACharacter_EnemyBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ACharacter_EnemyBase::TakeHit(int damage)
 {
 	Super::TakeHit(damage);

@@ -17,7 +17,7 @@ class BRAWLSLASH_API ACharacter_EnemyBase : public ACharacter_Base
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override {};
+	virtual void BeginPlay() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override {};
 

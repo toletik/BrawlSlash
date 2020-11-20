@@ -9,12 +9,14 @@ void UAnimNotifyState_IsInStartupCone::NotifyBegin(USkeletalMeshComponent* MeshC
 {
 	ACharacter_EnemyStrong* enemy = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	enemy->isInStartupCone = true;
+	if (enemy)
+		enemy->isInStartupCone = true;
 }
 
 void UAnimNotifyState_IsInStartupCone::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	ACharacter_EnemyStrong* enemy = Cast<ACharacter_EnemyStrong>(MeshComp->GetOwner());
 
-	enemy->isInStartupCone = false;
+	if (enemy)
+		enemy->isInStartupCone = false;
 }

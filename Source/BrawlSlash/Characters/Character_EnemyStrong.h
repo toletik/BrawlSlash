@@ -59,9 +59,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool attackCircleProject = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	float attackCircleAngle = 0.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 	bool canRotateDuringStartupCone = false;
 
