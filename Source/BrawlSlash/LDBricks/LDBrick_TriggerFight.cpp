@@ -28,9 +28,6 @@ void ALDBrick_TriggerFight::BeginPlay()
 
 void ALDBrick_TriggerFight::BoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (OtherComp == playerReference->GetCapsuleComponent() && !playerReference->isInSafeZone)
-    {
+    if (OtherComp == playerReference->GetCapsuleComponent() && !playerReference->isInSafeZone && enemyGroupToTrigger)
         enemyGroupToTrigger->StartFight();
-        GEngine->AddOnScreenDebugMessage(-23, 0.5f, FColor::Red, "Hi");
-    }
 }

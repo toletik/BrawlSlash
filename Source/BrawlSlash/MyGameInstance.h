@@ -21,6 +21,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isYRevert{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isMotionBlurActivate{ false };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float volumeMusic{ 50.0f };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float volumeSFX{ 50.0f };

@@ -7,11 +7,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
-#include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "Camera/CameraComponent.h"
 #include "../Characters/Character_EnemyStrong.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "LevelSequenceActor.h"
 #include "LevelSequence.h"
@@ -83,6 +83,7 @@ void AMyAIDirector::StartFight()
 	playerReference->debugInnerCircleRadius = radiusInnerCircle;
 	playerReference->debugBackCircleRadius = radiusBackCircle;
 	playerReference->PlayerStartFight();
+	playerReference->GetCharacterMovement()->MaxWalkSpeed = playerReference->walkSpeedFight;
 }
 
 void AMyAIDirector::SetEndToFight()
@@ -94,6 +95,8 @@ void AMyAIDirector::SetEndToFight()
 	playerReference->SetCameraStatsNav();
 	playerReference->SetFocusToClosestFocus();
 	playerReference->PlayerEndFight();
+	playerReference->GetCharacterMovement()->MaxWalkSpeed = playerReference->walkSpeedNav;
+	playerReference->health = playerReference->maxHealth;
 }
 
 void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)

@@ -72,6 +72,7 @@ void ALDBrick_ShieldPoints::SphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 	{
 		sphereCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		playerReference->currentShieldPoint = playerReference->shieldPointMax;
+		playerReference->PlayerGetShieldPoint();
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), shieldPointSound, GetActorLocation());
 		timelineShapeUp.PlayFromStart();
 	}

@@ -27,7 +27,4 @@ class BRAWLSLASH_API ALDBrick_KillZone : public AActor
 	class UBoxComponent* boxCollider;
 	class ACharacter_Player* playerReference{ nullptr };
 	class UMyGameInstance* gameInstanceReference{ nullptr };
-
-	UPROPERTY(EditAnywhere, Category = Sequence)
-	class ULevelSequence* sequenceToPlayOnPlayerDeath = nullptr;
 };

@@ -21,8 +21,6 @@ void ACharacter_Base::BeginPlay()
 	Super::BeginPlay();
 
 	health = maxHealth;
-
-	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 }
 
 // Called every frame

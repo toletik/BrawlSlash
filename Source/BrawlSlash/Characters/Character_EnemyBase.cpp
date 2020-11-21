@@ -6,12 +6,14 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
-#include "DrawDebugHelpers.h"
 #include "../AI/MyAIDirector.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void ACharacter_EnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 }
 
 void ACharacter_EnemyBase::TakeHit(int damage)
@@ -38,4 +40,9 @@ void ACharacter_EnemyBase::LookAtPlayer()
 {
 	beingDashedBack = false;
 	rotateDashedBack = true;
+}
+
+bool ACharacter_EnemyBase::IsPlayerInFront(FVector playerPos)
+{
+	return FVector::DotProduct(GetActorLocation() - playerPos, GetActorForwardVector()) < 0;
 }

@@ -35,12 +35,9 @@ void ALDBrick_KillZone::BoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AAc
 	{
 		gameInstanceReference->hasRestartLevel = true;
 		gameInstanceReference->numberOfPlayerShieldPoints = playerReference->currentShieldPoint;
-		if (sequenceToPlayOnPlayerDeath)
-		{
-			ALevelSequenceActor* temp;
-			playerReference->currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlayOnPlayerDeath, FMovieSceneSequencePlaybackSettings(), temp);
-			playerReference->currentSequence->Play();
-		}
-		UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
+		ALevelSequenceActor* temp;
+		playerReference->currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), playerReference->sequenceToPlayOnKillzone, FMovieSceneSequencePlaybackSettings(), temp);
+		playerReference->currentSequence->Play();
+		playerReference->state = CINEMATIC;
 	}
 }

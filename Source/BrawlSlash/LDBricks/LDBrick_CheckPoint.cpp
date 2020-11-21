@@ -32,5 +32,6 @@ void ALDBrick_CheckPoint::BoxBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 	{
 		gameInstanceReference->lastPlayerPos = playerReference->GetActorLocation();
 		gameInstanceReference->lastPlayerRot = rotationForRespawn;
+		gameInstanceReference->hasRestartLevel = true;
 	}
 }

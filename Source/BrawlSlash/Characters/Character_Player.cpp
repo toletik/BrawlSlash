@@ -12,7 +12,6 @@
 #include "Engine/Engine.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "Character_EnemyBase.h"
 
@@ -120,6 +119,8 @@ void ACharacter_Player::BeginPlay()
 	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
 	detectorOfFocus->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
 
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeedNav;
+
 	if (gameInstance->hasRestartLevel && sequenceToPlayOnRestart)
 	{
 		ALevelSequenceActor* temp;
@@ -184,6 +185,7 @@ void ACharacter_Player::UpdateTimers(float deltaTime)
 			currentSequence->GoToEndAndStop();
 			currentSequence = nullptr;
 			state = IDLE;
+			PlayerSkipSequence();
 		}
 	}
 }
@@ -209,9 +211,6 @@ void ACharacter_Player::UpdateDebug()
 		currentEnemyGroup->SetDebugFocusToNextEnemy();
 		currentEnemyGroup->SetDebugFocusToPreviousEnemy();
 	}
-
-	GEngine->AddOnScreenDebugMessage(-97, 1.0f, FColor::Cyan, FString("next ").Append(GetDebugName(debugNextFocus)));
-	GEngine->AddOnScreenDebugMessage(-98, 1.0f, FColor::Cyan, FString("previous ").Append(GetDebugName(debugPreviousFocus)));
 }
 void ACharacter_Player::UpdateCamera()
 {
@@ -264,7 +263,7 @@ void ACharacter_Player::UpdatePosToStickPoint()
 	//if player is in fight and he is too far to hit his focus
 	if (focus && state == E_STATE::ATTACKING && !isInReco)
 	{
-		FVector direction = GetStickPoint() - GetActorLocation();
+		FVector direction = GetStickPoint(true) - GetActorLocation();
 		direction.Z = 0;
 		AddMovementInput(direction, 1.0f);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -294,10 +293,16 @@ void ACharacter_Player::CheckGround()
 	raycastParams.AddIgnoredActor(this);
 	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() - FVector::UpVector * 100.0f, ECC_WorldStatic, raycastParams);
 
-	if (hit.GetActor() && hit.GetActor()->ActorHasTag("Stone"))
-		isOnStone = true;
-	else
-		isOnStone = false;
+	isOnStone = false;
+	isOnGrass = false;
+
+	if (hit.GetActor())
+	{
+		if (hit.GetActor()->ActorHasTag("Stone"))
+			isOnStone = true;
+		else if (hit.GetActor()->ActorHasTag("Grass"))
+			isOnGrass = true;
+	}
 }
 
 void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -454,7 +459,7 @@ void ACharacter_Player::MoveRight(float Value)
 //RightJoystick
 void ACharacter_Player::TurnAtRate(float Rate)
 {
-	if (Rate != 0.0f)
+	if (Rate != 0.0f && state != CINEMATIC)
 	{
 		currentTimeForComeBack = 0.0f;
 		// calculate delta for this frame from the rate information	
@@ -464,7 +469,7 @@ void ACharacter_Player::TurnAtRate(float Rate)
 void ACharacter_Player::LookUpAtRate(float Rate)
 {
 
-	if (Rate != 0.0f)
+	if (Rate != 0.0f && state != CINEMATIC)
 	{
 		currentTimeForComeBack = 0.0f;
 		// calculate delta for this frame from the rate information
@@ -480,6 +485,7 @@ void ACharacter_Player::DashAttack()
 	LookAtFocus(false);
 	toDoDamage = dashHitDamage;
 	state = E_STATE::DASH_ATTACK;
+	PlayerStartAttack();
 }
 
 //Buttons
@@ -505,6 +511,7 @@ void ACharacter_Player::Attack()
 			//Start attack
 			state = E_STATE::ATTACKING;
 			LookAtFocus(false);
+			PlayerStartAttack();
 
 			//attack combo 2 or 3
 			if (canCombo)
@@ -569,7 +576,7 @@ void ACharacter_Player::OnAPressed()
 {
 	if (isSequenceSkippable)
 		isHoldingInputToPassSequence = true;
-	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING) && Cast<ACharacter_EnemyBase>(focus))
+	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING))
 		StartDash(E_STATE::DASHING_BACK);
 }
 
@@ -603,7 +610,7 @@ void ACharacter_Player::DashHit()
 		return;
 	}
 
-	dashPosToReach = GetStickPoint();
+	dashPosToReach = GetStickPoint(true);
 
 	//Check if there is free space when the player is going to dash
 	if (!CheckIfFreeSpaceForDash())
@@ -637,11 +644,7 @@ void ACharacter_Player::DashBack()
 	
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
 
-	if (FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
-		dashPosToReach = focus->GetActorLocation() - focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
-	else
-		dashPosToReach = focus->GetActorLocation() + focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
-	dashPosToReach.Z = GetActorLocation().Z;
+	dashPosToReach = GetStickPoint(false);
 
 	//Check if there is free space when the player is going to dash
 	if (!CheckIfFreeSpaceForDash())
@@ -661,7 +664,7 @@ void ACharacter_Player::DashBack()
 	LaunchCharacter(direction * 10000.0f, true, true);
 }
 
-FVector	ACharacter_Player::GetStickPoint()
+FVector	ACharacter_Player::GetStickPoint(bool willDashHit)
 {
 	FVector vectorToReturn = FVector::ZeroVector;
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
@@ -670,10 +673,12 @@ FVector	ACharacter_Player::GetStickPoint()
 	//if player is in fight
 	if (enemy)
 	{
-		if (FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
-			vectorToReturn = focus->GetActorLocation() + focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
+		FVector offset = focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
+		if ((willDashHit && FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
+		|| (!willDashHit && FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) > 0))
+			vectorToReturn = focus->GetActorLocation() + offset;
 		else
-			vectorToReturn = focus->GetActorLocation() - focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
+			vectorToReturn = focus->GetActorLocation() - offset;
 
 		vectorToReturn.Z = GetActorLocation().Z;
 
@@ -729,7 +734,6 @@ bool ACharacter_Player::CheckIfFreeSpaceForDash()
 	FVector focusPos = focus->GetActorLocation();
 	focusPos.Z = GetActorLocation().Z;
 	GetWorld()->LineTraceSingleByChannel(hit, focusPos, dashPosToReach, ECC_WorldStatic, raycastParams);
-	DrawDebugLine(GetWorld(), focusPos, dashPosToReach, FColor::Blue, false, 1, 0, 5);
 
 	if (hit.GetActor())
 	{
@@ -792,10 +796,27 @@ void ACharacter_Player::StopDashBack()
 	GetWorldTimerManager().SetTimer(dashBackCooldownTimer, this, &ACharacter_Player::StopDashBackRecovery, dashBackRecoveryDuration, false);
 
 	currentEnemyGroup->UpdateIfIsInInner();
-	ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
-	enemyFocus->beingDashedBack = true;
-	GetWorldTimerManager().SetTimer(enemyFocus->timerHandler, enemyFocus, &ACharacter_EnemyBase::LookAtPlayer, enemyFocus->timeBeforeRotateWhenBeingDashedBack, false);
 
+	if (focus->ActorHasTag("DashPoint"))
+	{
+		PlayerStopDashHitDashPoint();
+
+		ALDBrick_DashPoint* dashPoint = Cast<ALDBrick_DashPoint>(focus);
+		dashPoint->OnPlayerEndDash();
+
+		if (currentEnemyGroup)
+		{
+			focus->Destroy();
+			currentEnemyGroup->SetFocusToClosestEnemy();
+		}
+	}
+
+	ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
+	if (enemyFocus)
+	{
+		enemyFocus->beingDashedBack = true;
+		GetWorldTimerManager().SetTimer(enemyFocus->timerHandler, enemyFocus, &ACharacter_EnemyBase::LookAtPlayer, enemyFocus->timeBeforeRotateWhenBeingDashedBack, false);
+	}
 }
 
 void ACharacter_Player::StopCombo()

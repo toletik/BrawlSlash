@@ -50,6 +50,9 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
 	bool isOnStone = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
+	bool isOnGrass = false;
+
 	void CheckGround();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
@@ -105,7 +108,13 @@ public:
 
 	//will be VisibleAnywhere after playTest
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Characteristics)
-	int currentShieldPoint{0};
+	int currentShieldPoint{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float walkSpeedNav{ 850.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float walkSpeedFight{ 600.0f };
 
 	void TakeHit(int damage) override;
 
@@ -184,7 +193,7 @@ public:
 
 	FVector dashDirection { 0, 0, 0 };
 
-	FVector	GetStickPoint();
+	FVector	GetStickPoint(bool willDashHit);
 
 	bool CheckIfFreeSpaceForDash();
 
@@ -366,18 +375,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = Sequence)
 	class ULevelSequence* sequenceToPlayOnDeath = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = Sequence)
+	class ULevelSequence* sequenceToPlayOnKillzone = nullptr;
+
 	//Events
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartFight();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerEndFight();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayerStartIsProjected();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayerEndIsProjected();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartInvincibleTime();
@@ -390,6 +396,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartHittedStrong();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerGetShieldPoint();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerLostShieldPoint();
@@ -412,6 +421,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerCombo3();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerDashAttack();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartAttack();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerSkipSequence();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
@@ -419,12 +437,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	float debugBackCircleRadius = 800;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	bool isFocusInShortRange{ false };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	bool isTracingEnemyAngularAcceptance{ false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class AActor* debugNextFocus = nullptr;

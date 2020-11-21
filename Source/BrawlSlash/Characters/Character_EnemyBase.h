@@ -25,6 +25,10 @@ public:
 	//Base
 
 	ACharacter_EnemyBase() {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
+	float walkSpeed{ 600 };
+
 	virtual void TakeHit(int damage) override;
 	virtual void AttackOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override {};
 	virtual void SetAttackState() {};
@@ -56,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
 	float timeBeforeRotateWhenBeingDashedBack{ 2.0f };
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPlayerInFront(FVector playerPos);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void LastEnemyInGroup();
