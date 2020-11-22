@@ -87,10 +87,6 @@ void ACharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ACharacter_Player::Attack);
 	PlayerInputComponent->BindAction("FocusNextEnemy", IE_Pressed, this, &ACharacter_Player::GetNextFocus);
 	PlayerInputComponent->BindAction("FocusPreviousEnemy", IE_Pressed, this, &ACharacter_Player::GetPreviousFocus);
-
-
-	PlayerInputComponent->BindAction("TestRandom", IE_Pressed, this, &ACharacter_Player::TestRandomStart);
-	PlayerInputComponent->BindAction("TestRandom", IE_Released, this, &ACharacter_Player::TestRandomEnd);
 }
 
 // Called when the game starts or when spawned
@@ -98,28 +94,13 @@ void ACharacter_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
-
-	//init values of camera
-	SetCameraStatsNav();
-	cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(fixedRotationAngle, GetActorRightVector())).Rotator(),
-	Controller->SetControlRotation(cameraRotation);
-	cameraBoom->SetRelativeLocation(cameraPosition);
-	cameraBoom->TargetArmLength = cameraLength;
-	cameraBoom->CameraLagMaxDistance = LagPositionCameraToPlayerLimitRange;
-	cameraBoom->CameraLagSpeed = LagSpeedCameraToPlayer;
-	followCamera->SetFieldOfView(cameraFOV);
-	cameraBoom->bEnableCameraLag = true; 
-	currentTimeForComeBack = timeForComeBack;
-
-	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
-	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	//Focus Detector
-	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
-	detectorOfFocus->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
+	currentSelfPos = GetActorLocation();
 
 	GetCharacterMovement()->MaxWalkSpeed = walkSpeedNav;
+
+	InitCamera();
+
+	gameInstance = Cast<UMyGameInstance>(GetGameInstance());
 
 	if (gameInstance->hasRestartLevel && sequenceToPlayOnRestart)
 	{
@@ -127,6 +108,13 @@ void ACharacter_Player::BeginPlay()
 		currentSequence = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), sequenceToPlayOnRestart, FMovieSceneSequencePlaybackSettings(), temp);
 		currentSequence->Play();
 	}
+
+	attackBox->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::AttackOverlap);
+	attackBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	//Focus Detector
+	detectorOfFocus->OnComponentBeginOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorBeginOverlap);
+	detectorOfFocus->OnComponentEndOverlap.AddDynamic(this, &ACharacter_Player::FocusDetectorEndOverlap);
 }
 
 // Called every frame
@@ -134,15 +122,13 @@ void ACharacter_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	currentSelfPos = GetActorLocation();
+
 	UpdateTimers(DeltaTime);
 
-	UpdateDebug();
+	UpdateNextAndPreviousEnemies();
 
 	UpdateCamera();
-
-	//Look at focus while idle
-	if ((GetVelocity().Size() < 0.5f || state == E_STATE::ATTACKING) && !isInReco) 
-		LookAtFocus(true);
 
 	UpdatePosToStickPoint();
 
@@ -151,10 +137,16 @@ void ACharacter_Player::Tick(float DeltaTime)
 	UpdateDashingBack();
 
 	CheckGround();
+
+	//Look at focus while idle
+	if ((GetVelocity().Size() < 0.5f || state == E_STATE::ATTACKING) && !isInReco) 
+		LookAtFocus(true);
 }
 
 void ACharacter_Player::UpdateTimers(float deltaTime)
 {
+	currentTimeForComeBack += deltaTime;
+
 	if (currentInvincibleTime > 0)
 	{
 		currentInvincibleTime -= deltaTime;
@@ -162,8 +154,6 @@ void ACharacter_Player::UpdateTimers(float deltaTime)
 		if (currentInvincibleTime <= 0)
 			PlayerEndInvincibleTime();
 	}
-
-	currentTimeForComeBack += deltaTime;
 
 	if (currentSequence && !currentSequence->IsPlaying())
 	{
@@ -189,32 +179,26 @@ void ACharacter_Player::UpdateTimers(float deltaTime)
 		}
 	}
 }
-void ACharacter_Player::UpdateDebug()
+void ACharacter_Player::UpdateNextAndPreviousEnemies()
 {
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
-	/*
-	if (enemy)
-	//&& (focus->GetActorLocation() - GetActorLocation()).Size() > enemy->minDistanceToPlayerDash 
-	//&& (focus->GetActorLocation() - GetActorLocation()).Size() < enemy->maxDistanceToPlayerDash)
-		isFocusInShortRange = true;
-	else if (focus 
-		 //&& (focus->GetActorLocation() - GetActorLocation()).Size() > minDistanceToDashNav 
-		 && (focus->GetActorLocation() - GetActorLocation()).Size() < maxDistanceToDashNav)
-		isFocusInShortRange = true;
-	else
-		isFocusInShortRange = false;
-		*/
-	debugNextFocus = nullptr;
-	debugPreviousFocus = nullptr;
 	if (currentEnemyGroup)
 	{
-		currentEnemyGroup->SetDebugFocusToNextEnemy();
-		currentEnemyGroup->SetDebugFocusToPreviousEnemy();
+		AActor* tempNextFocus = nextFocus;
+		AActor* tempPreviousFocus = previousFocus;
+		nextFocus = currentEnemyGroup->GetNextOrPreviousFocus(true);
+		previousFocus = currentEnemyGroup->GetNextOrPreviousFocus(false);
+
+		if (tempNextFocus != nextFocus)
+			PlayerChangeNextFocus();
+		if (tempPreviousFocus != previousFocus)
+			PlayerChangePreviousFocus();
 	}
 }
 void ACharacter_Player::UpdateCamera()
 {
 	//clean by factoring by RInterpTo
+
+	float lerpFactor = 0.0f;
 
 	//Camera Fight
 	if (currentEnemyGroup)
@@ -222,10 +206,11 @@ void ACharacter_Player::UpdateCamera()
 		if (currentTimeForComeBack >= timeForComeBack)
 		{
 			cameraRotation = rotationForFight;
-			Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorFixedRotation));
+			lerpFactor = rotationLerpFactorFixedRotation;
 		}
 
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorJoystick));
+		else
+			lerpFactor = rotationLerpFactorJoystick;
 	
 		// Zoom / deZoom
 		if (!currentEnemyGroup->IsAllEnemiesInCameraSight(GetWorld()->GetFirstPlayerController()))
@@ -236,34 +221,32 @@ void ACharacter_Player::UpdateCamera()
 	//Camera LookAt
 	else if (focus)
 	{
-		cameraRotation = FRotationMatrix::MakeFromX(focus->GetActorLocation() - GetActorLocation() - GetActorUpVector() * 500).Rotator();
+		cameraRotation = FRotationMatrix::MakeFromX(focus->GetActorLocation() - currentSelfPos - GetActorUpVector() * 500).Rotator();
 		cameraRotation.Pitch = FMath::Clamp(cameraRotation.Pitch, cameraVerticalAngleMax, cameraVerticalAngleMin);
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorToLookAt));
+		lerpFactor = rotationLerpFactorToLookAt;
 	
 	}
 	//Camera Behind
 	else if (currentTimeForComeBack >= timeForComeBack && needToRefreshCameraBehind)
 	{
 		cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(fixedRotationAngle, GetActorRightVector())).Rotator();
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorFixedRotation));
+		lerpFactor = rotationLerpFactorFixedRotation;
 	}
 	//Camera Nav
 	else
-		Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), rotationLerpFactorJoystick));
+		lerpFactor = rotationLerpFactorJoystick;
 
-
-
+	Controller->SetControlRotation(UKismetMathLibrary::RInterpTo(Controller->GetControlRotation(), cameraRotation, GetWorld()->GetDeltaSeconds(), lerpFactor));
 	cameraBoom->SetRelativeLocation( FMath::Lerp(cameraBoom->GetRelativeLocation(), cameraPosition, GetWorld()->GetDeltaSeconds()) );
 	cameraBoom->TargetArmLength = FMath::Lerp(cameraBoom->TargetArmLength, cameraLength, GetWorld()->GetDeltaSeconds());
 	followCamera->SetFieldOfView(FMath::Lerp(followCamera->FieldOfView, cameraFOV, GetWorld()->GetDeltaSeconds()) );
-
 }
 void ACharacter_Player::UpdatePosToStickPoint()
 {
 	//if player is in fight and he is too far to hit his focus
 	if (focus && state == E_STATE::ATTACKING && !isInReco)
 	{
-		FVector direction = GetStickPoint(true) - GetActorLocation();
+		FVector direction = GetStickPoint(true) - currentSelfPos;
 		direction.Z = 0;
 		AddMovementInput(direction, 1.0f);
 		GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -273,13 +256,13 @@ void ACharacter_Player::UpdatePosToStickPoint()
 }
 void ACharacter_Player::UpdateDashingHit()
 {
-	if (state == E_STATE::DASHING_HIT && FVector::DotProduct(dashPosToReach - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()) , dashDirection) < 0)
+	if (state == E_STATE::DASHING_HIT && FVector::DotProduct(dashPosToReach - (currentSelfPos + GetVelocity() * GetWorld()->GetDeltaSeconds()) , dashDirection) < 0)
 		StopDashHit();
 
 }
 void ACharacter_Player::UpdateDashingBack()
 {
-	if (state == E_STATE::DASHING_BACK && FVector::DotProduct(dashPosToReach - (GetActorLocation() + GetVelocity() * GetWorld()->GetDeltaSeconds()), dashDirection) < 0)
+	if (state == E_STATE::DASHING_BACK && FVector::DotProduct(dashPosToReach - (currentSelfPos + GetVelocity() * GetWorld()->GetDeltaSeconds()), dashDirection) < 0)
 		StopDashBack();
 }
 
@@ -291,7 +274,7 @@ void ACharacter_Player::CheckGround()
 	FHitResult hit;
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), GetActorLocation() - FVector::UpVector * 100.0f, ECC_WorldStatic, raycastParams);
+	GetWorld()->LineTraceSingleByChannel(hit, currentSelfPos, currentSelfPos - FVector::UpVector * 100.0f, ECC_WorldStatic, raycastParams);
 
 	isOnStone = false;
 	isOnGrass = false;
@@ -312,9 +295,7 @@ void ACharacter_Player::FocusDetectorBeginOverlap(UPrimitiveComponent* Overlappe
 		focusedActors.Add(OtherActor);
 
 		if (!currentEnemyGroup && state == E_STATE::IDLE)
-			//SetFocusNav(OtherActor);
 			SetFocusToClosestFocus();
-
 	}
 }
 
@@ -346,7 +327,7 @@ void ACharacter_Player::AttackOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		{
 			UComponent_EnemyShield* shield = enemyCast->FindComponentByClass<UComponent_EnemyShield>();
 
-			if (shield && shield->ShieldCheckProtection(GetActorLocation()))
+			if (shield && shield->ShieldCheckProtection(currentSelfPos))
 			{
 				PlayerHitShield();
 				state = E_STATE::PUSHED_BACK;
@@ -425,10 +406,10 @@ void ACharacter_Player::MoveForward(float Value)
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, Value);
+			if (Value == -1)
+				needToRefreshCameraBehind = false;
 		}
 
-		if (Value == -1)
-			needToRefreshCameraBehind = false;
 	}
 }
 void ACharacter_Player::MoveRight(float Value)
@@ -560,9 +541,9 @@ bool ACharacter_Player::CheckIfCanDash()
 			if (currentEnemyGroup->enemies[i] != focus)
 				raycastParams.AddIgnoredActor(currentEnemyGroup->enemies[i]);
 
-	GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_WorldStatic, raycastParams);
+	GetWorld()->LineTraceSingleByChannel(hit, currentSelfPos, focus->GetActorLocation(), ECC_WorldStatic, raycastParams);
 
-	float distanceToFocus = (hit.Location - GetActorLocation()).Size();
+	float distanceToFocus = (hit.Location - currentSelfPos).Size();
 
 	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
 	//if focus is target in world or focus is an enemy or not and player is at the good distance to dash, then dash
@@ -596,13 +577,12 @@ void ACharacter_Player::StartDash(E_STATE teleportState)
 	EndAttack();
 	StopCombo();
 
-	if (teleportState == E_STATE::DASHING_BACK)
-		GetWorldTimerManager().SetTimer(dashTimer, this, &ACharacter_Player::DashBack, preparingDashDuration, false);
-	else if (teleportState == E_STATE::DASHING_HIT)
-		GetWorldTimerManager().SetTimer(dashTimer, this, &ACharacter_Player::DashHit, preparingDashDuration, false);
+	nextDashState = teleportState;
+
+	GetWorldTimerManager().SetTimer(dashTimer, this, &ACharacter_Player::Dash, preparingDashDuration, false);
 }
 
-void ACharacter_Player::DashHit()
+void ACharacter_Player::Dash()
 {
 	if (!focus)
 	{
@@ -610,7 +590,10 @@ void ACharacter_Player::DashHit()
 		return;
 	}
 
-	dashPosToReach = GetStickPoint(true);
+	if (nextDashState == DASHING_HIT)
+		dashPosToReach = GetStickPoint(true);
+	else
+		dashPosToReach = GetStickPoint(false);
 
 	//Check if there is free space when the player is going to dash
 	if (!CheckIfFreeSpaceForDash())
@@ -619,49 +602,19 @@ void ACharacter_Player::DashHit()
 		return;
 	}
 ;
-	state = E_STATE::DASHING_HIT;
+	state = nextDashState;
 	GetWorldTimerManager().ClearTimer(dashTimer);
 	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 	//collision only need to be disable in fight
 	if (currentEnemyGroup)
 		SetActorEnableCollision(false);
 
-	FVector direction = dashPosToReach - GetActorLocation();
+	FVector direction = dashPosToReach - currentSelfPos;
 	direction.Normalize();
 	dashDirection = direction;
 	LaunchCharacter(direction * 10000.0f, true, true);
 
 	initialFocus = focus;
-}
-
-void ACharacter_Player::DashBack()
-{
-	if (!focus)
-	{
-		state = E_STATE::IDLE;
-		return;
-	}
-	
-	ACharacter_EnemyBase* enemy = Cast<ACharacter_EnemyBase>(focus);
-
-	dashPosToReach = GetStickPoint(false);
-
-	//Check if there is free space when the player is going to dash
-	if (!CheckIfFreeSpaceForDash())
-	{
-		state = E_STATE::IDLE;
-		return;
-	}
-
-	state = E_STATE::DASHING_BACK;
-	GetWorldTimerManager().ClearTimer(dashTimer);
-	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-	SetActorEnableCollision(false);
-
-	FVector direction = dashPosToReach - GetActorLocation();
-	direction.Normalize();
-	dashDirection = direction;
-	LaunchCharacter(direction * 10000.0f, true, true);
 }
 
 FVector	ACharacter_Player::GetStickPoint(bool willDashHit)
@@ -674,13 +627,13 @@ FVector	ACharacter_Player::GetStickPoint(bool willDashHit)
 	if (enemy)
 	{
 		FVector offset = focus->GetActorForwardVector() * ((enemy->GetCapsuleComponent()->GetScaledCapsuleRadius()) + stickPointFight);
-		if ((willDashHit && FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) < 0)
-		|| (!willDashHit && FVector::DotProduct(focus->GetActorLocation() - GetActorLocation(), focus->GetActorForwardVector()) > 0))
+		if ((willDashHit && FVector::DotProduct(focus->GetActorLocation() - currentSelfPos, focus->GetActorForwardVector()) < 0)
+		|| (!willDashHit && FVector::DotProduct(focus->GetActorLocation() - currentSelfPos, focus->GetActorForwardVector()) > 0))
 			vectorToReturn = focus->GetActorLocation() + offset;
 		else
 			vectorToReturn = focus->GetActorLocation() - offset;
 
-		vectorToReturn.Z = GetActorLocation().Z;
+		vectorToReturn.Z = currentSelfPos.Z;
 
 	}
 	//if focus is a Door
@@ -690,13 +643,13 @@ FVector	ACharacter_Player::GetStickPoint(bool willDashHit)
 		FCollisionQueryParams raycastParams;
 		raycastParams.AddIgnoredActor(this);
 		FVector focusPos = focus->GetActorLocation();
-		focusPos.Z = GetActorLocation().Z;
-		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focusPos, ECC_WorldDynamic, raycastParams);
+		focusPos.Z = currentSelfPos.Z;
+		GetWorld()->LineTraceSingleByChannel(hit, currentSelfPos, focusPos, ECC_WorldDynamic, raycastParams);
 
 		if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Door"))
 		{
 			FVector hitLocation = hit.Location;
-			hitLocation.Z = GetActorLocation().Z;
+			hitLocation.Z = currentSelfPos.Z;
 			FVector focusToHit = (hitLocation - focusPos);
 			focusToHit.Normalize();
 			vectorToReturn = hitLocation + focusToHit * stickPointNav;
@@ -708,7 +661,7 @@ FVector	ACharacter_Player::GetStickPoint(bool willDashHit)
 		FHitResult hit;
 		FCollisionQueryParams raycastParams;
 		raycastParams.AddIgnoredActor(this);
-		GetWorld()->LineTraceSingleByChannel(hit, GetActorLocation(), focus->GetActorLocation(), ECC_WorldDynamic, raycastParams);
+		GetWorld()->LineTraceSingleByChannel(hit, currentSelfPos, focus->GetActorLocation(), ECC_WorldDynamic, raycastParams);
 
 		if (hit.GetActor() != nullptr && hit.GetActor()->ActorHasTag("Chest"))
 		{
@@ -732,15 +685,11 @@ bool ACharacter_Player::CheckIfFreeSpaceForDash()
 	FCollisionQueryParams raycastParams;
 	raycastParams.AddIgnoredActor(focus);
 	FVector focusPos = focus->GetActorLocation();
-	focusPos.Z = GetActorLocation().Z;
+	focusPos.Z = currentSelfPos.Z;
 	GetWorld()->LineTraceSingleByChannel(hit, focusPos, dashPosToReach, ECC_WorldStatic, raycastParams);
 
 	if (hit.GetActor())
-	{
-		GEngine->AddOnScreenDebugMessage(-44, 0.2f, FColor::Red, GetDebugName(hit.GetActor()));
 		return false;
-	}
-
 
 	return true;
 }
@@ -804,11 +753,8 @@ void ACharacter_Player::StopDashBack()
 		ALDBrick_DashPoint* dashPoint = Cast<ALDBrick_DashPoint>(focus);
 		dashPoint->OnPlayerEndDash();
 
-		if (currentEnemyGroup)
-		{
-			focus->Destroy();
-			currentEnemyGroup->SetFocusToClosestEnemy();
-		}
+		focus->Destroy();
+		currentEnemyGroup->SetFocusToClosestEnemy();
 	}
 
 	ACharacter_EnemyBase* enemyFocus = Cast<ACharacter_EnemyBase>(focus);
@@ -828,29 +774,14 @@ void ACharacter_Player::StopCombo()
 
 void ACharacter_Player::SetFocusNav(AActor* newFocus)
 {
-	//when set to !nullptr call overlap end
+	if (focus != newFocus)
+		PlayerChangeMainFocus();
 	focus = newFocus;
-	
-	if (!currentEnemyGroup)
-	{
-		if (focus)
-			SetCameraStatsLookAt();
-		else
-			SetCameraStatsNav();
-	}
-}
 
-void ACharacter_Player::TestRandomStart()
-{
-	if (focusedActors.Num() > 0)
-		focus = focusedActors[0];
-
-	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, FString::FromInt(focusedActors.Num()) );
-
-}
-void ACharacter_Player::TestRandomEnd()
-{
-	GEngine->AddOnScreenDebugMessage(-17, 1.0f, FColor::Cyan, "End");
+	if (focus)
+		SetCameraStatsLookAt();
+	else
+		SetCameraStatsNav();
 }
 
 void ACharacter_Player::GetNextFocus()
@@ -859,9 +790,20 @@ void ACharacter_Player::GetNextFocus()
 		return;
 
 	if (currentEnemyGroup)
-		currentEnemyGroup->SetFocusToNextEnemy();
+	{
+		AActor* newFocus = currentEnemyGroup->GetNextOrPreviousFocus(true);
+		if (focus != newFocus)
+			PlayerChangeMainFocus();
+		focus = newFocus;
+	}
+
 	else if (focus)
-		SetFocusToNextFocus();
+	{
+		AActor* newFocus = GetFocusToNextOrPreviousFocus(true);
+		if (focus != newFocus)
+			PlayerChangeMainFocus();
+		focus = newFocus;
+	}
 }
 void ACharacter_Player::GetPreviousFocus()
 {
@@ -869,9 +811,33 @@ void ACharacter_Player::GetPreviousFocus()
 		return;
 
 	if (currentEnemyGroup)
-		currentEnemyGroup->SetFocusToPreviousEnemy();
+	{
+		AActor* newFocus = currentEnemyGroup->GetNextOrPreviousFocus(false);
+		if (focus != newFocus)
+			PlayerChangeMainFocus();
+		focus = newFocus;
+	}
 	else if (focus)
-		SetFocusToPreviousFocus();
+	{
+		AActor* newFocus = GetFocusToNextOrPreviousFocus(false);
+		if (focus != newFocus)
+			PlayerChangeMainFocus();
+		focus = newFocus;
+	}
+}
+
+void ACharacter_Player::InitCamera()
+{
+	SetCameraStatsNav();
+	cameraRotation = FRotationMatrix::MakeFromX(GetActorForwardVector().RotateAngleAxis(fixedRotationAngle, GetActorRightVector())).Rotator(),
+		Controller->SetControlRotation(cameraRotation);
+	cameraBoom->SetRelativeLocation(cameraPosition);
+	cameraBoom->TargetArmLength = cameraLength;
+	cameraBoom->CameraLagMaxDistance = LagPositionCameraToPlayerLimitRange;
+	cameraBoom->CameraLagSpeed = LagSpeedCameraToPlayer;
+	followCamera->SetFieldOfView(cameraFOV);
+	cameraBoom->bEnableCameraLag = true;
+	currentTimeForComeBack = timeForComeBack;
 }
 
 void ACharacter_Player::SetCameraStatsNav()
@@ -906,72 +872,59 @@ void ACharacter_Player::SetCameraStatsFight(FRotator rotationToAdopt, float minD
 
 void ACharacter_Player::SetFocusToClosestFocus()
 {
-	//player will get a focus if focusedActors.Num > 0
-	SetFocusNav(nullptr);
+	AActor* temp = nullptr;
 
-	FVector playerPos = GetActorLocation();
 	float distanceFromPlayer{ INFINITY };
 
 
 	for (int i = 0; i <= focusedActors.Num() - 1; ++i)
 	{
-		float distanceToFocus = (focusedActors[i]->GetActorLocation() - playerPos).Size();
+		float distanceToFocus = (focusedActors[i]->GetActorLocation() - currentSelfPos).Size();
 		if (distanceToFocus < distanceFromPlayer)
 		{
 			distanceFromPlayer = distanceToFocus;
-			SetFocusNav(focusedActors[i]);
+			temp = focusedActors[i];
 		}
 	}
+
+	SetFocusNav(temp);
 }
 
-void ACharacter_Player::SetFocusToNextFocus()
+AActor* ACharacter_Player::GetFocusToNextOrPreviousFocus(bool isGettingNext)
 {
-	FVector playerPos = GetActorLocation();
-	FVector vectorReference = focus->GetActorLocation() - playerPos;
+	AActor* toReturn = nullptr;
+
+	FVector vectorReference = focus->GetActorLocation() - currentSelfPos;
 	float smallestAngle = 360;
 
 	for (int i = 0; i < focusedActors.Num(); ++i)
 	{
 		if (focusedActors[i] != focus)
 		{
-			FVector playerToFocus = focusedActors[i]->GetActorLocation() - playerPos;
-			float FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
-
+			FVector playerToFocus = focusedActors[i]->GetActorLocation() - currentSelfPos;
+			
+			float FocusAngle = 0.0f;
+			if (isGettingNext)
+				(FVector::CrossProduct(vectorReference, playerToFocus).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+			else
+				(FVector::CrossProduct(vectorReference, playerToFocus).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+			
 			if (FocusAngle < smallestAngle)
 			{
 				smallestAngle = FocusAngle;
-				SetFocusNav(focusedActors[i]);
+				toReturn = focusedActors[i];
 			}
 		}
 	}
-}
-void ACharacter_Player::SetFocusToPreviousFocus()
-{
-	FVector playerPos = GetActorLocation();
-	FVector vectorReference = focus->GetActorLocation() - playerPos;
-	float smallestAngle = 360;
 
-	for (int i = 0; i < focusedActors.Num(); ++i)
-	{
-		if (focusedActors[i] != focus)
-		{
-			FVector playerToFocus = focusedActors[i]->GetActorLocation() - playerPos;
-			float FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
-
-			if (FocusAngle < smallestAngle)
-			{
-				smallestAngle = FocusAngle;
-				SetFocusNav(focusedActors[i]);
-			}
-		}
-	}
+	return toReturn;
 }
 
 void ACharacter_Player::LookAtFocus(bool lerp)
 {
 	if (focus)
 	{
-		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), focus->GetActorLocation());
+		FRotator temp = UKismetMathLibrary::FindLookAtRotation(currentSelfPos, focus->GetActorLocation());
 		temp.Pitch = 0;
 		if (lerp)
 			SetActorRotation(FMath::Lerp(GetActorRotation(), temp, rotationSpeedWhenChangeFocus));

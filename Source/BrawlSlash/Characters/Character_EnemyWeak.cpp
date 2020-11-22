@@ -4,6 +4,7 @@
 #include "Character_EnemyWeak.h"
 #include "Character_Player.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 
 ACharacter_EnemyWeak::ACharacter_EnemyWeak()
 {

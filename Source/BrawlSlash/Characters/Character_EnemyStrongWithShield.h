@@ -19,6 +19,12 @@ public:
 
 	virtual void TakeHit(int damage) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> dashPointInFightClassType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float distanceFromSelfToDashPoint = 700.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shield")
 	class UStaticMeshComponent* meshShieldFront;
 

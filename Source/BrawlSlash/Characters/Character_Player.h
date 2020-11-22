@@ -21,6 +21,8 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	TArray<AActor*> focusedActors;
 		
+	FVector currentSelfPos = FVector::ZeroVector;
+
 	UFUNCTION()
 	void FocusDetectorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
@@ -37,7 +39,7 @@ class BRAWLSLASH_API ACharacter_Player : public ACharacter_Base
 
 	void UpdateTimers(float deltaTime);
 
-	void UpdateDebug();
+	void UpdateNextAndPreviousEnemies();
 
 	void UpdateCamera();
 
@@ -81,16 +83,10 @@ protected:
 	void StartDash(E_STATE dashState);
 	void OnAPressed();
 	void OnAReleased();
-	void DashBack();
-	void DashHit();
-
-	void TurnAtRateFixed(float Rate);
+	void Dash();
 
 	void GetNextFocus();
 	void GetPreviousFocus();
-
-	void TestRandomStart();
-	void TestRandomEnd();
 
 public:
 	// Sets default values for this character's properties
@@ -100,7 +96,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* followCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool isInSafeZone {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Characteristics)
@@ -144,8 +140,7 @@ public:
 	void SetFocusNav(AActor* newFocus);
 	
 	void SetFocusToClosestFocus();
-	void SetFocusToNextFocus();
-	void SetFocusToPreviousFocus();
+	AActor* GetFocusToNextOrPreviousFocus(bool isGettingNext);
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return cameraBoom; }
@@ -214,7 +209,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 	int dashHitDamage = 4;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attack)
 	int toDoDamage{ 0 };
 
 	void BeginAttack();
@@ -229,6 +223,8 @@ public:
 
 	FTimerHandle dashTimer;
 
+	E_STATE nextDashState;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 	bool canCombo = false;
 
@@ -241,17 +237,20 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Camera OverAll
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float rotationSpeedHorizontal;
+
+	void InitCamera();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float rotationSpeedVertical;
+	float rotationSpeedHorizontal{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float LagSpeedCameraToPlayer;
+	float rotationSpeedVertical{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
-	float LagPositionCameraToPlayerLimitRange;
+	float LagSpeedCameraToPlayer{ 0.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
+	float LagPositionCameraToPlayerLimitRange{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraOverAll)
 	float rotationLerpFactorJoystick{2};
@@ -276,7 +275,7 @@ public:
 
 	//Cam Nav
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
-	float distanceNav;
+	float distanceNav{ 0.0f };
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float verticalAngleMinNav {10};
@@ -285,7 +284,7 @@ public:
 	float verticalAngleMaxNav {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
-	float fovNav;
+	float fovNav{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNav)
 	float cameraHeightNav{ 0 };
@@ -300,17 +299,17 @@ public:
 	float rotationLerpFactorFixedRotation{ 2 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
-	float timeForComeBack;
+	float timeForComeBack{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraNavBehind)
-	float currentTimeForComeBack;
+	float currentTimeForComeBack{ 0.0f };
 
 	//Cam LookAt
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float rotationLerpFactorToLookAt{ 2 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
-	float distanceLookAt;
+	float distanceLookAt{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float verticalAngleMinLookAt {10};
@@ -319,7 +318,7 @@ public:
 	float verticalAngleMaxLookAt {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
-	float fovLookAt;
+	float fovLookAt{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraLookAt)
 	float cameraHeightLookAt{ 0 };
@@ -328,7 +327,7 @@ public:
 
 	//Cam Fight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float distanceFight;
+	float distanceFight{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float verticalAngleMinFight {10};
@@ -337,13 +336,13 @@ public:
 	float verticalAngleMaxFight {80};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float fovFight;
+	float fovFight{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
 	float cameraHeightFight{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraFight)
-	float zoomDezoomSpeed;
+	float zoomDezoomSpeed{ 0.0f };
 
 	float minDistanceCameraFight{0.0f};
 
@@ -430,6 +429,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerSkipSequence();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerChangeMainFocus();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerChangeNextFocus();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerChangePreviousFocus();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
@@ -439,8 +447,8 @@ public:
 	float debugBackCircleRadius = 800;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	class AActor* debugNextFocus = nullptr;
+	class AActor* nextFocus = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	class AActor* debugPreviousFocus = nullptr;
+	class AActor* previousFocus = nullptr;
 };

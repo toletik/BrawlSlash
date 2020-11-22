@@ -31,6 +31,9 @@ ALDBrick_DashPoint::ALDBrick_DashPoint()
 	innerSphere->SetStaticMesh(SphereMeshAsset.Object);
 	innerSphere->SetupAttachment(outerSphere);
 
+	waitForRepopSphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_WaitForRepopSphere"));
+	waitForRepopSphere->SetStaticMesh(SphereMeshAsset.Object);
+	waitForRepopSphere->SetupAttachment(outerSphere);
 }
 
 void ALDBrick_DashPoint::BeginPlay()
@@ -54,7 +57,9 @@ void ALDBrick_DashPoint::OnPlayerEndDash()
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), glassBrokenSystem, GetActorLocation(), { 0, 0, 0 }, { 1, 1, 1 }, false, true);
 	UGameplayStatics::PlaySound2D(GetWorld(), glassBrokenSound);
 
-	outerSphere->SetVisibility(false, true);
+	outerSphere->SetVisibility(false);
+	innerSphere->SetVisibility(false);
+	waitForRepopSphere->SetVisibility(true);
 	innerSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetWorldTimerManager().SetTimer(timerForRespawn, this, &ALDBrick_DashPoint::OnRepop, timeBeforeRepop, false);
@@ -63,6 +68,8 @@ void ALDBrick_DashPoint::OnPlayerEndDash()
 void ALDBrick_DashPoint::OnRepop()
 {
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DashPointSpawnSound, GetActorLocation());
-	outerSphere->SetVisibility(true, true);
+	outerSphere->SetVisibility(true);
+	innerSphere->SetVisibility(true);
+	waitForRepopSphere->SetVisibility(false);
 	innerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }

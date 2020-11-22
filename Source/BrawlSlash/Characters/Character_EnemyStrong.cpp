@@ -3,6 +3,7 @@
 
 #include "Character_EnemyStrong.h"
 #include "Character_Player.h"
+#include "Components/CapsuleComponent.h"
 
 ACharacter_EnemyStrong::ACharacter_EnemyStrong()
 {

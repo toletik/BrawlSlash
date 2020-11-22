@@ -28,6 +28,8 @@ class BRAWLSLASH_API ALDBrick_DashPoint : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* innerSphere{ nullptr };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* waitForRepopSphere{ nullptr };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	FVector launchDirection{ 0, 0, 0 };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LDBrick, meta = (AllowPrivateAccess = "true"))
 	float launchForce{ 0 };

@@ -18,7 +18,10 @@ class BRAWLSLASH_API AMyAIDirector : public AActor
 	UPROPERTY(EditAnywhere, category = AI)
 	float numberOfEnemiesToHaveInInner { 0 };
 
-	bool hasAStrongEnemyInInner{ false };
+	bool hasAStrongEnemyInInner = false;
+
+	UPROPERTY(EditAnywhere, category = AI)
+	bool isTriggerByDistance = true;
 
 	// Sets default values for this actor's properties
 	AMyAIDirector();
@@ -51,13 +54,16 @@ public:
 
 	bool IsAllEnemiesInCameraSight(APlayerController* controller);
 
-	void SetFocusToNextEnemy();
+	AActor* GetNextOrPreviousFocus(bool isGettingNext);
 
-	void SetFocusToPreviousEnemy();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	FRotator rotationForTheFight { 0, 0, 0 };
 
-	void SetDebugFocusToNextEnemy();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	float radiusInnerCircle = 500.0f;
 
-	void SetDebugFocusToPreviousEnemy();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+	float radiusBackCircle = 700.0f;
 
 	UPROPERTY(EditAnywhere, category = AI)
 	TArray<ACharacter_EnemyBase*> vipEnemies;
@@ -71,26 +77,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	bool isSequenceSkippable = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	FRotator rotationForTheFight { 0, 0, 0 };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
-	float radiusInnerCircle = 500.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
-	float radiusBackCircle = 700.0f;
-
 	ACharacter_Player* playerReference{ nullptr };
 
 	bool isInFight{ false };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> dashPointInFightClassType;
-
 	AActor* dashPointInFight = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float distanceFromSelfToDashPoint = 700.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float minDistanceToAdoptForCamera{ 800.0f };
