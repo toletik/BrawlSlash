@@ -188,6 +188,11 @@ void ACharacter_Player::UpdateNextAndPreviousEnemies()
 		nextFocus = currentEnemyGroup->GetNextOrPreviousFocus(true);
 		previousFocus = currentEnemyGroup->GetNextOrPreviousFocus(false);
 
+		if (nextFocus == focus)
+			nextFocus = nullptr;
+		if (previousFocus == focus)
+			previousFocus = nullptr;
+
 		if (tempNextFocus != nextFocus)
 			PlayerChangeNextFocus();
 		if (tempPreviousFocus != previousFocus)
@@ -774,9 +779,10 @@ void ACharacter_Player::StopCombo()
 
 void ACharacter_Player::SetFocusNav(AActor* newFocus)
 {
-	if (focus != newFocus)
-		PlayerChangeMainFocus();
+	AActor* tempFocus = focus;
 	focus = newFocus;
+	if (tempFocus != focus)
+		PlayerChangeMainFocus();
 
 	if (focus)
 		SetCameraStatsLookAt();
@@ -892,7 +898,7 @@ void ACharacter_Player::SetFocusToClosestFocus()
 
 AActor* ACharacter_Player::GetFocusToNextOrPreviousFocus(bool isGettingNext)
 {
-	AActor* toReturn = nullptr;
+	AActor* toReturn = focus;
 
 	FVector vectorReference = focus->GetActorLocation() - currentSelfPos;
 	float smallestAngle = 360;
@@ -905,9 +911,9 @@ AActor* ACharacter_Player::GetFocusToNextOrPreviousFocus(bool isGettingNext)
 			
 			float FocusAngle = 0.0f;
 			if (isGettingNext)
-				(FVector::CrossProduct(vectorReference, playerToFocus).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+				FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z > 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
 			else
-				(FVector::CrossProduct(vectorReference, playerToFocus).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
+				FocusAngle = (FVector::CrossProduct(vectorReference, playerToFocus).Z < 0) ? acos(vectorReference.CosineAngle2D(playerToFocus)) : 360 - acos(vectorReference.CosineAngle2D(playerToFocus));
 			
 			if (FocusAngle < smallestAngle)
 			{

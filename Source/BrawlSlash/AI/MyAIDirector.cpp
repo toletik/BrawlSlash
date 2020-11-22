@@ -269,7 +269,7 @@ AActor* AMyAIDirector::GetNextOrPreviousFocus(bool isGettingNext)
 	FVector vectorReference = playerReference->focus->GetActorLocation() - cameraPos;
 	float smallestAngle = 360;
 
-	AActor* toReturn = nullptr;
+	AActor* toReturn = playerReference->focus;
 
 	if (dashPointInFight && dashPointInFight != playerReference->focus)
 	{
@@ -292,9 +292,9 @@ AActor* AMyAIDirector::GetNextOrPreviousFocus(bool isGettingNext)
 			FVector cameraToEnemy = enemies[i]->GetActorLocation() - cameraPos;
 			float enemyAngle = 0.0f;
 			if (isGettingNext)
-				(FVector::CrossProduct(vectorReference, cameraToEnemy).Z > 0) ? acos(vectorReference.CosineAngle2D(cameraToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(cameraToEnemy));
+				enemyAngle = (FVector::CrossProduct(vectorReference, cameraToEnemy).Z > 0) ? acos(vectorReference.CosineAngle2D(cameraToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(cameraToEnemy));
 			else
-				(FVector::CrossProduct(vectorReference, cameraToEnemy).Z < 0) ? acos(vectorReference.CosineAngle2D(cameraToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(cameraToEnemy));
+				enemyAngle = (FVector::CrossProduct(vectorReference, cameraToEnemy).Z < 0) ? acos(vectorReference.CosineAngle2D(cameraToEnemy)) : 360 - acos(vectorReference.CosineAngle2D(cameraToEnemy));
 
 			if (enemyAngle < smallestAngle)
 			{
