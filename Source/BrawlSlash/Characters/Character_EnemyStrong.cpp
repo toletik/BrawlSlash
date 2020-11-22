@@ -3,6 +3,7 @@
 
 #include "Character_EnemyStrong.h"
 #include "Character_Player.h"
+#include "Components/CapsuleComponent.h"
 
 ACharacter_EnemyStrong::ACharacter_EnemyStrong()
 {
@@ -36,8 +37,10 @@ void ACharacter_EnemyStrong::AttackOverlap(UPrimitiveComponent* OverlappedComp, 
 			if (playerCast->state != E_STATE::DEAD
 				&& ((attackMeshCircle->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackCircleProject)
 					|| (attackMeshStrong->GetCollisionEnabled() == ECollisionEnabled::QueryOnly && attackStrongProject)))
+			{
 				playerCast->state = E_STATE::PROJECTED;
-
+				playerCast->PlayerStartIsProjected();
+			}
 			else if (playerCast->state == E_STATE::IDLE)
 			{
 				playerCast->state = E_STATE::HITTED_STRONG;

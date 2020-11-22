@@ -430,6 +430,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerSkipSequence();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartIsProjected();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
