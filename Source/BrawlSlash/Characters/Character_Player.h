@@ -438,6 +438,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerChangePreviousFocus();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartIsProjected();
+
 	//////////////////////////////////////////////////////////////
 	//DEBUG
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
