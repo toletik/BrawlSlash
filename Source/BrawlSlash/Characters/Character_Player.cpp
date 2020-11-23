@@ -395,7 +395,7 @@ void ACharacter_Player::MoveForward(float Value)
 
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		if (canCancelCombo)
+		if (canCancelCombo && state != CINEMATIC)
 		{
 			state = E_STATE::IDLE;
 			canCancelCombo = false;
@@ -421,7 +421,7 @@ void ACharacter_Player::MoveRight(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		if (canCancelCombo)
+		if (canCancelCombo && state != CINEMATIC)
 		{
 			state = E_STATE::IDLE;
 			canCancelCombo = false;
@@ -561,7 +561,10 @@ bool ACharacter_Player::CheckIfCanDash()
 void ACharacter_Player::OnAPressed()
 {
 	if (isSequenceSkippable)
+	{
 		isHoldingInputToPassSequence = true;
+		PlayerStartPressingA();
+	}
 	if (currentEnemyGroup && !isDashBackInCooldown && (state == E_STATE::IDLE || state == E_STATE::ATTACKING))
 		StartDash(E_STATE::DASHING_BACK);
 }
@@ -572,6 +575,7 @@ void ACharacter_Player::OnAReleased()
 	{
 		isHoldingInputToPassSequence = false;
 		currentTimeToPassSequence = 0.0f;
+		PlayerStopPressingA();
 	}
 }
 

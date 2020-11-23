@@ -441,13 +441,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayerStartIsProjected();
 
-	//////////////////////////////////////////////////////////////
-	//DEBUG
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	float debugInnerCircleRadius = 400;
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStartPressingA();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
-	float debugBackCircleRadius = 800;
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayerStopPressingA();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	class AActor* nextFocus = nullptr;
