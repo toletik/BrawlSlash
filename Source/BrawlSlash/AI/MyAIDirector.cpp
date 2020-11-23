@@ -77,8 +77,6 @@ void AMyAIDirector::StartFight()
 	SetFocusToClosestEnemy();
 
 	playerReference->SetCameraStatsFight(rotationForTheFight, minDistanceToAdoptForCamera, maxDistanceToAdoptForCamera);
-	playerReference->debugInnerCircleRadius = radiusInnerCircle;
-	playerReference->debugBackCircleRadius = radiusBackCircle;
 	playerReference->PlayerStartFight();
 	playerReference->GetCharacterMovement()->MaxWalkSpeed = playerReference->walkSpeedFight;
 }
