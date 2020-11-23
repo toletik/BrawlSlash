@@ -85,8 +85,8 @@ void AMyAIDirector::SetEndToFight()
 {
 	isInFight = false;
 
-	if (playerReference->focus)
-		playerReference->PlayerChangeMainFocus();
+	AActor* tempNextFocus = playerReference->nextFocus;
+	AActor* tempPreviousFocus = playerReference->previousFocus;
 
 	playerReference->currentEnemyGroup = nullptr;
 	playerReference->focus = nullptr;
@@ -97,6 +97,12 @@ void AMyAIDirector::SetEndToFight()
 	playerReference->PlayerEndFight();
 	playerReference->GetCharacterMovement()->MaxWalkSpeed = playerReference->walkSpeedNav;
 	playerReference->health = playerReference->maxHealth;
+
+	playerReference->PlayerChangeMainFocus();
+	if (tempNextFocus)
+		playerReference->PlayerChangeNextFocus();
+	if (tempPreviousFocus)
+		playerReference->PlayerChangePreviousFocus();
 }
 
 void AMyAIDirector::RemoveEnemy(ACharacter_EnemyBase* enemyToRemove)

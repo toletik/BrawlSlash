@@ -32,10 +32,8 @@ void ACharacter_EnemyWeak::AttackOverlap(UPrimitiveComponent* OverlappedComp, AA
 		if (playerCast->health < tempHealth)
 		{
 			if (playerCast->state == E_STATE::IDLE)
-			{
 				playerCast->state = E_STATE::HITTED_WEAK;
-				playerCast->PlayerStartHittedWeak();
-			}
+			playerCast->PlayerStartHittedWeak();
 		}
 	}
 }

@@ -42,10 +42,8 @@ void ACharacter_EnemyStrong::AttackOverlap(UPrimitiveComponent* OverlappedComp, 
 				playerCast->PlayerStartIsProjected();
 			}
 			else if (playerCast->state == E_STATE::IDLE)
-			{
 				playerCast->state = E_STATE::HITTED_STRONG;
-				playerCast->PlayerStartHittedStrong();
-			}
+			playerCast->PlayerStartHittedStrong();
 		}
 	}
 }
