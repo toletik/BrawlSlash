@@ -76,5 +76,3 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnemyDeath();
 };
-
-
